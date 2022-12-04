@@ -16,19 +16,19 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="MySQL关系型数据库，插件式的存储引擎，这种架构可以根据业务的需求和实际需要选择合适的存储引擎。  客户端通过协议与服务器连接，发送查询语句，先检查缓存是否命中，若命中直接返回，否则进行语句解析 预处理，检查语句是否有语法错误，查询优化（是否会使用索引扫描），生成查询计划，启动查询引擎，开始查询，底层存储引擎调用API获取数据，返回给客户端 MYSQL默认使用B+树索引  字段选择优先级（由优至">
+    <meta name="description" content="MySQL关系型数据库，插件式的存储引擎，这种架构可以根据业务的需求和实际需要选择合适的存储引擎。 MySQL的架构分为两层  Server: Server层负责建立连接，分析，执行SQL。大多数核心部件在此实现，包括连接器，缓存查询，解析器，预处理器，执行器等。还有所有的内置函数和所有的跨引擎的功能如视图，都在Server层实现 Engine: 引擎层负责数据的存储和提取，索引也是有引擎层实现的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL">
 <meta property="og:url" content="http://example.com/post/mySQL.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="MySQL关系型数据库，插件式的存储引擎，这种架构可以根据业务的需求和实际需要选择合适的存储引擎。  客户端通过协议与服务器连接，发送查询语句，先检查缓存是否命中，若命中直接返回，否则进行语句解析 预处理，检查语句是否有语法错误，查询优化（是否会使用索引扫描），生成查询计划，启动查询引擎，开始查询，底层存储引擎调用API获取数据，返回给客户端 MYSQL默认使用B+树索引  字段选择优先级（由优至">
+<meta property="og:description" content="MySQL关系型数据库，插件式的存储引擎，这种架构可以根据业务的需求和实际需要选择合适的存储引擎。 MySQL的架构分为两层  Server: Server层负责建立连接，分析，执行SQL。大多数核心部件在此实现，包括连接器，缓存查询，解析器，预处理器，执行器等。还有所有的内置函数和所有的跨引擎的功能如视图，都在Server层实现 Engine: 引擎层负责数据的存储和提取，索引也是有引擎层实现的">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/13526879-3037b144ed09eb88.png">
 <meta property="og:image" content="http://example.com/img/B+tree.png">
 <meta property="og:image" content="http://example.com/img/undolog.png">
 <meta property="og:image" content="http://example.com/img/phantom.png">
 <meta property="article:published_time" content="2022-10-25T14:02:31.000Z">
-<meta property="article:modified_time" content="2022-12-02T06:57:05.075Z">
+<meta property="article:modified_time" content="2022-12-04T06:51:56.170Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="数据库基础">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          10k 字
+          11k 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          86 分钟
+          89 分钟
         
       </span>
     
@@ -285,21 +285,19 @@
               <div class="markdown-body">
                 
                 <h1 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h1><p>关系型数据库，插件式的存储引擎，这种架构可以根据业务的需求和实际需要选择合适的存储引擎。</p>
+<p>MySQL的架构分为两层</p>
 <ol>
-<li>客户端通过协议与服务器连接，发送查询语句，先检查缓存是否命中，若命中直接返回，否则进行语句解析</li>
-<li>预处理，检查语句是否有语法错误，查询优化（是否会使用索引扫描），生成查询计划，启动查询引擎，开始查询，底层存储引擎调用API获取数据，返回给客户端</li>
-<li>MYSQL默认使用B+树索引</li>
+<li>Server: Server层负责建立连接，分析，执行SQL。大多数核心部件在此实现，包括连接器，缓存查询，解析器，预处理器，执行器等。还有所有的内置函数和所有的跨引擎的功能如视图，都在Server层实现</li>
+<li>Engine: 引擎层负责数据的存储和提取，索引也是有引擎层实现的</li>
 </ol>
-<h3 id="字段选择优先级（由优至劣）"><a href="#字段选择优先级（由优至劣）" class="headerlink" title="字段选择优先级（由优至劣）"></a>字段选择优先级（由优至劣）</h3><ol>
-<li>整型</li>
-<li>time：定长运算快</li>
-<li>enum：枚举，能约束值，内部由整型存储</li>
-<li>char：定长，需要考虑字符集</li>
-<li>varchar：不定长，考虑字符集的转换与排序的校对集，速度慢</li>
-<li>text：无法使用内存临时表</li>
+<h2 id="执行一条查询语句的流程"><a href="#执行一条查询语句的流程" class="headerlink" title="执行一条查询语句的流程"></a>执行一条查询语句的流程</h2><ol>
+<li>连接器建立连接：与客户端进行 TCP 三次握手，校验客户端提供的用户名和密码，读取该客户端的权限</li>
+<li>查询缓存：如果要查询一个字段，引擎会先去查询缓存，如果命中，则会直接返回给客户端。但是在MySQL8.0缓存直接被取消了，因为对于更新频繁的表来说，缓存命中率很低。<strong>这个缓存不是buffer pool</strong></li>
+<li>解析：词法分析：解析器会根据输入字符串构建SQL语法树，提取出表明，字段名，SQL类型等。语法分析：根据词法分析的结果，根据语法规则判断是否满足SQL语法</li>
+<li>预处理：检查 SQL 查询语句中的表或者字段是否存在，将 <code>select *</code> 中的 <code>*</code> 符号，扩展为表上的所有列；</li>
+<li>优化：确定SQL语句的执行方案，比如使用哪个索引更快</li>
+<li>执行：根据执行计划执行 SQL 查询语句，从存储引擎读取记录，返回给客户端</li>
 </ol>
-<p><em><strong>定长优先。能选整型就不要选字符串，够用就行，不要富余分配空间，尽量避免使用Null</strong></em></p>
-<p>varchar最多可以定义65535个字节</p>
 <h3 id="事务的ACID"><a href="#事务的ACID" class="headerlink" title="事务的ACID"></a>事务的ACID</h3><ol>
 <li>原子性：要么全部成功，要么全部失败。由undo_log来保证</li>
 <li>一致性：数据库总是从一个状态转移到另一个状态</li>
@@ -323,7 +321,7 @@
 <li>2NF：1NF 的基础之上，消除了非主属性对于码的部分函数依赖。</li>
 <li>3NF：3NF 在 2NF 的基础之上，消除了非主属性对于码的传递函数依赖</li>
 </ul>
-<h3 id="四种隔离级别"><a href="#四种隔离级别" class="headerlink" title="四种隔离级别"></a>四种隔离级别</h3><ol>
+<h2 id="四种隔离级别"><a href="#四种隔离级别" class="headerlink" title="四种隔离级别"></a>四种隔离级别</h2><ol>
 <li>read uncommitted：所有事务都可以看见未提交的结果，产生脏读</li>
 <li>read committed：一个事务从开始到提交前，任何数据改变都是不可见的，产生不可重复读问题</li>
 <li>repeatable read：<code>MySQL</code>默认的隔离级别，解决不可重复读问题，保证同一事物的多个实例在并发读取事务时，会读取到同样的数据行，产生幻读问题（<code>InnoDB</code>的MVCC解决了幻读问题）</li>
@@ -335,10 +333,9 @@
 <li><code>MyISAM</code>：不支持事务，不支持外键，非聚集索引，索引保存的是数据文件的指针，主键索引和辅助索引独立。会创建一个单独的变量保存整个表的行数，读取表行数的速度更快。最小粒度锁为表锁，并发性能不好。</li>
 </ol>
 <h2 id="基础架构"><a href="#基础架构" class="headerlink" title="基础架构"></a>基础架构</h2><p><img src="/../img/13526879-3037b144ed09eb88.png" srcset="/img/loading.gif" lazyload alt="13526879-3037b144ed09eb88"></p>
-<p>MySQL 主要由下面几部分构成：</p>
 <ul>
-<li><strong>连接器：</strong> 身份认证和权限相关(登录 MySQL 的时候)。</li>
-<li><strong>查询缓存：</strong> 执行查询语句的时候，会先查询缓存（MySQL 8.0 版本后移除，因为这个功能不太实用）</li>
+<li><strong>连接器：</strong> 身份认证和权限相关(登录 MySQL 的时候)</li>
+<li><strong>查询缓存：</strong> 执行查询语句的时候，会先查询缓存（MySQL 8.0 版本后移除）</li>
 </ul>
 <blockquote>
 <p>连接建立后，执行查询语句的时候，会先查询缓存，MySQL 会先校验这个 SQL 是否执行过，以 Key-Value 的形式缓存在内存中，Key 是查询预计，Value 是结果集。如果缓存 key 被命中，就会直接返回给客户端，如果没有命中，就会执行后续的操作，完成后也会把结果缓存起来，方便下一次调用。当然在真正执行缓存查询的时候还是会校验用户的权限，是否有该表的查询条件</p>
@@ -347,7 +344,7 @@
 <ul>
 <li><p><strong>分析器：</strong> 没有命中缓存的话，SQL 语句就会经过分析器，分析器说白了就是要先看你的 SQL 语句要干嘛，再检查你的 SQL 语句语法是否正确。</p>
 </li>
-<li><p><strong>优化器：</strong> 按照 MySQL 认为最优的方案去执行。</p>
+<li><p><strong>优化器：</strong> 选择MySQL 认为最优的执行方案。</p>
 </li>
 <li><p><strong>执行器：</strong> 执行语句，然后从存储引擎返回数据。 执行语句之前会先判断是否有权限，如果没有权限的话，就会报错。</p>
 </li>
@@ -362,15 +359,14 @@
 </ul>
 <h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1><p><em><strong>为什么要有索引</strong></em></p>
 <p>一般的应用系统读写比例大约在10：1左右，而且数据的插入和更新出现性能问题的几率小于查询。在生产环境中，最容易出现问题的就是查询操作，因此对查询性能的优化就显得十分重要。</p>
-<p>索引的本质就是一个满足某种查找算法的数据结构，常见的有BST，AVL，红黑树，Btree，B+树等等</p>
-<p>这些结构以某种方式指向数据（索引结点指向数据记录物理地址的指针）</p>
+<p>索引的本质就是一个满足某种查找算法的数据结构，常见的有BST，AVL，红黑树，Btree，B+树等等，这些结构以某种方式指向数据（索引结点指向数据记录物理地址的指针）</p>
 <ol>
 <li>索引大大减少了服务器需要扫描的数据量，提高了检索效率</li>
 <li>避免排序，减少CPU消耗</li>
 <li>将随机IO转换为顺序IO</li>
 </ol>
-<p>索引也是一张表，保存了主键和索引，指向了实体表，也需要占用内存。索引存储于外存，所以索引的查询也需要磁盘IO开销,访问外存的时间成本大约是内存的十万倍</p>
-<p>虽然提高了查询速度，但是在对实体表进行更新时，索引也需要进行相应的维护更新，而索引的维护也需要开销，降低了更新表的速度</p>
+<p>索引存储于外存，所以索引的查询也需要磁盘IO开销，访问外存的时间成本大约是内存的十万倍</p>
+<p>虽然提高了查询速度，但是在对实体表进行更新时，索引也需要进行相应的维护更新</p>
 <h3 id="HASH索引"><a href="#HASH索引" class="headerlink" title="HASH索引"></a>HASH索引</h3><p>Memory引擎默认Hash索引</p>
 <p>等值查询很快，计算的hash值与对应的行指针一并存入表中，哈希碰撞的元素以链表的形式相连。也不支持排序，以及模糊查询，并且由于散列算法，键值对的存储是无序的，所以不支持范围查询。</p>
 <h3 id="B-树索引"><a href="#B-树索引" class="headerlink" title="B+树索引"></a>B+树索引</h3><p><code>InnoDB</code>，<code>MyISAM</code>默认是B+树</p>
@@ -383,17 +379,11 @@
 <p>在<code>InnoDB</code>中，叶子节点的容量默认为一页16KB</p>
 <p><strong>叶子节点结构(聚簇索引为例)：页目录（主键）+用户数据区域（单向链表，通过主键排序，在插入数据的时候便会排序）</strong></p>
 <p><strong>非叶子节点结构：页指针+指向的该页的最小主键值</strong></p>
-<h3 id="MYSQL索引分类"><a href="#MYSQL索引分类" class="headerlink" title="MYSQL索引分类"></a><strong>MYSQL索引分类</strong></h3><ol>
-<li>主键索引：一张表一个主键索引，通常与表一起创建。</li>
-<li>唯一索引：如果能确定某个数据列将只包含彼此各不相同的值，在为这个数据列创建索引的时候就应该用关键字UNIQUE把它定义为一个唯一索引。这么做的好处：一是简化了MySQL对这个索引的管理工作，这个索引也因此而变得更有效率；二是MySQL会在有新记录插入数据表时，如果字段的值已经出现过了，MySQL将拒绝插入那条新记录。也就是说，唯一索引可以保证数据记录的唯一性。事实上，在许多场合，人们创建唯一索引的目的往往不是为了提高访问速度，而只是为了避免数据出现重复。</li>
-<li>普通索引：建立在普通字段上的索引，唯一任务是加快对数据的访问速度。因此，应该只为那些最经常出现在查询条件（WHEREc）或排序条件（ORDERBY）中的数据列创建索引。只要有可能，就应该选择一个数据最整齐、最紧凑的数据列（如一个整数类型的数据列）来创建索引。</li>
-<li>复合索引：字符类型字段的前几个字符建立，可以覆盖多个数据列，遵循最左匹配原则，可能会因为order by失效。</li>
-</ol>
-<p>三星索引：衡量一个索引是否达到最佳表现的三个维度</p>
-<ol>
-<li>第一星：where后面的等值谓词，可以匹配索引列的顺序：意义在于谓索匹配的越多，索引片越窄，最终扫描的数据行也是越小。把 <strong>WHERE 后的等值条件列作为索引最开头的列，如此，必须扫描的索引片宽度就会缩至最短。</strong></li>
-<li>第二星：order by的排序是否和索引的顺序一致：意义在于避免进行额外的排序，增加消耗。<strong>将 ORDER BY 列加入到索引中，保持列的顺序</strong></li>
-<li>第三星：select的字段是否都为索引列：意义在于避免每一个索引行查询，都需要去聚簇索引进行一次随机IO查询。<strong>将查询语句中剩余的列都加入到索引中。</strong></li>
+<h1 id="MYSQL索引分类"><a href="#MYSQL索引分类" class="headerlink" title="MYSQL索引分类"></a><strong>MYSQL索引分类</strong></h1><ol>
+<li><strong>主键索引</strong>：一张表一个主键索引，通常与表一起创建。</li>
+<li><strong>唯一索引</strong>：如果能确定某个数据列将只包含彼此各不相同的值，在为这个数据列创建索引的时候就应该用关键字UNIQUE把它定义为一个唯一索引。这么做的好处：一是简化了MySQL对这个索引的管理工作，这个索引也因此而变得更有效率；二是MySQL会在有新记录插入数据表时，如果字段的值已经出现过了，MySQL将拒绝插入那条新记录。也就是说，唯一索引可以保证数据记录的唯一性。事实上，在许多场合，人们创建唯一索引的目的往往不是为了提高访问速度，而只是为了避免数据出现重复。</li>
+<li><strong>普通索引</strong>：建立在普通字段上的索引，唯一任务是加快对数据的访问速度。因此，应该只为那些最经常出现在查询条件（WHEREc）或排序条件（ORDERBY）中的数据列创建索引。只要有可能，就应该选择一个数据最整齐、最紧凑的数据列（如一个整数类型的数据列）来创建索引。</li>
+<li><strong>前缀索引</strong>：字符类型字段的前几个字符建立，可以覆盖多个数据列，遵循最左匹配原则，可能会因为order by失效。</li>
 </ol>
 <h3 id="普通索引和唯一索引有什么区别？"><a href="#普通索引和唯一索引有什么区别？" class="headerlink" title="普通索引和唯一索引有什么区别？"></a><em><strong>普通索引和唯一索引有什么区别？</strong></em></h3><p><strong>概念上的不同</strong>：普通索引可以重复。而唯一索引和主键一样，不可以重复，但在一张表里面只能有一个主键，不能为空，唯一索引可有多个。唯一索引可有一条记录为null。在学校，一般用学号做主键，身份证号作为唯一索引</p>
 <p><strong>查询实现的不同</strong>：若查询语句为</p>
@@ -407,14 +397,18 @@
 <p>若不在内存中，普通索引会将数据记录在change buffer；唯一索引会将数据页读入内存再插入。众所周知数据库的IO成本很高，所以普通索引更新数据的性能是要更优的。</p>
 <p><strong>总结：若更新性能优先级更高，选择普通索引。</strong></p>
 <h2 id="主键索引-聚簇索引"><a href="#主键索引-聚簇索引" class="headerlink" title="主键索引(聚簇索引)"></a>主键索引(聚簇索引)</h2><p><img src="/../img/B+tree.png" srcset="/img/loading.gif" lazyload alt="B+tree"></p>
-<h2 id="二级索引-辅助索引"><a href="#二级索引-辅助索引" class="headerlink" title="二级索引(辅助索引)"></a><strong>二级索引(辅助索引)</strong></h2><p>同样是B+树，以非主键而是以自定义规则的索引，以满足不同的查询需求，属于非聚集索引。</p>
+<h2 id="辅助索引-非聚簇索引"><a href="#辅助索引-非聚簇索引" class="headerlink" title="辅助索引(非聚簇索引)"></a><strong>辅助索引(非聚簇索引)</strong></h2><p>同样是B+树，以非主键而是以自定义规则的索引，以满足不同的查询需求，属于非聚集索引。</p>
 <p>叶子节点的用户数据区不再存储完整记录，而是存储<strong>主键+部分记录</strong>。</p>
 <p>所以使用辅助索引有时候需要进行回表，即部分记录无法满足查询需求，需要使用主键来重新到主键索引查找。</p>
 <h2 id="联合索引"><a href="#联合索引" class="headerlink" title="联合索引"></a>联合索引</h2><p>使用表中的多个字段创建索引，就是 <strong>联合索引</strong>，也叫 <strong>组合索引</strong> 或 <strong>复合索引</strong></p>
-<p><em><strong>什么情况下设置了复合索引，但不会使用？</strong></em></p>
-<ol>
-<li>没有符合最左匹配原则</li>
-<li>字段进行了隐私数据类型转化</li>
+<p>相反，如果只使用一个字段创建索引，就叫<strong>单列索引</strong></p>
+<h2 id="索引失效会出现在什么情况"><a href="#索引失效会出现在什么情况" class="headerlink" title="索引失效会出现在什么情况"></a><em><strong>索引失效会出现在什么情况</strong></em></h2><ol>
+<li>对索引使用左或者左右模糊匹配，例如%like，会进行全盘扫描。如果使用like%则会正常使用索引，因为B+树会根据最左的字段开始构建B+树索引，所以若使用%like，引擎会无法知道该从哪个索引值开始比较，所以就只能通过全盘扫描的方式查询。但是也有特殊情况，如果<strong>数据库表中的字段只有主键+二级索引</strong>，那么即使使用了左模糊匹配，也不会走全表扫描（type&#x3D;all），而是走全扫描二级索引树</li>
+<li>对索引字段使用函数，索引保存的是索引字段的原始值，而不是经过函数计算后的值，自然就没办法走索引了。当然在8.0之后，增加了函数索引，此时就可以使用索引了</li>
+<li>对索引字段进行表达式计算，原因同函数一样</li>
+<li>对索引进行隐式类型转换： <strong>MySQL 在遇到字符串和数字比较的时候，会自动把字符串转为数字，而这里相当于情况二，会使用一个函数将字符串进行转换，然后再进行比较</strong>。</li>
+<li>未遵循最左匹配原则</li>
+<li>在where中使用OR：如果在 OR 前的条件列是索引列，而在 OR 后的条件列不是索引列，那么索引会失效。</li>
 <li>引擎估算走辅助索引的时间反而比全表扫描的时间更长</li>
 </ol>
 <h3 id="什么是最左匹配原则？"><a href="#什么是最左匹配原则？" class="headerlink" title="什么是最左匹配原则？"></a><em><strong>什么是最左匹配原则？</strong></em></h3><p>对于复合索引，若有字段123，若查询时省略字段1，则无法使用索引。</p>
@@ -570,6 +564,16 @@
 <li>一个表的索引不超过五个</li>
 <li>联合索引，遵守最左匹配原则</li>
 </ol>
+<h3 id="字段选择优先级（由优至劣）"><a href="#字段选择优先级（由优至劣）" class="headerlink" title="字段选择优先级（由优至劣）"></a>字段选择优先级（由优至劣）</h3><ol>
+<li>整型</li>
+<li>time：定长运算快</li>
+<li>enum：枚举，能约束值，内部由整型存储</li>
+<li>char：定长，需要考虑字符集</li>
+<li>varchar：不定长，考虑字符集的转换与排序的校对集，速度慢</li>
+<li>text：无法使用内存临时表</li>
+</ol>
+<p><em><strong>定长优先。能选整型就不要选字符串，够用就行，不要富余分配空间，尽量避免使用Null</strong></em></p>
+<p>varchar最多可以定义65535个字节</p>
 <p><em><strong>如果MySQL出现慢查询，问题在哪？</strong></em></p>
 <ol>
 <li>索引失效或者无索引</li>
