@@ -30,7 +30,7 @@
 <meta property="og:image" content="http://example.com/img/reactor2.png">
 <meta property="og:image" content="http://example.com/img/epoll.png">
 <meta property="article:published_time" content="2022-11-02T05:45:40.000Z">
-<meta property="article:modified_time" content="2022-11-30T09:11:32.742Z">
+<meta property="article:modified_time" content="2022-12-04T12:35:06.317Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="网络编程基础知识">
 <meta name="twitter:card" content="summary_large_image">
@@ -232,7 +232,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          8.8k 字
+          8.9k 字
         
       </span>
     
@@ -243,7 +243,7 @@
         
         
         
-          73 分钟
+          75 分钟
         
       </span>
     
@@ -309,10 +309,7 @@
 <p>特别是在JAVA环境下，线程的创建，切换，代价高昂</p>
 <p>结构简单，适合规模小，低并发的情况</p>
 <p><img src="/../img/BIO.png" srcset="/img/loading.gif" lazyload alt="BIO"></p>
-<h4 id="特点：面向流的，阻塞的"><a href="#特点：面向流的，阻塞的" class="headerlink" title="特点：面向流的，阻塞的"></a>特点：面向流的，阻塞的</h4><p>java1.4以前的io模型，一连接对一个线程，原始的IO是面向流的，不存在缓存的概念。</p>
-<p>Java IO面向流意味着每次从流中读一个或多个字节，直至读取所有字节，它们没有被缓存在任何地方。</p>
-<p>此外，它不能前后移动流中的数据。如果需要前后移动从流中读取的数据，需要先将它缓存到一个缓冲区</p>
-<p>Java IO的各种流是阻塞的，这意味着当一个线程调用read或 write方法时，该线程被阻塞，直到有一些数据被读取，或数据完全写入，该线程在此期间不能再干任何事情了。</p>
+<h4 id="特点：面向流的，阻塞的"><a href="#特点：面向流的，阻塞的" class="headerlink" title="特点：面向流的，阻塞的"></a>特点：面向流的，阻塞的</h4><p>java1.4以前的io模型，一连接对一个线程，原始的IO是面向流的，不存在缓存的概念。面向流意味着每次从流中读一个或多个字节，直至读取所有字节，它们没有被缓存在任何地方。此外，它不能前后移动流中的数据。如果需要前后移动从流中读取的数据，需要先将它缓存到一个缓冲区，流是阻塞的，这意味着当一个线程调用read或 write方法时，该线程被阻塞，直到有一些数据被读取，或数据完全写入，该线程在此期间不能再干任何事情了。</p>
 <h2 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h2><p>非阻塞IO，顾名思义就是所有IO操作都是立刻返回而不会阻塞当前用户进程</p>
 <p><img src="/../img/non-blocking-io.png" srcset="/img/loading.gif" lazyload alt="non-blocking-io"></p>
 <p>当用户进程发出 read 操作时，如果 kernel 中的数据还没有准备好，那么它并不会 block 用户进程，而是立刻返回一个 EAGAIN error。</p>
@@ -323,8 +320,8 @@
 <p>做到了单线程也能管理所有套接字。这是非阻塞的，就算没有数据也不会停下来，而是返回无数据的标识，然后再进行下一次的轮询。</p>
 <p>IO多路复用是面向缓冲区的，每个连接都有一个缓冲区来暂存数据，由管道来进行双向传输</p>
 <p><img src="/../img/reactor2.png" srcset="/img/loading.gif" lazyload alt="reactor2"></p>
-<h2 id="selector"><a href="#selector" class="headerlink" title="selector"></a>selector</h2><p>实现循环监听通道信号的组件</p>
-<p>一个selector 对应一个线程， 多个channel以事件的方式注册于selector，代表一个进程便可以处理多个连接</p>
+<h2 id="selector"><a href="#selector" class="headerlink" title="selector"></a>selector</h2><p>多路复用器，底层使用了操作系统自身的多路复用系统调用——<code>select/poll/epoll</code></p>
+<p>一个selector 对应一个线程， 多个channel以事件的方式注册于selector，一个进程便可以处理多个连接</p>
 <p>selector 会在各个通道上切换，只有在连接&#x2F;通道真正有读写事件发生时，才会进行读写，就大大地减少了系统开销，并且不必为每个连接都创建一个线程，不用去维护多个线程，避免了多线程之间的上下文切换导致的开销</p>
 <h3 id="channel"><a href="#channel" class="headerlink" title="channel"></a>channel</h3><p>通道类似于流，但有些区别如下：</p>
 <ol>
@@ -332,11 +329,10 @@
 <li>通道可以实现异步读写数据</li>
 <li>通道可以从缓冲读数据，也可以写数据到缓冲</li>
 </ol>
-<p>channel 是双向的, 可以返回底层操作系统的情况, 比如Linux ，底层的操作系统通道就是双向的</p>
-<h3 id="buffer"><a href="#buffer" class="headerlink" title="buffer"></a>buffer</h3><p>Buffer 就是一个内存块 ，底层是有一个数组</p>
+<p>channel 是双向的, Channel封装了对数据源的操作，数据源可以看成是操作系统的文件描述符，用于提供平台独立操作功能，数据源的底层就是磁盘、网卡等IO设备</p>
+<h3 id="buffer"><a href="#buffer" class="headerlink" title="buffer"></a>buffer</h3><p>缓冲区，对应操作系统的用户空间中的用户缓冲区（user buffer）。Java程序在读I&#x2F;O流时，需要先将数据读取到Buffer中，写I&#x2F;O流时，需要先将数据写到Buffer中。JDK提供了<code>IntBuffer</code>、<code>LongBuffer</code>、<code>CharBuffer</code>、<code>ByteBuffer</code>等多种针对基础数据类型的Buffer；</p>
 <p>channel 提供从文件、网络读取数据的渠道，但是读取或写入的数据都必须经由 Buffer</p>
-<p>数据的读取写入是通过Buffer, 这个和BIO不同 , BIO 中要么是输入流，或者是输出流，不能双向</p>
-<p>但是NIO的Buffer 是可以读也可以写, 需要 flip 方法切换</p>
+<p>和BIO不同 , BIO 中要么是输入流，或者是输出流，不能双向，但是NIO的Buffer 是可以读也可以写</p>
 <h4 id="特点：面向块，非阻塞"><a href="#特点：面向块，非阻塞" class="headerlink" title="特点：面向块，非阻塞"></a>特点：面向块，非阻塞</h4><p>NIO是面向缓冲区的。数据被读取到缓冲区，需要时可在缓冲区中前后移动，这就增加了处理过程中的灵活性。</p>
 <p>Java NIO的非阻塞模式，使一个线程从某通道发送请求读取数据，如果目前没有数据可用时，就什么都不会获取，而不是保持线程阻塞，所以直至数据变的可以读取之前，该线程可以继续做其他的事情。 非阻塞写也是如此，一个线程请求写入一些数据到某通道，但不需要等待它完全写入，这个线程同时可以去做别的事情。</p>
 <p>NIO是可以做到用一个线程来处理多个操作的。selector会不断循环监听channel，如果通道中没有数据即没有请求时它可以去处理别的通道或者做其他的事情，如果通道中有数据它就会选择这个通道然后进行处理，实现了一个线程处理多个连接。</p>

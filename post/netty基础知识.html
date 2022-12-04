@@ -23,19 +23,22 @@
 <meta property="og:site_name" content="welcome">
 <meta property="og:description" content="为什么我们不用Java NIO？原生的Java NIO编程，对编程能力要求比较高，需要处理连接异常、网络闪断、拆包粘包、网络拥塞、长短连接等各种各样的网络通讯细节问题，这是一件非常困难且耗时的事情。并且，原生Java NIO还有一个臭名昭著的Epoll Bug，它会导致Selector空轮询，最终导致CPU 100%。官方声称在JDK 1.6版本的update 18修复了该问题，但是直到JDK1.">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/20210925225656115.png">
 <meta property="og:image" content="http://example.com/img/reactor3.png">
 <meta property="og:image" content="http://example.com/img/reactor4.png">
+<meta property="og:image" content="http://example.com/img/20211017221241599.png">
+<meta property="og:image" content="http://example.com/img/20211017221257805.jpg">
 <meta property="og:image" content="http://example.com/img/DMAIO.png">
 <meta property="og:image" content="http://example.com/img/DMAIO1.png">
 <meta property="og:image" content="http://example.com/img/DMAIO2.png">
 <meta property="og:image" content="http://example.com/img/DMAIO3.png">
 <meta property="og:image" content="http://example.com/img/DMAIO4.png">
 <meta property="article:published_time" content="2022-10-22T08:35:26.000Z">
-<meta property="article:modified_time" content="2022-11-24T12:42:57.070Z">
+<meta property="article:modified_time" content="2022-12-04T13:00:55.637Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="netty">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/reactor3.png">
+<meta name="twitter:image" content="http://example.com/img/20210925225656115.png">
   
   
   
@@ -233,7 +236,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.3k 字
+          6.8k 字
         
       </span>
     
@@ -244,7 +247,7 @@
         
         
         
-          37 分钟
+          57 分钟
         
       </span>
     
@@ -291,23 +294,57 @@
 <h2 id="Netty和Tomcat有什么区别？"><a href="#Netty和Tomcat有什么区别？" class="headerlink" title="Netty和Tomcat有什么区别？"></a><em><strong>Netty和Tomcat有什么区别？</strong></em></h2><p>Netty是一个基于NIO的异步网络通信框架，性能高，<strong>封装了原生NIO</strong>，降低了编码复杂度。</p>
 <p>Tomcat是一个Web服务器，是一个Servlet容器，内部只运行Servlet程序并处理HTTP请求。</p>
 <p>Netty封装的是IO模型，用于处理网络数据的传输，不关心具体的协议，其定制性更高</p>
-<h1 id="reactor线程模型"><a href="#reactor线程模型" class="headerlink" title="reactor线程模型"></a>reactor线程模型</h1><p>reactor就是IO多路复用（NIO）+线程池的结合优化版</p>
-<p>reactor线程模型：主要有四个角色</p>
+<h1 id="Reactor模式"><a href="#Reactor模式" class="headerlink" title="Reactor模式"></a>Reactor模式</h1><p>Reactor模式本质是一种<strong>事件驱动模型</strong>，由两部分组成</p>
 <ol>
-<li>Reactor：把IO事件分配给对应的handler处理，就是IO多路复用的select实现，即轮询监听</li>
-<li>Acceptor：处理客户端连接事件，创建Handler对象</li>
-<li>Handler：将自身与事件绑定，执行非阻塞读、写任务，负责channel的读入，业务处理完成后，负责将结果写出channel</li>
-<li>worker：用来处理handler传来的业务的线程</li>
+<li>Reactor反应器线程：负责查询IO事件，当检测到一个IO事件，将其发送给相应的Handler处理器去处理。这里的IO事件，就是NIO中Selector监控的通道IO事件；</li>
+<li>Handlers处理器：与IO事件（或者选择键）绑定，负责IO事件的处理，完成真正的连接建立、通道读取、处理业务逻辑、将结果写入通道等操作。</li>
 </ol>
-<p>其中1，2，3存放于主线程中，也称为bossGroup</p>
-<p>4存放于从线程，也就是线程池中，也称为workerGroup</p>
-<h2 id="单reactor-多线程"><a href="#单reactor-多线程" class="headerlink" title="单reactor-多线程"></a>单reactor-多线程</h2><p><img src="/../img/reactor3.png" srcset="/img/loading.gif" lazyload alt="reactor3"></p>
-<h2 id="主从reactor-多线程"><a href="#主从reactor-多线程" class="headerlink" title="主从reactor-多线程"></a>主从reactor-多线程</h2><p>这种模型下是把Reactor线程拆分了mainReactor和subReactor两个部分</p>
-<p>mainReactor只处理连接事件，读写事件交给subReactor来处理。业务逻辑还是由线程池来处理</p>
+<h2 id="单Reactor单线程模式"><a href="#单Reactor单线程模式" class="headerlink" title="单Reactor单线程模式"></a>单Reactor单线程模式</h2><p>单Reactor单线程模式，是指Reactor反应器和Handers处理器处于一个线程中执行。这种模式下，Reactor线程是个多面手，负责多路分离套接字，accept新连接，并分派请求到处理器链中：</p>
+<p><img src="/../img/20210925225656115.png" srcset="/img/loading.gif" lazyload alt="20210925225656115"></p>
+<h2 id="单reactor-多线程"><a href="#单reactor-多线程" class="headerlink" title="单reactor-多线程"></a>单reactor-多线程</h2><p>有一个专门的NIO线程用于监听服务端，接收客户端的TCP连接请求；</p>
+<p>网络读写等I&#x2F;O操作由一个NIO线程池负责，线程池可以采用标准的JDK线程池实现，它包含一个任务队列和N个可用的线程，由这些NIO线程负责消息的读取、解码、编码和发送；</p>
+<p>1个acceptor线程可以同时处理N条链路，但是1个链路只对应1个NIO线程，防止发生并发操作问题。</p>
+<p><img src="/../img/reactor3.png" srcset="/img/loading.gif" lazyload alt="reactor3"></p>
+<h2 id="主从reactor-多线程"><a href="#主从reactor-多线程" class="headerlink" title="主从reactor-多线程"></a>主从reactor-多线程</h2><p>服务端不再只用一个Acceptor线程接收客户端连接，而是一个独立的MainReactor线程池</p>
+<p>主从Reactor多线程模式比起单Reactor多线程模式，是将Reactor分成两部分：</p>
+<ol>
+<li>mainReactor：负责监听ServerSocket，accept新连接，并将建立的Socket分派给subReactor。</li>
+<li>subReactor：负责多路分离已连接的Socket，读写网络数据，并交给worker线程池处理。</li>
+</ol>
+<p>mainReactor线程池中的每个线程都可以接收客户端的TCP连接请求，并将建立完连接后的SocketChannel交给subReactor线程池处理；</p>
+<p>subReactor线程池中的线程会将接收到的SocketChannel注册到自己的Selector上，并负责监听和处理该SocketChannel的读&#x2F;写事件；</p>
+<p>mainReactor线程池<strong>只用于客户端的登录、握手和安全认证，一旦链路建立成功，就将链路注册到后端subReactor线程池的线程上，由它们负责后续的I&#x2F;O操作。</strong></p>
 <p><img src="/../img/reactor4.png" srcset="/img/loading.gif" lazyload alt="reactor4"></p>
+<h1 id="Netty结构"><a href="#Netty结构" class="headerlink" title="Netty结构"></a>Netty结构</h1><h2 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h2><p>在Netty中，通道（Channel）是核心概念之一，代表着网络连接。</p>
+<p>Channel负责与对端进行网络通信：既可以写入数据到对端，也可以从对端读取数据。</p>
+<p>Netty没有直接使用Java NIO的Channel通道，而是自己对Channel通道进行了封装。对应于不同的协议，Netty中常见的通道类型如下：</p>
+<p><strong>NioSocketChannel：TCP Socket传输通道；</strong></p>
+<p><strong>NioServerSocketChannel：TCP Socket服务器端监听通道；</strong></p>
+<h2 id="Handler"><a href="#Handler" class="headerlink" title="Handler"></a>Handler</h2><p>在Netty中，Handler是核心的业务处理组件，从开发人员的视角看，有<strong>入站</strong>和<strong>出站</strong>两种类型。</p>
+<p>入站：触发的方向为自底向上，一般都继承<code>ChannelInboundHandler</code>入站处理器。当数据或者信息入站到Netty通道时，Netty将触发ChannelInboundHandler对应的入站API，进行入站操作处理；</p>
+<p>出站：触发的方向为自顶向下，一般都继承<code>ChannelOutboundHandler</code>出站处理器。当业务处理完成后，需要操作Java NIO底层通道时，通过一系列的ChannelOutboundHandler出站处理器，完成Netty通道到底层通道的操作。</p>
+<h2 id="ChannelPipeline"><a href="#ChannelPipeline" class="headerlink" title="ChannelPipeline"></a>ChannelPipeline</h2><p>一条Netty通道需要很多的Handler业务处理器来处理业务。每条通道内部都有一条流水线（Pipeline）<strong>将Handler装配起来</strong>。<br>Netty的业务处理器流水线<strong>ChannelPipeline</strong>内部是一个双向链表结构，能够支持动态添加、删除Handler业务处理器。</p>
+<p><img src="/../img/20211017221241599.png" srcset="/img/loading.gif" lazyload alt="20211017221241599"></p>
+<h2 id="ChannelHandlerContext"><a href="#ChannelHandlerContext" class="headerlink" title="ChannelHandlerContext"></a>ChannelHandlerContext</h2><p>在Handler业务处理器被添加到流水线Pipeline中时，会创建一个通道处理器上下文<strong>ChannelHandlerContext</strong>，它代表了ChannelHandler和ChannelPipeline之间的关联。ChannelHandlerContext中包含了有许多方法，可以通过其获取上下文所关联的Netty组件实例，如所关联的通道、流水线、上下文内部的Handler业务处理器等；</p>
+<p>所以，总结一下，Channel、Handler、ChannelHandlerContext三者的关系为：</p>
+<ol>
+<li>每个Channel通道拥有一条ChannelPipeline通道流水线，流水线节点为ChannelHandlerContext上下文对象，每一个ChannelHandlerContext中包裹了一个ChannelHandler处理器；</li>
+<li>在ChannelHandler的入站&#x2F;出站处理方法中，Netty都会传递一个ChannelHandlerContext实例作为参数。在业务处理中，<strong>通过ChannelHandlerContext可以获取ChannelPipeline实例或者Channel实例。</strong></li>
+</ol>
+<p><img src="/../img/20211017221257805.jpg" srcset="/img/loading.gif" lazyload alt="20211017221257805"></p>
+<h2 id="ByteBuf"><a href="#ByteBuf" class="headerlink" title="ByteBuf"></a>ByteBuf</h2><p>ByteBuf是一个字节容器，内部是一个字节数组。</p>
+<p> Netty没有直接使用Java NIO中的ByteBuffer，而是自己是实现了一个<strong>BtyeBuf</strong>。与Java NIO的ByteBuffer相比，ByteBuf的优势如下：</p>
+<ol>
+<li>Pooling（池化），减少了内存复制和GC，提升了效率；</li>
+<li>支持自动扩容，使用更方便。</li>
+</ol>
+<h2 id="Decoder"><a href="#Decoder" class="headerlink" title="Decoder"></a>Decoder</h2><p>解码器：Netty从底层的Java通道读取字节数据，传入Netty通道的流水线中，随后开始入站处理。在入站处理过程中，需要将ByteBuf字节数据，解码成Java POJO对象。这个解码过程，通过Netty的Decoder完成。</p>
+<p>所有的Netty中的Decoder解码器，都是Inbound入站处理器类型，都直接或者间接地实现了ChannelInboundHandler接口，负责处理“入站数据”。解码器能将上一站Inbound入站处理器传过来的输入（Input）数据，进行数据的解码或者格式转换，然后输出（Output）到下一站Inbound入站处理器。</p>
+<h2 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h2><p>在Netty的业务处理完成后，业务处理的结果往往是某个Java POJO对象，需要编码成最终的ByteBuf二进制类型，通过流水线写入到底层的Java通道。这个编码过程，通过Netty的Encoder完成。</p>
+<p>所有的Netty中的Encoder编码器，都是Outbound出站处理器类型，都直接或者间接地实现了ChannelOutboundHandler接口，负责处理“出站数据”。编码器将上一站Outbound出站处理器传过来的输入（Input）数据进行编码或者格式转换，然后传递到下一站ChannelOutboundHandler出站处理器。</p>
 <h3 id="Netty的线程模型是怎么样的"><a href="#Netty的线程模型是怎么样的" class="headerlink" title="Netty的线程模型是怎么样的"></a><em><strong>Netty的线程模型是怎么样的</strong></em></h3><p>Netty同时支持Reactor单线程模型，多线程模型，主从多线程模型，用户可以配置参数在这三种模型之间切换</p>
 <p>服务端启动时，通常会创建两个NioEventLoopGroup实例，对应两个独立的Reactor线程池，bossGroup负责处理客户端的连接请求，workerGroup负责处理IO相关的操作，执行任务等。用户可以根据ServerBootstrap启动类选择参数配置线程模型。</p>
-<h3 id="Netty为什么高性能？"><a href="#Netty为什么高性能？" class="headerlink" title="Netty为什么高性能？"></a><em><strong>Netty为什么高性能？</strong></em></h3><ol>
+<h1 id="Netty为什么高性能？"><a href="#Netty为什么高性能？" class="headerlink" title="Netty为什么高性能？"></a><em><strong>Netty为什么高性能？</strong></em></h1><ol>
 <li>NIO模型，用最少的资源完成最多的任务</li>
 <li>内存零拷贝，减少不必要的拷贝造成资源浪费，实现更高效率的传输</li>
 <li>串行化处理读写：消息的处理尽可能在同一个线程内完成，避免切换线程的花销，避免多线程竞争和同步锁。调整NIO线程池的线程参数，可以同时启动多个串行化的线程，相比于多线程竞争机制性能更优。</li>
@@ -352,7 +389,7 @@
 </ol>
 <p>数据必须经过用户缓冲区才能到达Socket缓冲区，虽然加入了DMA来处理内核与硬件的数据传输，但是仍然效率不高</p>
 <h3 id="由mmap实现用户态直接I-x2F-O"><a href="#由mmap实现用户态直接I-x2F-O" class="headerlink" title="由mmap实现用户态直接I&#x2F;O"></a>由mmap实现用户态直接I&#x2F;O</h3><p><code>tmp_buf = mmap(file_fd, len);write(socket_fd, tmp_buf, len);</code></p>
-<p>使用 mmap 的目的是将内核中读缓冲区（read buffer）的地址与用户空间的缓冲区（user buffer）进行映射，从而实现内核缓冲区与应用程序内存的共享，省去了将数据从内核读缓冲区（read buffer）拷贝到用户缓冲区（user buffer）的过程，CPU直接将内核缓冲区中的数据拷贝到Socket缓冲区，节省了一次CPU拷贝。</p>
+<p>使用 mmap 的目的是将内核中读缓冲区（read buffer）的地址与用户空间的缓冲区（user buffer）进行映射，从而实现内核缓冲区与应用程序内存的共享，省去了将数据从内核读缓冲区（read buffer）拷贝到用户缓冲区（user buffer）的过程，CPU直接将内核缓冲区中的数据拷贝到Socket缓冲区，<strong>节省了一次CPU拷贝。</strong></p>
 <p><img src="/../img/DMAIO1.png" srcset="/img/loading.gif" lazyload alt="DMAIO1"></p>
 <p>当<code>mmap</code>一个文件时，如果这个文件被另一个进程所截获，那么<code>write</code>系统调用会因为访问非法地址被<code>SIGBUS</code>信号终止，<code>SIGBUS</code>默认会杀死进程并产生一个 <code>coredump</code>，服务器可能因此被终止。</p>
 <h3 id="Sendfile实现内核内的数据传输"><a href="#Sendfile实现内核内的数据传输" class="headerlink" title="Sendfile实现内核内的数据传输"></a>Sendfile实现内核内的数据传输</h3><p><code>sendfile(socket_fd, file_fd, len);</code></p>
