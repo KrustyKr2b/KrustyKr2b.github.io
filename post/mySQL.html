@@ -25,10 +25,11 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/13526879-3037b144ed09eb88.png">
 <meta property="og:image" content="http://example.com/img/B+tree.png">
+<meta property="og:image" content="http://example.com/img/next-key.png">
 <meta property="og:image" content="http://example.com/img/undolog.png">
 <meta property="og:image" content="http://example.com/img/phantom.png">
 <meta property="article:published_time" content="2022-10-25T14:02:31.000Z">
-<meta property="article:modified_time" content="2022-12-04T06:51:56.170Z">
+<meta property="article:modified_time" content="2022-12-04T09:14:56.476Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="数据库基础">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,7 +231,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          11k 字
+          12k 字
         
       </span>
     
@@ -241,7 +242,7 @@
         
         
         
-          89 分钟
+          102 分钟
         
       </span>
     
@@ -436,7 +437,7 @@
 <h3 id="InnoDB一颗高度为3的B-树可以存放多少行数据？"><a href="#InnoDB一颗高度为3的B-树可以存放多少行数据？" class="headerlink" title="InnoDB一颗高度为3的B+树可以存放多少行数据？"></a><em><strong><code>InnoDB</code>一颗高度为3的B+树可以存放多少行数据？</strong></em></h3><p><code>InnoDB</code>的一页大小为16k，若一行数据的大小为1k，那么可以存储16行数据</p>
 <p>若主键ID为<code>bigint</code>型，8字节，指针为6字节，总大小为14字节，那么一页可以存储1170个指针</p>
 <p>所以数据量大约为1170  * 1170 *  16&#x3D; 大约两千万</p>
-<h1 id="MySQL的锁"><a href="#MySQL的锁" class="headerlink" title="MySQL的锁"></a>MySQL的锁</h1><h2 id="按锁的属性分"><a href="#按锁的属性分" class="headerlink" title="按锁的属性分"></a>按锁的属性分</h2><p>共享锁：即读锁</p>
+<h1 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h1><h2 id="按锁的属性分"><a href="#按锁的属性分" class="headerlink" title="按锁的属性分"></a>按锁的属性分</h2><p>共享锁：即读锁</p>
 <p>排他锁：即写锁</p>
 <h3 id="按锁的粒度分"><a href="#按锁的粒度分" class="headerlink" title="按锁的粒度分"></a>按锁的粒度分</h3><p>行级锁：锁住一行或者多行记录</p>
 <p>表级锁：给整个表加锁</p>
@@ -460,7 +461,7 @@
 <li>若出现锁表不能读的情况，此时可以使用主从复制，让主库负责写，从库负责读，这样就不影响业务的正常运行</li>
 <li>当IO频率越来越大时，业务量越来越大时，单机已无法满足，此时多库的处理可以提高IO的性能</li>
 </ol>
-<h1 id="MySQL的锁机制"><a href="#MySQL的锁机制" class="headerlink" title="MySQL的锁机制"></a>MySQL的锁机制</h1><h2 id="记录锁"><a href="#记录锁" class="headerlink" title="记录锁"></a>记录锁</h2><p>记录锁是封锁这一条记录，阻止其他事务插入，更新，删除这一条记录</p>
+<h1 id="MySQL的行级锁"><a href="#MySQL的行级锁" class="headerlink" title="MySQL的行级锁"></a>MySQL的行级锁</h1><h2 id="记录锁"><a href="#记录锁" class="headerlink" title="记录锁"></a>记录锁</h2><p>记录锁是封锁这一条记录，阻止其他事务插入，更新，删除这一条记录</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs SQL"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> `test` <span class="hljs-keyword">WHERE</span> `id`<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
 
 <h2 id="间隙锁"><a href="#间隙锁" class="headerlink" title="间隙锁"></a>间隙锁</h2><p>间隙锁是封锁索引记录中的间隙，或者第一条索引记录之前或者之后的范围的数据，间隙锁面向的是范围，所以是<strong>左开右开区间</strong></p>
@@ -484,6 +485,25 @@
 <li>若对存在的记录加锁，则会锁住前后两个区间的内容</li>
 <li>若对不存在的记录加锁，则会锁住该记录所在区间的内容</li>
 </ol>
+<p><img src="/../img/next-key.png" srcset="/img/loading.gif" lazyload alt="next-key"></p>
+<h2 id="插入意向锁"><a href="#插入意向锁" class="headerlink" title="插入意向锁"></a>插入意向锁</h2><p>一个事务在插入一条记录的时候，需要判断插入位置是否已被其他事务加了间隙锁。</p>
+<p>如果有的话，插入操作就会发生<strong>阻塞</strong>，直到拥有间隙锁的那个事务提交为止（释放间隙锁），在此期间会生成一个<strong>插入意向锁</strong>，表明有事务想在某个区间插入新记录，但是现在处于等待排队阶段。</p>
+<p><em><strong>MySQL 加锁时，是先生成锁结构，然后设置锁的状态，如果锁状态是等待状态，并不是意味着事务成功获取到了锁，只有当锁状态为正常状态时，才代表事务成功获取到了锁</strong></em></p>
+<p>插入意向锁是一种特殊的间隙锁，它锁住了一个点，这个点也相当于一个区间</p>
+<h1 id="MySQL的行级加锁机制"><a href="#MySQL的行级加锁机制" class="headerlink" title="MySQL的行级加锁机制"></a>MySQL的行级加锁机制</h1><p>InnoDB 引擎支持行级锁，而 MyISAM 引擎并不支持行级锁</p>
+<h2 id="唯一索引等值查询"><a href="#唯一索引等值查询" class="headerlink" title="唯一索引等值查询"></a>唯一索引等值查询</h2><p><strong>走主键索引查询单条记录，比如 where id &#x3D; 1</strong></p>
+<p>若记录存在：由于主键具有唯一性，所以<strong>其他事务插入 id &#x3D; 1 的时候，会因为主键冲突，导致无法插入 id &#x3D; 1 的新记录，也无法删除该记录</strong>。这样事务 A 在多次查询 id &#x3D; 1 的记录的时候，不会出现前后两次查询的结果集不同，也就避免了幻读的问题。所以此时临键锁会退化成记录锁。</p>
+<p>若记录不存在：若id&#x3D;1的记录不存在，我们只需保证多次查询id&#x3D;1的记录都不会存在，所以临键锁就会退化为间隙锁。<strong>锁是加在索引上的，而这个场景下查询的记录是不存在的，自然就没办法锁住这条不存在的记录，只能锁住区间。</strong></p>
+<h2 id="唯一索引范围查询"><a href="#唯一索引范围查询" class="headerlink" title="唯一索引范围查询"></a>唯一索引范围查询</h2><p>若为大于查询：例如where id &gt; 15，此时查询的第一条数据是id&#x3D;20，从该条记录开始往后查询，直到最后一条记录。此时数据库为了避免幻读会加两个临键锁： (15, 20] 的 next-key 锁和(20, +∞] 的 next-key 锁。保证了不会出现<strong>小于20大于15的新纪录</strong>和<strong>大于符合条件的最大记录（这里是20）的新记录</strong></p>
+<p>若为大于等于查询：若这里有id&#x3D;15的记录，那么就相当于等值查询，会加一个15的记录锁。临键锁的加锁方式和大于的情况一样</p>
+<h2 id="非唯一索引等值查询"><a href="#非唯一索引等值查询" class="headerlink" title="非唯一索引等值查询"></a>非唯一索引等值查询</h2><p>当我们用非唯一索引进行等值查询的时候，<strong>因为存在两个索引，一个是主键索引，一个是非唯一索引（二级索引），所以在加锁时，这两个索引都会被同时加锁，但是对主键索引加锁的时候，只有满足查询条件的记录才会对它们的主键索引加锁</strong>。</p>
+<p>记录不存在的情况：二级索引会被加上间隙锁，避免幻读。但是即使加上了间隙锁，由于是位于二级索引，还是会出现记录插入成功的特例，<strong>因为二级索引树是按照二级索引值按顺序存放的，在相同的二级索引值情况下， 再按主键 id 的顺序存放。</strong>即使二级索引值位于间隙锁区间内，但主键值没有，还是可以插入成功的</p>
+<p>记录存在的情况：<strong>由于不是唯一索引，所以肯定存在值相同的记录</strong>，此时数据库会对主键索引和二级索引都加锁，对于主键索引，由于主键的唯一性，事务会对其加上记录锁。对于二级索引，会被加上临键锁和间隙锁，以保证该条记录无法被更改，以及附近范围内无法插入新值。</p>
+<h2 id="非唯一索引范围查询"><a href="#非唯一索引范围查询" class="headerlink" title="非唯一索引范围查询"></a>非唯一索引范围查询</h2><p>非唯一索引和主键索引的范围查询的加锁也有所不同，<strong>非唯一索引范围查询，索引的 next-key lock 不会有退化为间隙锁和记录锁的情况</strong>，二级索引记录加锁都是加 next-key 锁</p>
+<p>所以当对于二级索引的范围查询，事务会对主键索引加记录锁，对二级索引的附近区间全部加上临键锁</p>
+<h2 id="没有加索引的查询"><a href="#没有加索引的查询" class="headerlink" title="没有加索引的查询"></a>没有加索引的查询</h2><p>如果锁定读查询语句，没<strong>有使用索引列作为查询条件</strong>，或者查询语句没有走索引查询，<strong>导致扫描是全表扫描</strong>。那么，每一条记录的索引上都会加 next-key 锁，这样就相当于锁住的全表，这时如果其他事务对该表进行增、删、改操作的时候，都会被阻塞。</p>
+<p>或者update 和 delete 语句如果查询条件<strong>不加索引</strong>，那么由于扫描的方式也是全表扫描，也会锁住整张表。</p>
+<p>因此，<strong>在执行 update、delete、select … for update 等具有加锁性质的语句，一定要检查语句是否走了索引</strong>，否则若锁住整张表，会造成很严重的性能问题</p>
 <h1 id="MVCC"><a href="#MVCC" class="headerlink" title="MVCC"></a>MVCC</h1><p>Multi-Version Concurrency Control多版本并发控制，实现对数据库的并发访问，实现读写冲突不加锁，非阻塞并发读。</p>
 <p>数据库的并发有三种场景</p>
 <ol>
