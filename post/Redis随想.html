@@ -24,8 +24,10 @@
 <meta property="og:description" content="Redis的数据结构   数据类型 简单描述 使用场景    String string(字符串)是Redis最简单也是使用最广泛的数据结构，它的内部是一个字符数组。String(字符串)是动态字符串，允许修改；它在结构上的实现类似于Java中的ArrayList（默认构造一个大小为10的初始数组），这是冗余分配内存的思想，也称为预分配；这种思想可以减少扩容带来的性能消耗。当string(字符串)">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/redis.png">
+<meta property="og:image" content="http://example.com/img/9fa26a74965efbf0f56b707a03bb9b7f.png">
 <meta property="og:image" content="http://example.com/img/redis1.png">
 <meta property="og:image" content="http://example.com/img/3def9bbb70168ee0d6645fc450f2e030.gif">
+<meta property="og:image" content="http://example.com/img/98987d9417b2bab43087f45fc959d32a.png">
 <meta property="og:image" content="http://example.com/img/redlock.png">
 <meta property="og:image" content="http://example.com/img/ae6edf4e4d97e73020f36be0d7aee2df.png">
 <meta property="og:image" content="http://example.com/img/redisSYN.png">
@@ -39,7 +41,7 @@
 <meta property="og:image" content="http://example.com/img/RedisIO2.png">
 <meta property="og:image" content="http://example.com/img/RedisIO3.png">
 <meta property="article:published_time" content="2022-09-24T05:45:16.000Z">
-<meta property="article:modified_time" content="2022-11-30T09:01:23.593Z">
+<meta property="article:modified_time" content="2022-12-04T11:53:40.636Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="数据库基础">
 <meta name="twitter:card" content="summary_large_image">
@@ -241,7 +243,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          19k 字
+          21k 字
         
       </span>
     
@@ -252,7 +254,7 @@
         
         
         
-          161 分钟
+          172 分钟
         
       </span>
     
@@ -340,6 +342,7 @@
 </tr>
 </tbody></table>
 <p><img src="/../img/redis.png" srcset="/img/loading.gif" lazyload alt="redis"></p>
+<p><img src="/../img/9fa26a74965efbf0f56b707a03bb9b7f.png" srcset="/img/loading.gif" lazyload alt="9fa26a74965efbf0f56b707a03bb9b7f"></p>
 <h1 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h1><p>int：存储数字</p>
 <p>raw：长度大于39字节，基于SDS</p>
 <p>embstr：长度小于39字节，基于SDS</p>
@@ -416,17 +419,59 @@
 <li>与红黑树相比：实现简单，无需变色左旋右旋等操作</li>
 </ol>
 <h1 id="Redis的持久化"><a href="#Redis的持久化" class="headerlink" title="Redis的持久化"></a>Redis的持久化</h1><p>因为redis的数据是在内存里，一旦断电或者宕机，数据便会丢失，所以必须保证数据不会因为故障而丢失</p>
-<h3 id="RDB-redis-database"><a href="#RDB-redis-database" class="headerlink" title="RDB(redis database)"></a>RDB(redis database)</h3><p><strong>快照</strong>，在指定的时间间隔内将内存中的所有数据集快照写入磁盘</p>
-<p>Redis会单独创建fork一个子进程来进行持久化，依靠操作系统的COW机制（写入时复制，在client没有对数据进行写入时，子进程和主进程通过指针共享一个物理页面，当client对数据进行写入修改时，OS才会为页面创建副本，子进程将副本数据写入RDB，而这个过程仍然不影响主进程对数据的修改），fork进程内部的数据便是整个数据库的一个快照。当子进程完成对新RDB文件的写入时，便会拿其替换原来的RDB文件。</p>
-<p><code>fork 的作用是复制一个与当前进程一样的进程。新进程的所有数据（变量、环境变量、程序计数器等）数值都和原进程一致，但是是一个全新的进程，并作为原进程的子进程。 子进程读取数据，然后序列化写到磁盘中。</code></p>
-<p>RDB是对整个内存的数据进行快照，所以只有一个文件，这种方法适合大规模的数据恢复，而且很方便，因为OS只需要fork一个子进程，服务进程无需进行其他的IO操作，最大化保障redis的性能。</p>
-<p>但是RDB也有一些缺点：最后一次快照无法及时写入内存，可能会发生丢失，因为是由fork子进程来完成持久化，相当于克隆了一份内存数据，当数据集较大时，可能会影响整个服务器的性能。</p>
-<h3 id="AOF-Append-Only-File"><a href="#AOF-Append-Only-File" class="headerlink" title="AOF(Append Only File)"></a>AOF(Append Only File)</h3><p>以日志的形式来记录写操作，<strong>只记录写指令</strong>，恢复时只需从前往后执行一遍即可完成数据恢复的工作。</p>
-<p>记录方式：写后日志：即在数据写入内存后再记录日志，让操作系统先执行命令，只有命令执行成功才能被记录，这种方式排除了错误的指令，并且不会阻塞当前的写操作。</p>
-<p>风险：若写入数据后未来得及记录日志便宕机，就会造成数据丢失。虽然避免了当前命令的阻塞，但是会给下一个操作带来阻塞 的风险，因为AOF日志是在主线程中进行的，写入磁盘时，磁盘的写压力大，可能会造成后序操作的阻塞。</p>
-<p>同步写回：每个操作完成后写回，会影响性能，但是可靠性高</p>
-<p>每秒写回：即每秒进行一次写回，性能适中，但是可能会丢失这一秒内的数据</p>
-<p>操作系统控制的写回：每个写完命令执行完，只是先把日志写到AOF文件的内存缓冲区，由操作系统决定何时写回磁盘。性能好，但是宕机时丢失的数据多</p>
+<h2 id="RDB-redis-database"><a href="#RDB-redis-database" class="headerlink" title="RDB(redis database)"></a>RDB(redis database)</h2><p><strong>快照</strong>，记录某一个瞬间的内存数据，记录的是实际数据</p>
+<h3 id="save"><a href="#save" class="headerlink" title="save"></a>save</h3><p>执行了 save 命令，就会在主线程生成 RDB 文件，由于和执行操作命令在同一个线程，所以如果写入 RDB 文件的时间太长，<strong>会阻塞主线程</strong>；</p>
+<h3 id="bgsave"><a href="#bgsave" class="headerlink" title="bgsave"></a>bgsave</h3><p>Redis会单独创建fork一个子进程来进行持久化，这样可以<strong>避免主线程的阻塞</strong>；</p>
+<blockquote>
+<p>fork 的作用是复制一个与当前进程一样的进程。新进程的所有数据（变量、环境变量、程序计数器等）数值都和原进程一致，但是是一个全新的进程，并作为原进程的子进程</p>
+</blockquote>
+<p>执行 bgsave 过程中，Redis 依然<strong>可以继续处理操作命令</strong>的，也就是数据是能被修改的，关键的技术就在于<strong>写时复制技术（Copy-On-Write, COW）。</strong></p>
+<p>在主线程没有对数据进行写入时，<strong>子进程和父进程通过指针共享一个物理页面</strong>，也就是可以共享读。对数据进行写入修改时，OS会为页面创建副本，子进程将副本数据写入RDB，这个过程不影响主进程对数据的修改。子进程完成对新RDB文件的写入时，便会拿其替换原来的RDB文件。</p>
+<p>RDB是对整个内存的数据进行快照，所以只有一个文件，这种方法适合大规模的数据恢复，而且很方便。</p>
+<p>但是RDB也有一些缺点：最后一次快照无法及时写入内存，可能会发生丢失，RDB属于全量快照，这是一个比较重量级的操作，当数据集较大时，可能会影响整个服务器的性能。</p>
+<h3 id="对过期键的处理"><a href="#对过期键的处理" class="headerlink" title="对过期键的处理"></a>对过期键的处理</h3><p><strong>RDB 文件生成阶段</strong>：从内存状态持久化成 RDB（文件）的时候，会对 key 进行过期检查，<strong>过期的键「不会」被保存到新的 RDB 文件中</strong>，因此 Redis 中的过期键不会对生成新 RDB 文件产生任何影响。</p>
+<p><strong>RDB 加载阶段</strong>：RDB 加载阶段时，要看服务器是主服务器还是从服务器，分别对应以下两种情况：</p>
+<ul>
+<li><strong>如果 Redis 是「主服务器」运行模式的话，在载入 RDB 文件时，程序会对文件中保存的键进行检查，过期键「不会」被载入到数据库中</strong>。所以过期键不会对载入 RDB 文件的主服务器造成影响；</li>
+<li><strong>如果 Redis 是「从服务器」运行模式的话，在载入 RDB 文件时，不论键是否过期都会被载入到数据库中</strong>。但由于主从服务器在进行数据同步时，从服务器的数据会被清空。所以一般来说，过期键对载入 RDB 文件的从服务器也不会造成影响。</li>
+</ul>
+<h2 id="AOF-Append-Only-File"><a href="#AOF-Append-Only-File" class="headerlink" title="AOF(Append Only File)"></a>AOF(Append Only File)</h2><p>以日志的形式来记录写操作，<strong>只记录写指令</strong>，恢复时只需从前往后执行一遍即可完成数据恢复的工作。</p>
+<p>Reids 是先执行写操作命令后，才将该命令记录到 AOF 日志里的</p>
+<p>这么做的好处：</p>
+<ol>
+<li><strong>避免额外的检查开销</strong>：让操作系统先执行命令，只有命令执行成功才能被记录，这种方式排除了错误的指令</li>
+<li><strong>不会阻塞当前写操作命令的执行</strong>：因为当写操作命令执行成功后，才会将命令记录到 AOF 日志</li>
+</ol>
+<p>这么做的风险：</p>
+<ol>
+<li><strong>数据可能会丢失：</strong> 执行写操作命令和记录日志是两个过程，那当 Redis 在还没来得及将命令写入到硬盘时，服务器发生宕机了，这个数据就会有丢失的风险。</li>
+<li><strong>可能阻塞其他操作：</strong> 由于写操作命令执行成功后才记录到 AOF 日志，不会阻塞当前命令的执行， 但是会阻塞后续的操作。</li>
+</ol>
+<p>Redis 提供了 3 种将日志写回硬盘的策略</p>
+<p><img src="/../img/98987d9417b2bab43087f45fc959d32a.png" srcset="/img/loading.gif" lazyload alt="98987d9417b2bab43087f45fc959d32a"></p>
+<h3 id="AOF-重写机制"><a href="#AOF-重写机制" class="headerlink" title="AOF 重写机制"></a><strong>AOF 重写机制</strong></h3><p>当 AOF 文件的大小超过所设定的阈值后，Redis 就会启用 AOF 重写机制，来压缩 AOF 文件。</p>
+<p>AOF 重写机制是在重写时，读取当前数据库中的所有键值对，然后将每一个键值对用一条命令记录到「新的 AOF 文件」，等到全部记录完后，就将新的 AOF 文件替换掉现有的 AOF 文件。<strong>在使用重写机制后，就会读取 name 最新的 value（键值对）</strong>重写工作完成后，就会将新的 AOF 文件覆盖现有的 AOF 文件，这就相当于压缩了 AOF 文件，使得 AOF 文件体积变小了。</p>
+<p>Redis 的<strong>重写 AOF 过程是由子进程 bgrewriteaof来完成的</strong></p>
+<p>子进程进行 AOF 重写期间，主进程可以继续处理命令请求，从而避免阻塞主进程；同样使用写时复制，当主线程只进行读操作时，子进程使用与主进程相同的内存空间，当发生写操作时，就会复制一份副本给子进程。双方写操作互不影响。</p>
+<p><strong>重写过程中，主进程依然可以正常处理命令</strong>，那么如何保证主进程操作的KV和AOF的一致性？</p>
+<p>为了解决数据不一致问题，Redis 设置了一个 <strong>AOF 重写缓冲区</strong>，这个缓冲区在创建 bgrewriteaof 子进程之后开始使用。</p>
+<p>在重写 AOF 期间，当 Redis 执行完一个写命令之后，它会<strong>同时将这个写命令写入到 「AOF 缓冲区」和 「AOF 重写缓冲区」</strong>。</p>
+<p>也就是说，在 bgrewriteaof 子进程执行 AOF 重写期间，主进程需要执行以下三个工作:</p>
+<ul>
+<li>执行客户端发来的命令；</li>
+<li>将执行后的写命令追加到 「AOF 缓冲区」；</li>
+<li>将执行后的写命令追加到 「AOF 重写缓冲区」；</li>
+</ul>
+<p>当子进程完成 AOF 重写工作（<em>更新KV</em>）后，会向主进程发送一条信号，主进程收到该信号后，会调用一个信号处理函数，该函数主要做以下工作：</p>
+<ul>
+<li><strong>将 AOF 重写缓冲区中的所有内容追加到新的 AOF 的文件中，使得新旧两个 AOF 文件所保存的数据库状态一致</strong>；</li>
+<li>新的 AOF 的文件进行改名，覆盖现有的 AOF 文件。、</li>
+</ul>
+<p>简而言之就是设立一个缓冲区来暂存AOF进程暂不能扫描到的新内容，等AOF完成后再追加</p>
+<h3 id="对过期键的处理-1"><a href="#对过期键的处理-1" class="headerlink" title="对过期键的处理"></a>对过期键的处理</h3><ul>
+<li><strong>AOF 文件写入阶段</strong>：当 Redis 以 AOF 模式持久化时，<strong>如果数据库某个过期键还没被删除</strong>，<strong>那么 AOF 文件会保留此过期键</strong>，当此过期键被删除后，Redis 会向 AOF 文件追加一条 DEL 命令来显式地删除该键值。</li>
+<li><strong>AOF 重写阶段</strong>：执行 AOF 重写时，会对 Redis 中的键值对进行检查，<strong>已过期的键不会被保存到重写后的 AOF 文件中</strong>，因此不会对 AOF 重写造成任何影响。</li>
+</ul>
 <h1 id="Redis的事务"><a href="#Redis的事务" class="headerlink" title="Redis的事务"></a>Redis的事务</h1><p>redis是不支持回滚的：由程序员自行纠正编程错误，无回滚的方式保证了内部的简单快速</p>
 <p>以MULTI开始一个事务，将多个命令入队，入队后不会立即执行，而是放置在等待执行的队列里，由EXEC触发事务</p>
 <p>所有命令都会被序列化，顺序执行，执行过程中不会被其他客户端的命令打断</p>
@@ -491,6 +536,7 @@
 <p>主服务器将缓冲区的写命令发送给从服务器，从服务器接收命令，并执行，完成主从复制</p>
 <p><strong>主从同步依赖于命令传播</strong></p>
 <p>当主服务器接收命令导致数据发生变化时，为了维护主从状态一致，主服务器会将导致自己数据状态发生改变的命令传播到从服务器执行，当从服务器也执行了相同的命令之后，主从服务器之间的数据状态将会保持一致。</p>
+<p>比如<strong>主库在 key 到期时，会在 AOF 文件里增加一条 del 指令，同步到所有的从库</strong>，从库通过执行这条 del 指令来删除过期的 key。</p>
 <p>sync命令的缺点：</p>
 <ol>
 <li>生成RDB快照文件会占用大量的CPU，磁盘IO资源，令主服务器响应能力下降</li>
