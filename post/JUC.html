@@ -37,7 +37,7 @@
 <meta property="og:image" content="http://example.com/img/longadder.png">
 <meta property="og:image" content="http://example.com/img/LongAdder1.png">
 <meta property="article:published_time" content="2022-10-20T06:09:39.000Z">
-<meta property="article:modified_time" content="2022-11-23T06:09:11.230Z">
+<meta property="article:modified_time" content="2022-12-06T04:04:34.522Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="Java基础知识">
 <meta name="twitter:card" content="summary_large_image">
@@ -477,12 +477,12 @@
 <p>如何将新值刷新到主内存中：</p>
 <p><strong>CPU寄存器-&gt;Cache-&gt;Main memory</strong>，写缓冲区可以避免处理器停顿下来等待写入数据而造成的延迟，并且写缓冲区可以合并多次写，减少对内存总线的占用。</p>
 <p>但是在写入主内存之前，另外一个线程是看不到的，所以就需要volatile关键则来保证可见性</p>
-<p>当线程对volatile修饰的变量进行写操作时，汇编指令会多出一个lock前缀，这就是<strong>内存屏障</strong>，而在多核心环境下，这个前缀会对应两个操作：</p>
+<p>当线程对volatile修饰的变量进行写操作时，<strong>汇编指令会多出一个lock前缀，这就是内存屏障，而在多核心环境下，这个前缀会对应两个操作：</strong></p>
 <ol>
-<li>将当前缓存行的数据<strong>立即</strong>写回系统内存</li>
+<li>将当前<strong>缓存行的数据立即写回系统内存</strong></li>
 <li>这个写回内存的操作会使其他cpu里缓存的副本无效化</li>
 </ol>
-<p>这就是缓存一致性协议，每个处理器通过嗅探在总线传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，从而需要重新从系统内存中读取数据。</p>
+<p><strong>这就是缓存一致性协议，每个处理器通过嗅探在总线传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，从而需要重新从系统内存中读取数据。</strong></p>
 <p>所以多核心环境下，每一个线程读取被volatile修饰的变量时，都必须在主内存中读取最新的结果，而不是使用local memory内的数据，这样保证了一个线程修改变量的结果其他线程都是可知的，保证了线程的可见性。</p>
 <h2 id="如何禁止指令重排"><a href="#如何禁止指令重排" class="headerlink" title="如何禁止指令重排"></a>如何禁止指令重排</h2><p>同样依赖于lock前缀，即内存屏障实现</p>
 <p>编译器不会对volatile读与volatile读后面的任意内存操作重排序；</p>

@@ -16,34 +16,29 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Redis的数据结构   数据类型 简单描述 使用场景    String string(字符串)是Redis最简单也是使用最广泛的数据结构，它的内部是一个字符数组。String(字符串)是动态字符串，允许修改；它在结构上的实现类似于Java中的ArrayList（默认构造一个大小为10的初始数组），这是冗余分配内存的思想，也称为预分配；这种思想可以减少扩容带来的性能消耗。当string(字符串)">
+    <meta name="description" content="Redis数据结构   数据类型 简单描述 使用场景    String string(字符串)是Redis最简单也是使用最广泛的数据结构，它的内部是一个字符数组。String(字符串)是动态字符串，允许修改；它在结构上的实现类似于Java中的ArrayList（默认构造一个大小为10的初始数组），这是冗余分配内存的思想，这种思想可以减少扩容带来的性能消耗。当string(字符串)的大小达到扩容阈">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis">
-<meta property="og:url" content="http://example.com/post/Redis%E9%9A%8F%E6%83%B3.html">
+<meta property="og:url" content="http://example.com/post/Redis.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="Redis的数据结构   数据类型 简单描述 使用场景    String string(字符串)是Redis最简单也是使用最广泛的数据结构，它的内部是一个字符数组。String(字符串)是动态字符串，允许修改；它在结构上的实现类似于Java中的ArrayList（默认构造一个大小为10的初始数组），这是冗余分配内存的思想，也称为预分配；这种思想可以减少扩容带来的性能消耗。当string(字符串)">
+<meta property="og:description" content="Redis数据结构   数据类型 简单描述 使用场景    String string(字符串)是Redis最简单也是使用最广泛的数据结构，它的内部是一个字符数组。String(字符串)是动态字符串，允许修改；它在结构上的实现类似于Java中的ArrayList（默认构造一个大小为10的初始数组），这是冗余分配内存的思想，这种思想可以减少扩容带来的性能消耗。当string(字符串)的大小达到扩容阈">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/redis.png">
 <meta property="og:image" content="http://example.com/img/9fa26a74965efbf0f56b707a03bb9b7f.png">
 <meta property="og:image" content="http://example.com/img/redis1.png">
 <meta property="og:image" content="http://example.com/img/3def9bbb70168ee0d6645fc450f2e030.gif">
+<meta property="og:image" content="http://example.com/img/1116398-20190711211545977-842176016.png">
+<meta property="og:image" content="http://example.com/img/1116398-20190711211630034-1363544681.png">
 <meta property="og:image" content="http://example.com/img/98987d9417b2bab43087f45fc959d32a.png">
-<meta property="og:image" content="http://example.com/img/redlock.png">
-<meta property="og:image" content="http://example.com/img/ae6edf4e4d97e73020f36be0d7aee2df.png">
-<meta property="og:image" content="http://example.com/img/redisSYN.png">
-<meta property="og:image" content="http://example.com/img/redisSYN1.png">
-<meta property="og:image" content="http://example.com/img/redisSYN2.png">
-<meta property="og:image" content="http://example.com/img/redisSYN3.png">
-<meta property="og:image" content="http://example.com/img/RedisSYN4.png">
-<meta property="og:image" content="http://example.com/img/filter.png">
+<meta property="og:image" content="http://example.com/img/QQ%E6%88%AA%E5%9B%BE20221206155431.png">
 <meta property="og:image" content="http://example.com/img/redisIO.png">
 <meta property="og:image" content="http://example.com/img/redisIO1.png">
 <meta property="og:image" content="http://example.com/img/RedisIO2.png">
 <meta property="og:image" content="http://example.com/img/RedisIO3.png">
 <meta property="article:published_time" content="2022-09-24T05:45:16.000Z">
-<meta property="article:modified_time" content="2022-12-04T11:53:40.636Z">
+<meta property="article:modified_time" content="2022-12-06T08:23:21.653Z">
 <meta property="article:author" content="SamuelZhou">
-<meta property="article:tag" content="数据库基础">
+<meta property="article:tag" content="Redis">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://example.com/img/redis.png">
   
@@ -243,7 +238,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          21k 字
+          17k 字
         
       </span>
     
@@ -254,7 +249,7 @@
         
         
         
-          172 分钟
+          145 分钟
         
       </span>
     
@@ -297,7 +292,7 @@
             
               <div class="markdown-body">
                 
-                <h1 id="Redis的数据结构"><a href="#Redis的数据结构" class="headerlink" title="Redis的数据结构"></a>Redis的数据结构</h1><table>
+                <h1 id="Redis数据结构"><a href="#Redis数据结构" class="headerlink" title="Redis数据结构"></a>Redis数据结构</h1><table>
 <thead>
 <tr>
 <th><strong>数据类型</strong></th>
@@ -307,7 +302,7 @@
 </thead>
 <tbody><tr>
 <td>String</td>
-<td>string(字符串)是Redis最简单也是使用最广泛的数据结构，它的内部是一个字符数组。String(字符串)是动态字符串，允许修改；它在结构上的实现类似于Java中的ArrayList（默认构造一个大小为10的初始数组），这是冗余分配内存的思想，也称为预分配；这种思想可以减少扩容带来的性能消耗。当string(字符串)的大小达到扩容阈值时，将会对string(字符串)进行扩容，string(字符串)的扩容主要有三种情况：1.长度小于1MB，扩容后为原先的两倍; length &#x3D; length * 2 2.长度大于1MB，扩容后增加1MB; length &#x3D; length + 1MB 3. 字符串的长度最大值为 512MB</td>
+<td>string(字符串)是Redis最简单也是使用最广泛的数据结构，它的内部是一个字符数组。String(字符串)是动态字符串，允许修改；它在结构上的实现类似于Java中的ArrayList（默认构造一个大小为10的初始数组），这是冗余分配内存的思想，这种思想可以减少扩容带来的性能消耗。当string(字符串)的大小达到扩容阈值时，将会对string(字符串)进行扩容，string(字符串)的扩容主要有三种情况：1.长度小于1MB，扩容后为原先的两倍; length &#x3D; length * 2 2.长度大于1MB，扩容后增加1MB; length &#x3D; length + 1MB 3. 字符串的长度最大值为 512MB</td>
 <td>缓存、计数器、分布式锁等。</td>
 </tr>
 <tr>
@@ -317,7 +312,7 @@
 </tr>
 <tr>
 <td>Hash</td>
-<td>Redis的hash(字典)相当于Java语言中的HashMap，hash(字典)的实现与Java中的HashMap（JDK1.7）的结构也是一致的，它的数据结构也是数组+链表组成的二维结构，Redis中的hash(字典)存储的value只能是字符串值，此外扩容与Java中的HashMap也不同。Java中的HashMap在扩容的时候是一次性完成的，而Redis考虑到其核心存取是单线程的性能问题，为了追求高性能，因而采取了渐进式rehash策略。渐进式rehash指的是并非一次性完成，它是多次完成的，因此需要保留旧的hash结构，所以Redis中的hash(字典)会存在新旧两个hash结构，在rehash结束后也就是旧hash的值全部搬迁到新hash之后，新的hash在功能上才会完全替代以前的hash。</td>
+<td>hash(字典)的实现与Java中的HashMap（JDK1.7）的结构是一致的，它的数据结构也是数组+链表组成的二维结构，Redis中的hash(字典)存储的<strong>value只能是字符串值</strong>，此外扩容与Java中的HashMap也不同。Java中的HashMap在扩容的时候是一次性完成的，而Redis为了追求高性能，因而采取了渐进式rehash策略。渐进式rehash指的是并非一次性完成，它是多次完成的，因此需要保留旧的hash结构，所以Redis中的hash(字典)会存在新旧两个hash结构，在rehash结束后也就是旧hash的值全部搬迁到新hash之后，新的hash在功能上才会完全替代以前的hash。</td>
 <td>用户信息、Hash 表……</td>
 </tr>
 <tr>
@@ -327,13 +322,13 @@
 </tr>
 <tr>
 <td>Bitmaps</td>
-<td>Bitmaps 称为位图，严格来说它不是一种数据类型。Bitmaps底层就是字符串（key-value）byte数组。我们可以使用普通的get&#x2F;set直接获取和设值位图的内容，也可以通过Redis提供的位图操作getbit&#x2F;setbit等将byte数组看成“位数组”来处理。Bitmaps 的“位数组”每个单元格只能存储0和1，数组的下标在Bitmaps中称为偏移量。Bitmaps设置时key不存在会自动生成一个新的字符串，如果设置的偏移量超出了现有内容的范围，就会自动将位数组进行零扩充</td>
+<td>Bitmaps 称为位图，Bitmaps底层就是字符串（key-value）byte数组。我们可以使用普通的get&#x2F;set直接获取和设值位图的内容，也可以通过Redis提供的位图操作getbit&#x2F;setbit等将byte数组看成“位数组”来处理。Bitmaps 的“位数组”每个单元格只能存储0和1，数组的下标在Bitmaps中称为偏移量。Bitmaps设置时key不存在会自动生成一个新的字符串，如果设置的偏移量超出了现有内容的范围，就会自动将位数组进行零扩充</td>
 <td>员工打卡……</td>
 </tr>
 <tr>
-<td>Geospatial</td>
-<td>Geospatial是Redis在3.2版本以后增加的地理位置GEO模块</td>
-<td>微信附近的人，在线点餐“附近的餐馆”……</td>
+<td>ZSET</td>
+<td><strong>有序键值对集合</strong>，和哈希表不同，底层用跳表实现，可以实现键值对的有序存储</td>
+<td>成绩榜单</td>
 </tr>
 <tr>
 <td>HyperLogLog</td>
@@ -346,16 +341,15 @@
 <h1 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h1><p>int：存储数字</p>
 <p>raw：长度大于39字节，基于SDS</p>
 <p>embstr：长度小于39字节，基于SDS</p>
-<h2 id="SDS结构模型"><a href="#SDS结构模型" class="headerlink" title="SDS结构模型"></a>SDS结构模型</h2><p>基于C语言，由Redis封装的一种简单高效安全的数据结构</p>
-<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><p>SDS的底层实现思路其实十分简单</p>
+<h2 id="SDS结构"><a href="#SDS结构" class="headerlink" title="SDS结构"></a>SDS结构</h2><p>SDS为字符串添加了信息header</p>
 <ol>
-<li>无符号变量len：记录字符串的长度</li>
-<li>无符号变量free：记录空闲内存的大小</li>
-<li>char型数组buf：存储字符</li>
+<li><strong>无符号变量len：记录字符串的长度</strong></li>
+<li><strong>无符号变量free：记录空闲内存的大小</strong></li>
+<li><strong>char型数组buf：存储字符</strong></li>
 </ol>
-<p>其中：buf尾部会自动追加一个空字符，遵循了c语言原生字符串的规范，并且SDS的指针也不是指向起始位置，而是指向buf，使得SDS可以直接使用一部分库函数。</p>
-<p>SDS取消了字节对齐，使得指针移动一位便可以读取到header里的信息。如果没有取消，这个移动的位数是未知的，就无法兼容C语言的库函数了，指针操作也要麻烦很多。</p>
-<h3 id="数据结构优化："><a href="#数据结构优化：" class="headerlink" title="数据结构优化："></a>数据结构优化：</h3><p>如果一个字符串非常短，但是记录信息的头部却占用了更多的空间，这未免有一些浪费，所以SDS会分为五种类型</p>
+<p>buf尾部会自动追加一个空字符，遵循了c语言原生字符串的规范，<strong>并且SDS的指针也不是指向起始位置，而是指向buf</strong>，使得SDS可以直接使用一部分库函数。</p>
+<p><strong>SDS取消了字节对齐，使得指针移动一位便可以读取到header里的信息。</strong>如果没有取消，这个移动的位数是未知的，就无法兼容C语言的库函数了，指针操作也要麻烦很多</p>
+<p>如果一个字符串非常短，但是记录信息的头部却占用了更多的空间，这未免有一些浪费，所以SDS会分为五种类型</p>
 <ol>
 <li>短字符串：小于32，用一个char类型的flag变量来记录长度，低三位存储类型，高三位存储长度</li>
 <li>短字符串：用一字节的char来记录长度，一字节的flag来记录类型</li>
@@ -363,20 +357,18 @@
 <li>长字符串：用4字节的int来记录长度</li>
 <li>超长字符串：用8字节的long来记录字符串</li>
 </ol>
-<p>SDS的最大长度：在3.X版本中，因为数据结构中的len属性是由int来修饰的，所以buf的最大长度就是214783647，即512MB</p>
+<p>SDS的最大长度：在3.X版本中，因为数据结构中的<strong>len属性是由int来修饰的，所以buf的最大长度就是214783647，即512MB</strong></p>
 <p>但是在6.x版本后，长度就更多样了</p>
 <h3 id="SDS相比原生string的优势："><a href="#SDS相比原生string的优势：" class="headerlink" title="SDS相比原生string的优势："></a>SDS相比原生string的优势：</h3><ol>
-<li>O(1)时间复杂度获取字符串的长度：因为C语言原生基本数据类型不记录自身长度，当要计算一个字符串的长度必须遍历整个字符串，直到遇到空字符为止，时间复杂度O(n)，而使用SDS则直接获取len属性即可，时间复杂度为O(1)</li>
-<li>二进制安全：在C语言中，用空字符表示字符串的结束，若字符串本身就包含空字符，那么遇到便会截断，即非二进制安全。与其相对的便是二进制安全，SDS使用len属性来判断字符串是否结束，不会受到空字符影响。</li>
-<li>杜绝缓冲区溢出：在C语言中，在对字符串进行拼接操作时，若没有给字符串分配足够的内存，那么就可能产生缓冲区溢出，把其他数据覆盖掉。而SDS的自动扩容机制杜绝了溢出，<code>sdsMakeRoomFor</code>方法：参数：原字符串，待加入的字符串。若空闲空间大于待拼接字符串的长度，则无需扩容；若拼接后的长度小于1M，则直接扩容至新长度的两倍；若拼接后的长度大于1M，则扩容至新长度+1M；扩容后检查类型，若发生变化，则需要为SDS重新分配内存（header的大小也改变了）</li>
-<li>优化的内存分配策略：预分配：扩容后的SDS不会恰好容下新字符串，而是多分配了一些空间，从而减少修改字符串时带来的内存重分配次数；惰性空间释放机制：当缩短字符串时，不会立刻回收空余的空间，而是仅仅更新len属性，空余空间供将来使用，减少内存分配频率，当然Redis也提供了释放未使用空间的方法<code>sdsRemoveFreeSpace</code></li>
+<li>O(1)时间复杂度获取字符串的长度：因为C语言原生基本数据类型不记录自身长度，获取一个字符串的长度必须遍历，直到遇到空字符为止，时间复杂度O(n)，而使用SDS则直接在header里获取len属性即可，时间复杂度为O(1)</li>
+<li>二进制安全：在C语言中，用空字符表示字符串的结束，若字符串本身就包含空字符，那么遇到便会截断，即非二进制安全。与其相对的便是二进制安全，SDS使用<strong>len属性</strong>来判断字符串是否结束，不会受到空字符影响。</li>
+<li><strong>杜绝缓冲区溢出</strong>：在C语言中，在对字符串进行拼接操作时，若没有给字符串分配足够的内存，那么就可能产生缓冲区溢出，把其他数据覆盖掉。而SDS的自动扩容机制杜绝了溢出，<strong>SDS在拼接时会判断是否有足够的空间留给新字符串，若空闲空间大于待拼接字符串的长度，</strong>则无需扩容；若拼接后的长度小于1M，则直接扩容至新长度的两倍；若拼接后的长度大于1M，则扩容至新长度+1M；扩容后检查类型，若发生变化，则需要为SDS重新分配内存（header的大小也改变了）</li>
+<li>优化的内存分配策略：冗余分配，从而减少修改字符串时带来的内存重分配次数；惰性空间释放机制：当缩短字符串时，不会立刻回收空余的空间，而是仅仅更新len属性，空余空间供将来使用，减少内存分配频率。</li>
 </ol>
-<h1 id="List列表"><a href="#List列表" class="headerlink" title="List列表"></a>List列表</h1><p>Redis 的列表相当于 Java 语言里面的 LinkedList，这意味着List的插入和删除操作非常块，但是索引定位就比较慢了</p>
-<p>List支持先进先出（lpop）先进后出（rpop）</p>
-<p>List有两种实现方式：压缩列表和双向循环链表</p>
-<h4 id="ziplist：节点的数据小于64字节，数据个数小于512个"><a href="#ziplist：节点的数据小于64字节，数据个数小于512个" class="headerlink" title="ziplist：节点的数据小于64字节，数据个数小于512个"></a>ziplist：<strong>节点的数据小于64字节，数据个数小于512个</strong></h4><p>一般的数组都要求每一格的元素大小相同，但是若要存储不同大小的字符串，就需要以最大长度来作为元素大小，会造成一定程度的浪费。而压缩列表就是将元素紧凑，但是会在每个元素的头部追加一个len属性，这样就能很容易计算出下一个元素的内存地址。</p>
+<h1 id="List列表"><a href="#List列表" class="headerlink" title="List列表"></a>List列表</h1><p>Redis 的列表相当于 Java 语言里面的 LinkedList，可以实现队列和栈</p>
+<h4 id="ziplist"><a href="#ziplist" class="headerlink" title="ziplist"></a>ziplist</h4><p><strong>节点的数据小于64字节，数据个数小于512个</strong>，一般的数组都要求每一格的元素大小相同，但是若要存储不同大小的字符串，就需要以最大长度来作为元素大小，会造成一定程度的浪费。而压缩列表就是将元素紧凑，但是会在每个元素的头部追加一个len属性，这样就能很容易计算出下一个元素的内存地址。</p>
 <h4 id="双向链表"><a href="#双向链表" class="headerlink" title="双向链表"></a>双向链表</h4><p>和<code>linkedlist</code>很相似，可以处理数据量较大的情况，每个节点包含value和前驱，后继节点的指针</p>
-<h4 id="quicklist"><a href="#quicklist" class="headerlink" title="quicklist"></a>quicklist</h4><p>在redis3.2版本之前，使用ziplist和linkedlist作为列表的底层实现，就使用quicklist</p>
+<h4 id="quicklist"><a href="#quicklist" class="headerlink" title="quicklist"></a>quicklist</h4><p>在redis3.2版本之前，使用ziplist和linkedlist作为列表的底层实现，<strong>3.2之后就使用quicklist</strong></p>
 <p>quicklist其实现也是依赖于ziplist和linkedlist来实现的，它是两个结构的结合。</p>
 <p>它将ziplist来进行分段存储，也就是分成一个个的quicklistNode节点来进行存储。<strong>每个quicklistNode指向一个ziplist</strong>，然后quicklistNode之间是通过双向指针来进行连接的。</p>
 <p><img src="/../img/redis1.png" srcset="/img/loading.gif" lazyload alt="redis1"></p>
@@ -390,6 +382,34 @@
 <p>其他情况由哈希表实现，和JDK1.7里的hashmap类似，都是<strong>无序键值对集合</strong>，底层是数组+链表</p>
 <p>hash也有两种实现方式，当数据量小的时候，使用压缩列表，当数据量大的时候，使用散列表。</p>
 <p>但是hash只能存储字符串，并且redis为了保证高性能，采用渐进式的rehash方法，即在不断输入的任务以及hash操作中一步步将旧结构里的内容迁移到新结构中</p>
+<h2 id="哈希表的扩容"><a href="#哈希表的扩容" class="headerlink" title="哈希表的扩容"></a>哈希表的扩容</h2><p><strong>负载因子：</strong><code>factor = used/size</code></p>
+<p><strong>size：数组的长度</strong> ；<strong>used：表示有多少个键值对实体</strong></p>
+<h4 id="扩容规则"><a href="#扩容规则" class="headerlink" title="扩容规则"></a>扩容规则</h4><ol>
+<li>没有执行<code>bgsave</code>和<code>bgrewriteaof</code>指令的情况下，即未 进行子进程RDB快照和AOF重写时，负载因子大于等于1时进行扩容。</li>
+<li>正在执行<code>bgsave</code>和<code>bgrewriteaof</code>指令的情况下，哈希表的负载因大于等于5时进行扩容；</li>
+</ol>
+<p>扩容与JAVA哈希表相同，都是扩容为2次幂大小</p>
+<h4 id="缩容规则"><a href="#缩容规则" class="headerlink" title="缩容规则"></a>缩容规则</h4><p><strong>负载因子小于0.1时</strong>，会进行缩容操作，同样保持2次幂大小</p>
+<h4 id="渐进式rehash"><a href="#渐进式rehash" class="headerlink" title="渐进式rehash"></a>渐进式rehash</h4><p>Java中HashMap的rehash过程就是一次性将当前所有节点进行rehash然后复制到新哈希表相应的位置上，之后释放掉原有的hash表，持有新表的引用，这个过程是一个时间复杂度为<code>O(n)</code>的操作。<br>对于单线程的Redis而言，一次性承受<code>O(n)</code>时间复杂度的rehash操作所带来的阻塞的感知是很明显的，因而其使用的是一种称为<strong>渐进式rehash</strong>的方式</p>
+<p>其过程如下：</p>
+<ol>
+<li>假设当前数据在表1中，那么<strong>首先为表2分配足够的空间</strong>，空间大小即按照扩容和缩容规则设定的大小</li>
+<li>在表中维护一个变量，<strong>rehashidx&#x3D;0</strong>，<strong>表示rehash正式开始</strong></li>
+<li>rehash进行期间，外界调用Redis执行增删改查操作时，程序除了执行指定的操作以外，还会顺带将旧表中的元素进行转移，每次仅处理少量的转移任务(100个元素)</li>
+<li>当一次rehash工作完成之后，程序将rehashidx属性的值+1</li>
+<li>随着rehash的不断执行，最终在某个时间点上，所有元素迁移完成，这时程序<strong>将rehashidx属性的值设为-1</strong>，<strong>表示rehash操作已完成</strong></li>
+</ol>
+<p>这个过程会存在两个明显问题</p>
+<ol>
+<li>每次对字典执行增删改查时才会触发<code>rehash</code>过程，万一不进行操作了，是不是就不会进行数据迁移了呢？</li>
+<li>在维护两个表的时候，此时如何正常对外提供服务？</li>
+</ol>
+<p>第一个问题，<code>Redis</code>有一个<strong>定时器，会定时去判断<code>rehash</code>是否完成</strong>，如果没有完成，即使没有命令执行，也会主动进行<code>rehash</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-comment">// 服务器定时任务</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">databaseCron</span><span class="hljs-params">()</span> &#123;<br>         ...<br>         <span class="hljs-keyword">if</span> (server.activerehashing) &#123;<br>            <span class="hljs-keyword">for</span> (j = <span class="hljs-number">0</span>; j &lt; dbs_per_call; j++) &#123;<br>                 <span class="hljs-comment">// rehash方法</span><br>                 <span class="hljs-type">int</span> work_done = incrementallyRehash(rehash_db);<br>                 <span class="hljs-keyword">if</span> (work_done) &#123;<br>                       <span class="hljs-comment">/* If the function did some work, stop here, we&#x27;ll do</span><br><span class="hljs-comment">                        * more at the next cron loop. */</span><br>                       <span class="hljs-keyword">break</span>;<br>                  &#125; <span class="hljs-keyword">else</span> &#123;<br>                 <span class="hljs-comment">/* If this db didn&#x27;t need rehash, we&#x27;ll try the next one. */</span><br>                      rehash_db++;<br>                      rehash_db %= server.dbnum;<br>                  &#125;<br>             &#125;<br>        &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>第二个问题，对于<strong>添加操作</strong>，会将新的数据直接添加到新表上面。</p>
+<p>对于<strong>删除、更改、查询操作</strong>，会直接在旧表上进行，当在旧表上查询不到时，会接着去新表上查找，如果再找不到，则表明不存在该键值对。</p>
+<p><strong>渐进式rehash存在的问题：需要长时间维护两个hash表，对内存会造成较大的压力，特别是当内存紧张时</strong></p>
 <h1 id="SET"><a href="#SET" class="headerlink" title="SET"></a>SET</h1><p><strong>无序集合</strong>，存储一组不重复的数据，类似于HashSet，元素无序且唯一</p>
 <p>同样两种实现方法：有序数组inset（只用于处理整数）和散列表。前者是处理较少的数据，后者是处理大量数据。</p>
 <h1 id="ZSET"><a href="#ZSET" class="headerlink" title="ZSET"></a>ZSET</h1><p><strong>有序键值对集合</strong></p>
@@ -418,8 +438,22 @@
 <li>插入查询过程类似于二分查找，所以时间复杂度为O(logn)</li>
 <li>与红黑树相比：实现简单，无需变色左旋右旋等操作</li>
 </ol>
-<h1 id="Redis的持久化"><a href="#Redis的持久化" class="headerlink" title="Redis的持久化"></a>Redis的持久化</h1><p>因为redis的数据是在内存里，一旦断电或者宕机，数据便会丢失，所以必须保证数据不会因为故障而丢失</p>
-<h2 id="RDB-redis-database"><a href="#RDB-redis-database" class="headerlink" title="RDB(redis database)"></a>RDB(redis database)</h2><p><strong>快照</strong>，记录某一个瞬间的内存数据，记录的是实际数据</p>
+<h1 id="Redis对象模型"><a href="#Redis对象模型" class="headerlink" title="Redis对象模型"></a>Redis对象模型</h1><p>Redis其实并没有直接使用这些基本数据类型，了加快读写速度，在此基础上又包装了一层称之为<strong>RedisObject</strong></p>
+<p>redis中每一个value都可以理解为是一个RedisObject</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">redisObject</span>&#123;</span><br>    <span class="hljs-type">unsigned</span> type:<span class="hljs-number">4</span>;<br>    <span class="hljs-type">unsigned</span> encoding:<span class="hljs-number">4</span>;<br>    <span class="hljs-type">unsigned</span> lru:LRU_BITS;<br>    <span class="hljs-type">int</span> refcount;<br>    <span class="hljs-type">void</span> *ptr;<br>&#125;robj;<br></code></pre></td></tr></table></figure>
+
+<p>结构内有五个属性</p>
+<h2 id="type"><a href="#type" class="headerlink" title="type"></a>type</h2><p>type主要存储当前value对象的数据类型：字符串，列表，哈希，集合，有序集合，就是上文写的基本数据类型。</p>
+<p>对于 Redis 数据库保存的键值对来说，键一定是一个字符串对象，而值则可以是上述五种的其中一种</p>
+<h2 id="encoding"><a href="#encoding" class="headerlink" title="encoding"></a>encoding</h2><p>简单说encoding存储当前值对象底层编码的实现方式。不同type对象对应不同的编码</p>
+<p>比如对于type为ZSET的对象，encoding可以为INTSET（整数集合），也可以为SKIPLIST（跳表）</p>
+<p>简而言之就是说明<strong>底层数据类型的具体实现</strong></p>
+<p><img src="/../img/1116398-20190711211545977-842176016.png" srcset="/img/loading.gif" lazyload alt="1116398-20190711211545977-842176016"></p>
+<h2 id="lru"><a href="#lru" class="headerlink" title="lru"></a>lru</h2><p>在使用LRU和LFU时会有差别，但是大小固定为24bit，用于内存淘汰策略</p>
+<h2 id="refcount"><a href="#refcount" class="headerlink" title="refcount"></a><strong>refcount</strong></h2><p>用于共享计数，类似于JVM GC的引用计数垃圾回收算法，当refcount为0时，表示没有其它对象引用，可以进行释放此对象</p>
+<h2 id="ptr"><a href="#ptr" class="headerlink" title="**ptr **"></a>**ptr **</h2><p>ptr指针是指向对象的底层实现数据结构</p>
+<p><img src="/../img/1116398-20190711211630034-1363544681.png" srcset="/img/loading.gif" lazyload alt="1116398-20190711211630034-1363544681"></p>
+<h1 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h1><h2 id="RDB快照"><a href="#RDB快照" class="headerlink" title="RDB快照"></a>RDB快照</h2><p><strong>快照</strong>，记录某一个瞬间的内存数据，记录的是实际数据</p>
 <h3 id="save"><a href="#save" class="headerlink" title="save"></a>save</h3><p>执行了 save 命令，就会在主线程生成 RDB 文件，由于和执行操作命令在同一个线程，所以如果写入 RDB 文件的时间太长，<strong>会阻塞主线程</strong>；</p>
 <h3 id="bgsave"><a href="#bgsave" class="headerlink" title="bgsave"></a>bgsave</h3><p>Redis会单独创建fork一个子进程来进行持久化，这样可以<strong>避免主线程的阻塞</strong>；</p>
 <blockquote>
@@ -477,180 +511,40 @@
 <p>所有命令都会被序列化，顺序执行，执行过程中不会被其他客户端的命令打断</p>
 <p>在提交之前所有命令都不会被执行</p>
 <p>不保证原子性：有一条命令失败，其他的命令仍然会进行，没有回滚</p>
-<h3 id="redis和memcached的区别"><a href="#redis和memcached的区别" class="headerlink" title="redis和memcached的区别"></a><em><strong>redis和memcached的区别</strong></em></h3><p>memcached全部存储于内存中，断电后会挂掉；redis具有持久化机制</p>
-<p>Redis具有复杂的数据类型</p>
-<p>Redis自己构建了VM机制，一般的系统调用系统函数，会浪费时间去移动和请求</p>
-<p>redis的value值最大可以达到1gb，memcached只有1mb</p>
-<h1 id="Redis分布式锁——Redission"><a href="#Redis分布式锁——Redission" class="headerlink" title="Redis分布式锁——Redission"></a>Redis分布式锁——Redission</h1><p><img src="/../img/redlock.png" srcset="/img/loading.gif" lazyload alt="redlock"></p>
-<p>分布式锁是控制分布式系统或不同系统之间共同访问共享资源的一种锁实现，如果不同的系统或同一个系统的不同主机之间共享了某个资源时，往往需要互斥来防止彼此干扰来保证一致性。</p>
-<p>使用场景：多个服务间保证同一时刻同一时间段内同一用户只能有一个请求（防止关键业务出现并发攻击）</p>
-<p>实现分布式锁的主要步骤：</p>
+<h1 id="Redis过期删除和内存淘汰"><a href="#Redis过期删除和内存淘汰" class="headerlink" title="Redis过期删除和内存淘汰"></a>Redis过期删除和内存淘汰</h1><p>每当我们对一个 key 设置了过期时间时，Redis 会把该 key 带上过期时间存储到一个<strong>过期字典</strong>中</p>
+<p><strong>该数据结构保存了数据库中所有 key 的过期时间</strong></p>
+<p>当我们查询一个 key 时，Redis 首先检查过期字典</p>
 <ol>
-<li>指定一个 key 作为锁标记，存入 Redis 中，指定一个 <strong>唯一的标识</strong> 作为 value。</li>
-<li>当 key 不存在时才能设置值，确保同一时间只有一个客户端进程获得锁，满足 <strong>互斥性</strong> 特性。</li>
-<li>设置一个过期时间，防止因系统异常导致没能删除这个 key，满足 <strong>防死锁</strong> 特性。</li>
-<li>当处理完业务之后需要清除这个 key 来释放锁，清除 key 时需要校验 value 值，需要满足 <strong>解铃还须系铃人</strong> 。</li>
+<li>如果不存在该key，则正常读取键值</li>
+<li>如果存在，则会获取该 key 的过期时间，然后<strong>与当前系统时间进行比对，如果比系统时间大，那就没有过期</strong>，否则判定该key已过期</li>
 </ol>
-<p>Redisson 提供了看门狗，每获得一个锁时，只设置一个很短的过期时间，同时起一个线程在每次快要到超时时间时去刷新锁的过期时间。在释放锁的同时结束这个线程。</p>
-<h2 id="RedLock算法"><a href="#RedLock算法" class="headerlink" title="RedLock算法"></a>RedLock算法</h2><p>Redisson分布式锁，在某些极端情况下仍然是有缺陷的</p>
-<ol>
-<li><p>客户端长时间内阻塞导致锁失效</p>
-<p>客户端 1 得到了锁，因为网络问题或者 GC 等原因导致长时间阻塞，然后业务程序还没执行完锁就过期了，这时候客户端 2 也能正常拿到锁，可能会导致线程安全问题。</p>
-</li>
-<li><p>Redis 服务器时钟漂移</p>
-<p>如果 Redis 服务器的机器时间发生了向前跳跃，就会导致这个 key 过早超时失效，比如说客户端 1 拿到锁后，key 还没有到过期时间，但是 Redis 服务器的时间比客户端快了 2 分钟，导致 key 提前就失效了，这时候，如果客户端 1 还没有释放锁的话，就可能导致多个客户端同时持有同一把锁的情况，同样会造成线程安全的问题。</p>
-</li>
-<li><p>单点实例安全问题</p>
-<p>如果 Redis 是单机模式挂了的话，那所有的客户端都获取不到锁了，假设你是主从模式，但 Redis 的主从同步是异步进行的，如果 Redis 主宕机了，这个时候从机并没有同步到这一把锁，那么机器 B 再次申请的时候就会再次申请到这把锁。</p>
-</li>
-</ol>
-<p>引入红锁算法：</p>
-<ol>
-<li><p>客户端在多个 Redis 实例上申请加锁，必须保证<strong>大多数节点加锁成功</strong>，默认为N&#x2F;2+1个</p>
-<p>解决容错性问题，部分实例异常，剩下的还能加锁成功</p>
-</li>
-<li><p>大多数节点<strong>加锁的总耗时</strong>，要小于锁设置的过期时间。</p>
-<p>多实例操作，可能存在网络延迟、丢包、超时等问题，所以就算是大多数节点加锁成功，如果加锁的累积耗时超过了锁的过期时间，那有些节点上的锁可能也已经失效了，还是没有意义的。客户端会记录每次加锁消耗的时间并求和，加锁总耗时小于锁失效时间，锁才算获取成功。</p>
-</li>
-<li><p>释放锁，要向<strong>全部节点</strong>发起释放锁请求</p>
-<p>如果部分节点加锁成功，但最后由于异常导致大部分节点没加锁成功，就要释放掉所有redis实例，各节点要保持一致</p>
-</li>
-</ol>
-<h1 id="Redis主从"><a href="#Redis主从" class="headerlink" title="Redis主从"></a>Redis主从</h1><p><strong>主从复制</strong>，或者叫主从同步，是指将一台 Redis 服务器的数据，复制到其他的 Redis 服务器。</p>
-<p>前者称为 **主节点(master)**，后者称为 **从节点(slave)**。且数据的复制是 <strong>单向</strong> 的，只能由主节点到从节点。</p>
-<p>Redis 主从复制支持 <strong>主从同步</strong> 和 <strong>从从同步</strong> 两种，后者是 Redis 后续版本新增的功能，以减轻主节点的同步负担。</p>
-<p><img src="/../img/ae6edf4e4d97e73020f36be0d7aee2df.png" srcset="/img/loading.gif" lazyload alt="ae6edf4e4d97e73020f36be0d7aee2df"></p>
-<p>主从复制的目的：</p>
+<h2 id="惰性删除-定期删除"><a href="#惰性删除-定期删除" class="headerlink" title="惰性删除+定期删除"></a><strong>惰性删除+定期删除</strong></h2><p>惰性删除策略，<strong>不主动删除过期键，每次从数据库访问 key 时，都检测 key 是否过期，如果过期则删除该 key。</strong></p>
+<p>惰性删除的缺点：如果一个 key 已经过期，而这个 key 又仍然保留在数据库中，那么只要这个过期 key 一直没有被访问，它所占用的内存就不会释放，造成了一定的内存空间浪费。</p>
+<p>定期删除策略，<strong>每隔一段时间随机从数据库中取出一定数量的 key 进行检查，并删除其中的过期key。</strong></p>
+<p>定期删除的缺点：难以确定删除操作执行的时长和频率。如果执行的太频繁，就会对 CPU 不友好；如果执行的太少，那又和惰性删除一样了，过期 key 占用的内存不会及时得到释放。</p>
+<p><strong>Redis 选择「惰性删除+定期删除」这两种策略配和使用</strong>，以求在合理使用 CPU 时间和避免内存浪费之间取得平衡。</p>
+<h2 id="内存淘汰"><a href="#内存淘汰" class="headerlink" title="内存淘汰"></a>内存淘汰</h2><h3 id="不进行数据淘汰的策略"><a href="#不进行数据淘汰的策略" class="headerlink" title="不进行数据淘汰的策略"></a>不进行数据淘汰的策略</h3><p><strong>noeviction</strong>（Redis3.0之后默认的内存淘汰策略）：当超过最大设置内存时，不淘汰任何数据，而是不再提供服务，直接返回错误</p>
+<h3 id="进行数据淘汰的策略"><a href="#进行数据淘汰的策略" class="headerlink" title="进行数据淘汰的策略"></a>进行数据淘汰的策略</h3><p>在设置了过期时间的数据中进行淘汰：</p>
 <ul>
-<li><strong>数据冗余：</strong> 主从复制实现了数据的热备份，是持久化之外的一种数据冗余方式。</li>
-<li><strong>故障恢复：</strong> 当主节点出现问题时，可以由从节点提供服务，实现快速的故障恢复 *(实际上是一种服务的冗余)*。</li>
-<li><strong>负载均衡：</strong> 在主从复制的基础上，配合读写分离，可以由主节点提供写服务，由从节点提供读服务 <em>（即写 Redis 数据时应用连接主节点，读 Redis 数据时应用连接从节点）</em>，分担服务器负载。尤其是在写少读多的场景下，通过多个从节点分担读负载，可以大大提高 Redis 服务器的并发量。</li>
-<li><strong>高可用基石：</strong> 除了上述作用以外，主从复制还是哨兵和集群能够实施的 <strong>基础</strong>，因此说主从复制<strong>是 Redis 高可用的基础</strong>。</li>
+<li><strong>volatile-random</strong>：随机淘汰设置了过期时间的任意键值；</li>
+<li><strong>volatile-ttl</strong>：优先淘汰<strong>最早过期</strong>的键值。</li>
+<li><strong>volatile-lru</strong>（Redis3.0 之前，默认的内存淘汰策略）：淘汰所有设置了过期时间的键值中，<strong>最久未使用</strong>的键值；</li>
+<li><strong>volatile-lfu</strong>（Redis 4.0 后新增的内存淘汰策略）：淘汰所有设置了过期时间的键值中，最少使用的键值；</li>
 </ul>
-<h2 id="redis2-7及以前版本"><a href="#redis2-7及以前版本" class="headerlink" title="redis2.7及以前版本"></a>redis2.7及以前版本</h2><p><strong>主从复制依赖于sync</strong></p>
-<p><img src="/../img/redisSYN.png" srcset="/img/loading.gif" lazyload alt="redisSYN"></p>
-<p>当主服务器接收到sync命令后，会执行bgsave命令</p>
-<p>主服务器主进程fork的子进程会生成一个RDB文件，同时将RDB快照产生后的所有写操作记录在缓冲区中</p>
-<p>bgsave命令执行完成后，主服务器将生成的RDB文件发送给从服务器</p>
-<p>从服务器接收到RDB文件后，首先会清除本身的全部数据，然后载入RDB文件，将自己的数据状态更新成主服务器的RDB文件的数据状态</p>
-<p>主服务器将缓冲区的写命令发送给从服务器，从服务器接收命令，并执行，完成主从复制</p>
-<p><strong>主从同步依赖于命令传播</strong></p>
-<p>当主服务器接收命令导致数据发生变化时，为了维护主从状态一致，主服务器会将导致自己数据状态发生改变的命令传播到从服务器执行，当从服务器也执行了相同的命令之后，主从服务器之间的数据状态将会保持一致。</p>
-<p>比如<strong>主库在 key 到期时，会在 AOF 文件里增加一条 del 指令，同步到所有的从库</strong>，从库通过执行这条 del 指令来删除过期的 key。</p>
-<p>sync命令的缺点：</p>
-<ol>
-<li>生成RDB快照文件会占用大量的CPU，磁盘IO资源，令主服务器响应能力下降</li>
-<li>主服务器将生成的RDB文件发送给从服务器，会占用大量网络IO资源</li>
-<li>从服务器接收RDB文件并载入，会导致从服务器阻塞，无法提供服务</li>
-<li>当从服务器掉线再重连后，会产生不一致的问题，而sync无法处理这一情况，只能使用全量同步</li>
-</ol>
-<h2 id="redis2-8-—-redis4-0"><a href="#redis2-8-—-redis4-0" class="headerlink" title="redis2.8 — redis4.0"></a>redis2.8 — redis4.0</h2><p>尽量<strong>减少全量同步的发生，尽可能使用增量同步</strong>，在2.8版本之后使用<strong>psync</strong>命令代替了sync命令来执行同步操作，psync命令同时具备全量同步和增量同步的功能。</p>
-<p>增量同步的实现原理：</p>
-<ol>
-<li><strong>复制偏移量</strong></li>
-<li><strong>复制积压缓冲区</strong></li>
-<li><strong>服务器运行 ID</strong></li>
-</ol>
-<h3 id="复制偏移量"><a href="#复制偏移量" class="headerlink" title="复制偏移量"></a>复制偏移量</h3><p>这是主从服务器都会维护的参数</p>
-<p>主服务器向从服务发送数据，传播N个字节的数据，主服务的复制偏移量增加N</p>
-<p>从服务器接收主服务器发送的数据，接收N个字节的数据，从服务器的复制偏移量增加N</p>
-<p><img src="/../img/redisSYN1.png" srcset="/img/loading.gif" lazyload alt="redisSYN1"></p>
-<p><strong>假设此时A&#x2F;B正常传播，C从服务器断线</strong></p>
-<p><img src="/../img/redisSYN2.png" srcset="/img/loading.gif" lazyload alt="redisSYN2"></p>
-<p>有了复制偏移量之后，从服务器C断线重连后，主服务器只需要发送从服务器缺少的100字节数据即可</p>
-<h3 id="复制积压缓冲区"><a href="#复制积压缓冲区" class="headerlink" title="复制积压缓冲区"></a>复制积压缓冲区</h3><p><img src="/../img/redisSYN3.png" srcset="/img/loading.gif" lazyload alt="redisSYN3"></p>
-<p>复制积压缓冲区是一个固定长度的队列，默认为1MB大小。</p>
-<p>当主服务器数据状态发生改变，主服务器将数据同步给从服务器的同时会另存一份到复制积压缓冲区中</p>
-<p>复制积压缓冲区为了能和偏移量进行匹配，它<strong>不仅存储了数据内容，还记录了每个字节对应的偏移量：</strong></p>
-<p><img src="/../img/RedisSYN4.png" srcset="/img/loading.gif" lazyload alt="RedisSYN4"></p>
-<p>所以主服务器可以通过这个缓冲区来知道从服务器缺失了哪些数据</p>
-<p>当从服务器断线重连后，从服务器通过psync命令将自己的复制偏移量（offset）发送给主服务器，主服务器便可通过这个偏移量来判断进行增量传播还是全量同步。</p>
+<p>在所有数据范围内进行淘汰：</p>
 <ul>
-<li>如果偏移量offset+1的数据仍然在复制积压缓冲区中，那么进行增量同步操作</li>
-<li>反之进行全量同步操作，与sync一致</li>
+<li><strong>allkeys-random</strong>：随机淘汰任意键值;</li>
+<li><strong>allkeys-lru</strong>：淘汰整个键值中最久未使用的键值；</li>
+<li><strong>allkeys-lfu</strong>（Redis 4.0 后新增的内存淘汰策略）：淘汰整个键值中最少使用的键值。</li>
 </ul>
-<p>可以由用户自定义缓冲区大小：尽可能的使用增量同步，但是缓冲区又不会占用过大的内存</p>
-<h3 id="服务器运行ID"><a href="#服务器运行ID" class="headerlink" title="服务器运行ID"></a>服务器运行ID</h3><p>当<strong>主服务器宕机</strong>后，某台从服务器被选举成为新的主服务器，就通过比较运行ID来区分谁是主服务器</p>
-<ol>
-<li><p>运行ID（run id）是服务器启动时自动生成的40个随机的十六进制字符串，主服务和从服务器均会生成运行ID</p>
-</li>
-<li><p>当从服务器首次同步主服务器的数据时，<strong>主服务器会发送自己的运行ID给从服务器</strong>，从服务器会保存在RDB文件中</p>
-</li>
-<li><p>当从服务器断线重连后，从服务器会向主服务器发送之前保存的主服务器运行ID，如果服务器运行ID匹配，则证明主服务器未发生更改，可以尝试进行增量同步</p>
-</li>
-<li><p>如果服务器运行ID不匹配，则进行全量同步</p>
-</li>
-</ol>
-<h2 id="redis4-0之后"><a href="#redis4-0之后" class="headerlink" title="redis4.0之后"></a>redis4.0之后</h2><p>psync升级为psync2.0</p>
-<p> psync2.0 抛弃了服务器运行ID，采用了replid和replid2来代替，其中replid存储的是当前主服务器的运行ID，replid2保存的是上一个主服务器运行ID</p>
-<p>通过replid和replid2我们可以解决<strong>主服务器切换</strong>时，增量同步的问题：</p>
-<ol>
-<li><p>如果replid等于当前主服务器的运行id，那么判断同步方式增量&#x2F;全量同步</p>
-</li>
-<li><p>如果replid不相等，则判断replid2是否相等（是否同属于上一个主服务器的从服务器），如果相等，仍然可以选择增量&#x2F;全量同步，如果不相等则只能进行全量同步。</p>
-</li>
-</ol>
-<h1 id="Redis哨兵"><a href="#Redis哨兵" class="headerlink" title="Redis哨兵"></a>Redis哨兵</h1><p>Redis Sentinel（哨兵）：由一个或多个Sentinel实例组成的Sentinel系统，它可以监视任意多个主从服务器</p>
-<p>当监视的主服务器宕机时，自动下线主服务器，并且择优选取从服务器升级为新的主服务器。 </p>
-<p><strong>Sentinel本质上就是一个Redis服务器，一个拥有较少命令和部分特殊功能的Redis服务器</strong></p>
-<p><strong>哨兵的职能：</strong></p>
-<ol>
-<li>监控：不断地检查主节点和从节点是否运作正常。周期性地给所有的主从库发送 PING 命令，检测它们是否仍然在线运行，没有在规定时间内响应哨兵的 PING 命令，哨兵就会把它标记为“下线状态”；若主库下线，就会开始自动切换主库的流程。</li>
-<li>通知：当被监控的某个 Redis 服务器出现问题时， 哨兵可以通过 API 向管理员或者其他应用程序发送通知。当推举出新主库时，哨兵会把新主库的连接信息发给其他从库，和新主库建立连接。同时也会将连接信息通知客户端。</li>
-<li>故障转移：当 主节点 不能正常工作时，哨兵会开始故障转移操作<strong>，</strong>它会将失效主节点的其中一个 从节点升级为新的主节点，并让其他从节点改为复制新的主节点。</li>
-<li>配置提供：客户端在初始化时，通过连接哨兵来获得当前 Redis 服务的主节点地址，当试图连接失效的主服务器时，哨兵集群也会向客户端返回新主服务器的地址</li>
-</ol>
-<h3 id="主观下线和客观下线"><a href="#主观下线和客观下线" class="headerlink" title="主观下线和客观下线"></a>主观下线和客观下线</h3><p><strong>哨兵进程会使用 PING 命令检测它自己和主、从库的网络连接情况，用来判断实例的状态</strong>。如果哨兵发现主库或从库对 PING 命令的响应超时了，那么，哨兵就会先把它标记为“主观下线”。如果检测的是从库，那么哨兵直接标记为“下线”，因为从库的下线影响一般不太大，集群的对外服务不会间断。</p>
-<p>但是，如果检测的是主库，那么，哨兵还不能简单地把它标记为“主观下线”，因为有可能出现误判。一旦错误启动了主从切换，后续的选主和通知操作都会带来额外的计算和通信开销。误判一般会发生在<strong>集群网络压力较大、网络拥塞，或者是主库本身压力较大</strong>的情况下。</p>
-<p>因为哨兵通常会采用多实例组成的集群模式进行部署，这也被称为<strong>哨兵集群</strong>。引入集群一起来判断，多个哨兵的网络同时不稳定的概率较小，就可以避免单个哨兵误判的情况。</p>
-<p>在判断主库是否下线时，只有大多数（一半以上）的哨兵实例都判断主库已经“主观下线”了，主库才会被标记为<strong>客观下线</strong></p>
-<h3 id="故障转移的步骤"><a href="#故障转移的步骤" class="headerlink" title="故障转移的步骤"></a>故障转移的步骤</h3><ol>
-<li>在Slave中选择数据最新的作为新的Master</li>
-<li>向其他Slave发送新的复制指令，让其他从服务器成为新的Master的Slave</li>
-<li>继续监视旧Master，如果其上线则将旧Master设置为新Master的Slave</li>
-</ol>
-<h1 id="Redis的数据过期淘汰策略"><a href="#Redis的数据过期淘汰策略" class="headerlink" title="Redis的数据过期淘汰策略"></a>Redis的数据过期淘汰策略</h1><p>定期删除策略：启用一个计时器定时监视所有的key，判断key是否过期，过期就删除。这种策略可以保证过期的Key最终都会被删除。缺点：遍历内存中所有的key非常消耗CPU。并且如果key已经过期，但是计时器未被唤起，这段时间内Key仍可以使用</p>
-<p>惰性删除策略：在获取key时，才判断key是否过期，过期即可删除。缺点：若key一直未被使用，那么就算过期了也不会被删除</p>
-<p>定期删除+惰性删除：结合两者的特性，每次选取部分key扫描，减轻了CPU的负担。</p>
-<p>内存淘汰机制：</p>
-<ol>
-<li>volatile-lru：从已设置过期时间的数据集中选取最少使用的数据淘汰</li>
-<li>volatile-ttl：从已设置过期时间的数据集中选取将要过期的数据淘汰</li>
-<li>volatile-random：随机选取数据淘汰</li>
-<li>allkeys-lru：当内存不足以容纳新数据时，移除最少使用的Key</li>
-<li>allkeys-random：从数据集中任意选择数据淘汰</li>
-<li>no-eviction：禁止淘汰数据，满了就拒绝写入</li>
-</ol>
-<h1 id="Redis缓存穿透"><a href="#Redis缓存穿透" class="headerlink" title="Redis缓存穿透"></a>Redis缓存穿透</h1><p>缓存穿透是指查询一个根本不存在的数据，缓存层和持久层都不会命中，请求都会压到数据库，从而压垮数据库。</p>
-<p>比如用户一个不存在的用户id获取用户信息</p>
-<p>在日常工作中出于容错的考虑，如果从持久层查不到数据则不写入缓存层，缓存穿透将导致不存在的数据每次请求都要到持久层去查询，失去了缓存保护后端持久的意义。</p>
-<h3 id="缓存穿透解决方案："><a href="#缓存穿透解决方案：" class="headerlink" title="缓存穿透解决方案："></a>缓存穿透解决方案：</h3><ol>
-<li><strong>对空值缓存</strong>：如果一个查询返回的数据为空（不管数据是否存在），我们仍然把这个空结果（null）进行缓存，设置空结果的过期时间会很短，最长不超过五分钟。</li>
-<li><strong>设置可访问的白名单</strong>：使用bitmaps；类型定义一个可以访问的名单，名单id作为bitmaps的偏移量，每次访问和bitmaps里面的id进行比较，如果访问id不在bitmaps里面，进行拦截，不允许访问</li>
-<li><strong>采用布隆过滤器</strong>：用布隆过滤器当缓存的索引，只有在布隆过滤器中，才去查询缓存，如果不在布隆器中，则直接返回。</li>
-</ol>
-<p><img src="/../img/filter.png" srcset="/img/loading.gif" lazyload alt="filter"></p>
-<p>布隆过滤器是一种概率型数据结构，它可以告诉你某种东西<strong>一定不存在或者可能存在</strong>，当布隆过滤器说，某种东西存在时，这种东西可能不存在；当布隆过滤器说，某种东西不存在时，那么这种东西一定不存在。 常用于解决一个元素是否在某个集合中的业务场景，但是判断某种东西是否存在时，可能会被误判。</p>
-<p>向布隆过滤器中添加key时，会使用多个hash函数对key进行hash并取模获得一个位置，每个hash函数都会算得一个不同的位置，把数组的这几个位置都置为1。</p>
-<p>向布隆过滤器询问key是否存在时，计算散列值，看看位数组中这几个位置是否都为1，只要有一个位为0，那么说明布隆过滤器中这个<strong>key一定不存在</strong>。</p>
-<p>如果这几个位置都是1，只是<strong>极有可能存在</strong>，因为这些位被置为1可能是因为其他的key存在所致。如果这个位数组比较稀疏，判断正确的概率就会很大，如果这个位数组比较拥挤，判断正确的概率就会降低。</p>
-<h1 id="Redis缓存击穿"><a href="#Redis缓存击穿" class="headerlink" title="Redis缓存击穿"></a>Redis缓存击穿</h1><p>缓存击穿是指缓存中没有但数据库中有的数据，这时由于并发用户特别多，同时读缓存没读到数据，又同时去数据库去取数据，引起数据库压力瞬间增大，造成过大压力。比如微博热搜的一个突发事件，如果没有把这个词条作为热点词存储到缓存中或者缓存时间到期，那么用户访问这个词时，就会通过缓存，直接访问数据库，引起数据库压力瞬间增大。</p>
-<p>它和缓存穿透的区别在于：<strong>缓存击穿是指缓存中没有但数据库中有的数据</strong>，由于并发用户特别多，同时读缓存没读到数据，同时数据库取数据引起数据库压力瞬间增大，造成过大压力。<strong>缓存穿透是指缓存和数据库中都没有的数据</strong>，而用户不断发起请求。</p>
-<h3 id="缓存击穿解决方案："><a href="#缓存击穿解决方案：" class="headerlink" title="缓存击穿解决方案："></a>缓存击穿解决方案：</h3><ol>
-<li><strong>预先设置热门数据</strong>：在redis高峰访问前，把一些热门数据提前存入redis中，监控哪些数据是热门数据，实时调整key的过期时长</li>
-<li><strong>使用分布式锁</strong>：</li>
-</ol>
-<h1 id="Redis缓存雪崩"><a href="#Redis缓存雪崩" class="headerlink" title="Redis缓存雪崩"></a>Redis缓存雪崩</h1><p><strong>情况一</strong>：当数据保存在缓存中，并且设置了过期时间。如果在某一个时刻，大量数据同时过期，此时，再访问这些数据的话，就会发生缓存缺失，应用就会把请求发送给数据库，从数据库中读取数据。如果应用的并发请求量很大，从而导致数据库压力激增</p>
-<h3 id="情况一解决方案"><a href="#情况一解决方案" class="headerlink" title="情况一解决方案"></a>情况一解决方案</h3><ol>
-<li>避免给大量的数据设置相同的过期时间，可以使用一个较小的随机数来作为波动值（随机增加 1~3 分钟），这样一来，不同数据的过期时间有所差别，但差别又不会太大，既避免了大量数据同时过期，同时也保证了这些数据基本在相近的时间失效，仍然能满足业务需求。</li>
-<li>服务降级：对于优先级不同的数据采用不同的应对措施来降低数据库压力。当业务应用访问非核心数据（例如电商商品属性）时，暂时停止从缓存中查询这些数据，而是直接返回预定义信息、空值或是错误信息；当业务应用访问核心数据（例如电商商品库存）时，仍然允许查询缓存，如果缓存缺失，也可以继续通过数据库读取。</li>
-</ol>
-<p><strong>情况二</strong>：Redis 缓存实例发生故障宕机，无法处理请求，导致大量请求同时积压到持久层，从而发生缓存雪崩。</p>
-<h3 id="情况二解决方案"><a href="#情况二解决方案" class="headerlink" title="情况二解决方案"></a>情况二解决方案</h3><ol>
-<li>服务熔断：暂停业务应用对缓存系统的接口访问。业务应用调用缓存接口时，缓存客户端并不把请求发给 Redis 缓存实例，而是直接返回，等到 Redis 缓存实例重新恢复服务后，再允许应用请求发送到缓存系统。避免引发连锁的数据库雪崩。但是这种方法对业务应用的影响大，因为暂停了访问</li>
-<li>请求限流：不暂停，而是限制访问量，在业务系统的请求入口前端控制每秒进入系统的请求数，避免过多的请求被发送到数据库。</li>
-<li>事前预防：构建 Redis 缓存高可靠集群。如果 Redis 缓存的主节点故障宕机了，从节点还可以切换成为主节点，继续提供缓存服务，避免了由于缓存实例宕机而导致的缓存雪崩问题。</li>
-</ol>
+<h3 id="LRU和LFU的区别"><a href="#LRU和LFU的区别" class="headerlink" title="LRU和LFU的区别"></a>LRU和LFU的区别</h3><p>Redis 实现的是一种<strong>近似 LRU 算法</strong>，为了更好的节约内存，<strong>实现方式是在 Redis 的对象结构体中记录此数据的最后一次访问时间</strong>。当 Redis 进行内存淘汰时，会使用<strong>随机采样的方式来淘汰数据</strong>，它是随机取多个key，然后<strong>淘汰最久没有使用的那个</strong>。</p>
+<p><strong>在 LRU 算法中</strong>，Redis 对象头的 24 bits的字段是用来记录 key 的访问时间戳，因此Redis可以根据对象头中的字段记录的值，来比较最后一次 key 的访问时间长，从而淘汰最久未被使用的 key。</p>
+<p>Redis的LRU实现方式诠释了redis对于高性能的执着：<strong>不用为所有的数据维护链表，节省了空间占用；不用在每次数据访问时都移动更改node的前驱指针和后继指针，提升了缓存性能。</strong></p>
+<p>但是LRU<strong>无法解决缓存污染问题</strong>，比如一次读取了大量的数据，而这些数据只会被读取这一次，那么这些数据会留存在 Redis 缓存中很长一段时间，造成缓存污染。</p>
+<p> Redis 4.0之后引入了 LFU 算法来解决这个问题。</p>
+<p>LFU即<strong>最近最不常用的</strong>，LFU 算法是根据<strong>数据访问次数</strong>来淘汰数据的，它的核心思想是“如果数据过去被访问多次，那么将来被访问的频率也更高”。所以，LFU 算法会记录每个数据的访问次数。当一个数据被再次访问时，就会增加该数据的访问次数。这样就解决了偶尔被访问一次之后，数据留存在缓存中很长一段时间的问题。</p>
+<p><strong>在 LFU 算法中</strong>，Redis对象头的24 bits的字段被分成两段来存储，高 16bit 存储 ldt(Last Decrement Time)，用来记录 key 的访问时间戳；低 8bit 存储 logc(Logistic Counter)，用来记录 key 的访问频次。</p>
+<p><img src="/../img/QQ%E6%88%AA%E5%9B%BE20221206155431.png" srcset="/img/loading.gif" lazyload alt="QQ截图20221206155431"></p>
 <h1 id="Redis网络模型"><a href="#Redis网络模型" class="headerlink" title="Redis网络模型"></a>Redis网络模型</h1><h2 id="Redis为何选择单线程，其性能瓶颈究竟在哪里"><a href="#Redis为何选择单线程，其性能瓶颈究竟在哪里" class="headerlink" title="Redis为何选择单线程，其性能瓶颈究竟在哪里"></a><em>Redis为何选择单线程，其性能瓶颈究竟在哪里</em></h2><blockquote>
 <p>Redis 官方的对于此的回答是：</p>
 <p>对于一个 DB 来说，CPU 通常不会是瓶颈，因为大多数请求<strong>不是 CPU 密集型</strong>的，<strong>而是 I&#x2F;O 密集型</strong>。</p>
@@ -731,6 +625,10 @@
 <li>利用原子操作+交错访问实现无锁的多线程模型</li>
 <li>隔离主进程和其他子进程，让多线程网络模型能发挥最大的性能。Redis 通过设置 CPU 亲和性，可以将主进程和子进程绑定到不同的核隔离开来，使之互不干扰</li>
 </ul>
+<h3 id="redis和memcached的区别"><a href="#redis和memcached的区别" class="headerlink" title="redis和memcached的区别"></a><em><strong>redis和memcached的区别</strong></em></h3><p>memcached全部存储于内存中，断电后会挂掉；redis具有持久化机制</p>
+<p>Redis具有复杂的数据类型</p>
+<p>Redis自己构建了VM机制，一般的系统调用系统函数，会浪费时间去移动和请求</p>
+<p>redis的value值最大可以达到1gb，memcached只有1mb</p>
 
                 
               </div>
@@ -743,7 +641,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80/">#数据库基础</a>
+        <a href="/tags/Redis/">#Redis</a>
       
     </div>
   
@@ -756,7 +654,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Redis</div>
-      <div>http://example.com/post/Redis随想.html</div>
+      <div>http://example.com/post/Redis.html</div>
     </div>
     <div class="license-meta">
       

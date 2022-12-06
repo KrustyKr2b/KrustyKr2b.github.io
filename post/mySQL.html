@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://example.com/img/undolog.png">
 <meta property="og:image" content="http://example.com/img/phantom.png">
 <meta property="article:published_time" content="2022-10-25T14:02:31.000Z">
-<meta property="article:modified_time" content="2022-12-04T09:14:56.476Z">
+<meta property="article:modified_time" content="2022-12-05T12:38:04.831Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="数据库基础">
 <meta name="twitter:card" content="summary_large_image">
@@ -231,7 +231,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          12k 字
+          13k 字
         
       </span>
     
@@ -242,7 +242,7 @@
         
         
         
-          102 分钟
+          107 分钟
         
       </span>
     
@@ -377,7 +377,7 @@
 <li>除叶子结点外的子节点：只起到索引的作用，仅存储指针，不存储信息</li>
 <li>所有信息存储于叶子结点，所有叶子结点在底部链接形成一个双向链表（范围查询）</li>
 </ol>
-<p>在<code>InnoDB</code>中，叶子节点的容量默认为一页16KB</p>
+<p><strong>在<code>InnoDB</code>中，叶子节点的容量默认为一页16KB</strong>，磁盘预读，预读其实就是利用了局部性原理，具体过程是：对于每个文件的第一个读请求，系统读入所请求的页面并读入紧随其后的少数几个页面（通常是三个页面），这时的预读称为同步预读。<strong>4kb(磁盘一页的大小) + 12kb(预读三个页面) &#x3D; 16kb</strong></p>
 <p><strong>叶子节点结构(聚簇索引为例)：页目录（主键）+用户数据区域（单向链表，通过主键排序，在插入数据的时候便会排序）</strong></p>
 <p><strong>非叶子节点结构：页指针+指向的该页的最小主键值</strong></p>
 <h1 id="MYSQL索引分类"><a href="#MYSQL索引分类" class="headerlink" title="MYSQL索引分类"></a><strong>MYSQL索引分类</strong></h1><ol>
@@ -461,6 +461,10 @@
 <li>若出现锁表不能读的情况，此时可以使用主从复制，让主库负责写，从库负责读，这样就不影响业务的正常运行</li>
 <li>当IO频率越来越大时，业务量越来越大时，单机已无法满足，此时多库的处理可以提高IO的性能</li>
 </ol>
+<h1 id="MySQL的乐观锁"><a href="#MySQL的乐观锁" class="headerlink" title="MySQL的乐观锁"></a>MySQL的乐观锁</h1><p>乐观锁是相对悲观锁而言的，乐观锁假设数据一般情况不会造成冲突，所以在数据进行提交更新的时候，才会正式对数据的冲突与否进行检测，如果冲突，则返回给用户异常信息，让用户决定如何去做。乐观锁适用于读多写少的场景，这样可以提高程序的吞吐量。</p>
+<p>乐观锁采取了更加宽松的加锁机制。也是为了避免数据库幻读、业务处理时间过长等原因引起数据处理错误的一种机制</p>
+<p>乐观锁不会刻意使用数据库本身的锁机制，而是依据数据本身来保证数据的正确性。乐观锁的实现：</p>
+<p><strong>CAS+版本号控制：</strong>一般是在数据表中加上一个数据版本号 version 字段，表示数据被修改的次数。当数据被修改时，version 值会 +1。当线程 A 要更新数据时，在读取数据的同时也会读取 version 值，在提交更新时，若刚才读取到的 version 值与当前数据库中的 version 值相等时才更新，否则重试更新操作，直到更新成功。</p>
 <h1 id="MySQL的行级锁"><a href="#MySQL的行级锁" class="headerlink" title="MySQL的行级锁"></a>MySQL的行级锁</h1><h2 id="记录锁"><a href="#记录锁" class="headerlink" title="记录锁"></a>记录锁</h2><p>记录锁是封锁这一条记录，阻止其他事务插入，更新，删除这一条记录</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs SQL"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> `test` <span class="hljs-keyword">WHERE</span> `id`<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
 
