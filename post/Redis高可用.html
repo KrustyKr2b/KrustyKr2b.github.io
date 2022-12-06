@@ -16,12 +16,12 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Redis分布式锁 分布式锁是控制分布式系统或不同系统之间共同访问共享资源的一种锁实现，如果不同的系统或同一个系统的不同主机之间共享了某个资源时，往往需要互斥来防止彼此干扰来保证一致性。 使用场景：多个服务间保证同一时刻同一时间段内同一用户只能有一个请求（防止关键业务出现并发攻击） 实现分布式锁的主要步骤：  指定一个 key 作为锁标记，存入 Redis 中，指定一个 唯一的标识 作为 valu">
+    <meta name="description" content="Redis分布式锁 分布式锁是控制分布式系统或不同系统之间共同访问共享资源的一种锁实现，如果不同的系统或同一个系统的不同主机之间共享了某个资源时，往往需要互斥来防止彼此干扰来保证一致性。 使用场景：多个服务间保证同一时刻同一时间段内同一用户只能有一个请求（防止关键业务出现并发攻击） 实现分布式锁的主要步骤：  指定一个 key 作为锁标记，存入 Redis 中，指定一个唯一的标识作为 value。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis高可用">
 <meta property="og:url" content="http://example.com/post/Redis%E9%AB%98%E5%8F%AF%E7%94%A8.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="Redis分布式锁 分布式锁是控制分布式系统或不同系统之间共同访问共享资源的一种锁实现，如果不同的系统或同一个系统的不同主机之间共享了某个资源时，往往需要互斥来防止彼此干扰来保证一致性。 使用场景：多个服务间保证同一时刻同一时间段内同一用户只能有一个请求（防止关键业务出现并发攻击） 实现分布式锁的主要步骤：  指定一个 key 作为锁标记，存入 Redis 中，指定一个 唯一的标识 作为 valu">
+<meta property="og:description" content="Redis分布式锁 分布式锁是控制分布式系统或不同系统之间共同访问共享资源的一种锁实现，如果不同的系统或同一个系统的不同主机之间共享了某个资源时，往往需要互斥来防止彼此干扰来保证一致性。 使用场景：多个服务间保证同一时刻同一时间段内同一用户只能有一个请求（防止关键业务出现并发攻击） 实现分布式锁的主要步骤：  指定一个 key 作为锁标记，存入 Redis 中，指定一个唯一的标识作为 value。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/redlock.png">
 <meta property="og:image" content="http://example.com/img/ae6edf4e4d97e73020f36be0d7aee2df.png">
@@ -30,11 +30,12 @@
 <meta property="og:image" content="http://example.com/img/redisSYN2.png">
 <meta property="og:image" content="http://example.com/img/redisSYN3.png">
 <meta property="og:image" content="http://example.com/img/RedisSYN4.png">
-<meta property="og:image" content="http://example.com/img/filter.png">
 <meta property="og:image" content="http://example.com/img/QQ%E6%88%AA%E5%9B%BE20221206135100.png">
 <meta property="og:image" content="http://example.com/img/QQ%E6%88%AA%E5%9B%BE20221206135355.png">
+<meta property="og:image" content="http://example.com/img/filter.png">
+<meta property="og:image" content="http://example.com/img/6e3db3ba2f829ddc14237f5c7c00e7ce.png">
 <meta property="article:published_time" content="2022-12-06T05:21:43.000Z">
-<meta property="article:modified_time" content="2022-12-06T08:23:30.525Z">
+<meta property="article:modified_time" content="2022-12-06T12:49:56.899Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="Redis">
 <meta name="twitter:card" content="summary_large_image">
@@ -236,7 +237,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          8.8k 字
+          9.3k 字
         
       </span>
     
@@ -247,7 +248,7 @@
         
         
         
-          73 分钟
+          78 分钟
         
       </span>
     
@@ -295,21 +296,21 @@
 <p>使用场景：多个服务间保证同一时刻同一时间段内同一用户只能有一个请求（防止关键业务出现并发攻击）</p>
 <p>实现分布式锁的主要步骤：</p>
 <ol>
-<li>指定一个 key 作为锁标记，存入 Redis 中，指定一个 <strong>唯一的标识</strong> 作为 value。</li>
+<li>指定一个 key 作为锁标记，存入 Redis 中，指定一个<strong>唯一的标识</strong>作为 value。</li>
 <li>当 key 不存在时才能设置值，确保同一时间只有一个客户端进程获得锁，满足 <strong>互斥性</strong> 特性。</li>
-<li>设置一个过期时间，防止因系统异常导致没能删除这个 key，满足 <strong>防死锁</strong> 特性。</li>
-<li>当处理完业务之后需要清除这个 key 来释放锁，清除 key 时需要校验 value 值，需要满足 <strong>解铃还须系铃人</strong> 。</li>
+<li>设置一个<strong>过期时间</strong>，防止因系统异常导致没能删除这个 key，满足 <strong>防死锁</strong> 特性。</li>
+<li>当处理完业务之后需要清除这个 key 来释放锁，清除 key 时需要校验 value 值，需要满足解铃还须系铃人** 。</li>
 </ol>
-<p>Redisson 提供了看门狗，每获得一个锁时，只设置一个很短的过期时间，同时起一个线程在每次快要到超时时间时去刷新锁的过期时间。在释放锁的同时结束这个线程。</p>
+<p>Redisson提供了看门狗，每获得一个锁时，只设置一个很短的过期时间，同时起一个线程在每次快要到超时时间时去刷新锁的过期时间。在释放锁的同时结束这个线程。</p>
 <h2 id="RedLock算法"><a href="#RedLock算法" class="headerlink" title="RedLock算法"></a>RedLock算法</h2><p>Redisson分布式锁，在某些极端情况下仍然是有缺陷的</p>
 <ol>
-<li><p>客户端长时间内阻塞导致锁失效</p>
+<li><p><strong>客户端长时间内阻塞导致锁失效</strong></p>
 <p>客户端 1 得到了锁，因为网络问题或者 GC 等原因导致长时间阻塞，然后业务程序还没执行完锁就过期了，这时候客户端 2 也能正常拿到锁，可能会导致线程安全问题。</p>
 </li>
-<li><p>Redis 服务器时钟漂移</p>
+<li><p><strong>Redis 服务器时钟漂移</strong></p>
 <p>如果 Redis 服务器的机器时间发生了向前跳跃，就会导致这个 key 过早超时失效，比如说客户端 1 拿到锁后，key 还没有到过期时间，但是 Redis 服务器的时间比客户端快了 2 分钟，导致 key 提前就失效了，这时候，如果客户端 1 还没有释放锁的话，就可能导致多个客户端同时持有同一把锁的情况，同样会造成线程安全的问题。</p>
 </li>
-<li><p>单点实例安全问题</p>
+<li><p><strong>单点实例安全问题</strong></p>
 <p>如果 Redis 是单机模式挂了的话，那所有的客户端都获取不到锁了，假设你是主从模式，但 Redis 的主从同步是异步进行的，如果 Redis 主宕机了，这个时候从机并没有同步到这一把锁，那么机器 B 再次申请的时候就会再次申请到这把锁。</p>
 </li>
 </ol>
@@ -325,7 +326,7 @@
 <p>如果部分节点加锁成功，但最后由于异常导致大部分节点没加锁成功，就要释放掉所有redis实例，各节点要保持一致</p>
 </li>
 </ol>
-<h1 id="Redis主从"><a href="#Redis主从" class="headerlink" title="Redis主从"></a>Redis主从</h1><p><strong>主从复制</strong>，或者叫主从同步，是指将一台 Redis 服务器的数据，复制到其他的 Redis 服务器。</p>
+<h1 id="Redis主从模式"><a href="#Redis主从模式" class="headerlink" title="Redis主从模式"></a>Redis主从模式</h1><p><strong>主从复制</strong>，或者叫主从同步，是指将一台 Redis 服务器的数据，复制到其他的 Redis 服务器。</p>
 <p>前者称为 **主节点(master)**，后者称为 **从节点(slave)**。且数据的复制是 <strong>单向</strong> 的，只能由主节点到从节点。</p>
 <p>Redis 主从复制支持 <strong>主从同步</strong> 和 <strong>从从同步</strong> 两种，后者是 Redis 后续版本新增的功能，以减轻主节点的同步负担。</p>
 <p><img src="/../img/ae6edf4e4d97e73020f36be0d7aee2df.png" srcset="/img/loading.gif" lazyload alt="ae6edf4e4d97e73020f36be0d7aee2df"></p>
@@ -398,7 +399,7 @@
 <li><p>如果replid不相等，则判断replid2是否相等（是否同属于上一个主服务器的从服务器），如果相等，仍然可以选择增量&#x2F;全量同步，如果不相等则只能进行全量同步。</p>
 </li>
 </ol>
-<h1 id="Redis哨兵"><a href="#Redis哨兵" class="headerlink" title="Redis哨兵"></a>Redis哨兵</h1><p>Redis Sentinel（哨兵）：由一个或多个Sentinel实例组成的Sentinel系统，它可以监视任意多个主从服务器</p>
+<h1 id="Redis哨兵模式"><a href="#Redis哨兵模式" class="headerlink" title="Redis哨兵模式"></a>Redis哨兵模式</h1><p>Redis Sentinel（哨兵）：由一个或多个Sentinel实例组成的Sentinel系统，它可以监视任意多个主从服务器</p>
 <p>当监视的主服务器宕机时，自动下线主服务器，并且择优选取从服务器升级为新的主服务器。 </p>
 <p><strong>Sentinel本质上就是一个Redis服务器，一个拥有较少命令和部分特殊功能的Redis服务器</strong></p>
 <p><strong>哨兵的职能：</strong></p>
@@ -417,6 +418,49 @@
 <li>向其他Slave发送新的复制指令，让其他从服务器成为新的Master的Slave</li>
 <li>继续监视旧Master，如果其上线则将旧Master设置为新Master的Slave</li>
 </ol>
+<h1 id="Redis-集群模式"><a href="#Redis-集群模式" class="headerlink" title="Redis 集群模式"></a>Redis 集群模式</h1><p>集群，即 Redis Cluster，是 Redis 3.0 开始引入的分布式存储方案。集群由多个节点(Node)组成，Redis 的数据分布在这些节点中。</p>
+<p>不同于主从复制模式，集群会提供多个master节点提供写服务，每个master节点中存储的数据都不一样，这些数据通过数据分片的方式被自动分割到不同的master节点上。</p>
+<p>为了保证集群的高可用，每个master节点下面还需要添加至少1个slave节点，这样当某个master节点发生故障后，可以从它的slave节点中选举一个作为新的master节点继续提供服务。不过当某个master节点和它下面所有的slave节点都发生故障时，就不可用了。</p>
+<p><img src="/../img/QQ%E6%88%AA%E5%9B%BE20221206135100.png" srcset="/img/loading.gif" lazyload alt="集群架构"></p>
+<p>在搭建分布式集群的时候首先要考虑的是如何将数据按照一定的区分规则映射到对应的节点上，每个节点的数据都是总数据的一部分，所有的节点合成一份总的数据，每个节点的数据相互独立，没有重复的数据。</p>
+<h2 id="hash分区"><a href="#hash分区" class="headerlink" title="hash分区"></a>hash分区</h2><p>hash分区一般有三种方式</p>
+<h3 id="hash取余"><a href="#hash取余" class="headerlink" title="hash取余"></a>hash取余</h3><p>对键值进行hash产生一个hsah数值，然后根据服务器的数量进行取模操作</p>
+<p><strong>当新增或删减节点时</strong>，节点数量发生变化，系统中所有的数据都需要<strong>重新计算映射关系</strong>，引发大规模数据迁移</p>
+<p>这种方式的突出优点是简单性，常用于数据库的分库分表规则，一般采用预分区的方式，提前根据数据量规划好分区数，比如划分为 512 或 1024 张表，保证可支撑未来一段时间的数据量，再根据负载情况将表迁移到其他数据库中</p>
+<h3 id="一致性hash"><a href="#一致性hash" class="headerlink" title="一致性hash"></a>一致性hash</h3><p>一致性哈希算法将 <strong>整个哈希值空间</strong> 组织成一个<strong>虚拟的圆环</strong>，范围一般是 0 - 2^32-1，对于每一个数据，根据 <code>key</code> 计算 hash 值，确定数据在环上的位置，<strong>然后从此位置沿顺时针行走</strong>，找到的第一台服务器就是其应该映射到的服务器</p>
+<p>其根本思想就是对所有的数据进行一次hash运算，然后将映射到对应节点上去，<strong>映射条件为距离最近的节点</strong>，这样就可以保证集群进行伸缩操作的时候影响的数据最小</p>
+<h3 id="哈希槽hash"><a href="#哈希槽hash" class="headerlink" title="哈希槽hash"></a>哈希槽hash</h3><p>该方案在<strong>一致性哈希分区的基础上</strong>，引入了<strong>虚拟节点</strong>的概念。Redis 集群使用的便是该方案，其中的虚拟节点称为<strong>槽（slot）</strong>。槽是介于数据和实际节点之间的虚拟概念，每个实际节点包含一定数量的槽，每个槽包含哈希值在一定范围内的数据。</p>
+<p>Redis 集群中内置了 16384 个哈希槽，当需要在 Redis 集群中放置一个 key-value时，redis 先对 key 使用crc16算法算出一个结果，然后把结果对 16384 求余数，这样每个 key 都会对应一个编号在 0-16383 之间的哈希槽，redis 会根据节点数量大致均等的将哈希槽映射到不同的节点。</p>
+<p><strong>使用哈希槽的好处就在于可以方便的添加或移除节点：</strong></p>
+<ol>
+<li>当需要增加节点时，只需要把其他节点的某些哈希槽挪到新节点就可以了；</li>
+<li>当需要移除节点时，只需要把移除节点上的哈希槽挪到其他节点就行了；</li>
+</ol>
+<p>Redis的作者认为它的哈希槽+crc算法计算hash的效果已经不错了，虽然没有一致性hash灵活，但实现很简单，节点增删时处理起来也很方便。</p>
+<p><img src="/../img/QQ%E6%88%AA%E5%9B%BE20221206135355.png" srcset="/img/loading.gif" lazyload alt="分区规则"></p>
+<p>Redis的分区有一个很显著的特点：<strong>分区规则是内存的一个逻辑模块，</strong>不需要像原来的关系数据库使用外部挂件进行分区，例如mysql分区通常还会通过mycat进行操作。</p>
+<h2 id="集群脑裂"><a href="#集群脑裂" class="headerlink" title="集群脑裂"></a>集群脑裂</h2><p>在 Redis 主从架构中，部署方式一般是「一主多从」，主节点提供写操作，从节点提供读操作。</p>
+<p> 如果主节点的网络突然发生了问题，它与所有的从节点都失联了，但是此时的主节点和客户端的网络是正常的，客户端并不知道 Redis 内部已经出现了问题，还在照样的向这个失联的主节点写数据，此时这些数据被旧主节点缓存到了缓冲区里，但是这些数据都是无法同步给从节点的。</p>
+<p>这时，哨兵也发现主节点失联了，它就认为主节点挂了（但实际上正常运行），于是哨兵就会在「从节点」中选举出一个 leader 作为主节点</p>
+<p>这时集群就有两个主节点了 —— <strong>脑裂出现了</strong>。</p>
+<p>然后，网络突然好了，哨兵因为之前已经选举出一个新主节点了，它就会把旧主节点降级为从节点，然后从节点会向新主节点请求数据同步</p>
+<p><strong>因为第一次同步是全量同步的方式，此时的从节点会清空掉自己本地的数据，然后再做全量同步。</strong></p>
+<p><strong>所以，之前客户端在过程 A 写入的数据就会丢失了，也就是集群产生脑裂数据丢失的问题</strong>。</p>
+<p>总结就是：由于网络问题，集群节点之间失去联系。主从数据不同步；重新平衡选举，产生两个主节点。等网络恢复，旧主节点会降级为从节点，再与新主节点进行同步复制的时候，从节点会清空自己的缓冲区，所以导致之前客户端写入的数据丢失了。</p>
+<p><strong>如何解决：设置参数并监听</strong></p>
+<p>当主节点发现从节点下线或者通信的总数量小于阈值时，那么认为主节点失去了与从节点的连接，此时禁止主节点进行写数据，直接把错误返回给客户端。</p>
+<p>在 Redis 的配置文件中有两个参数我们可以设置：</p>
+<ol>
+<li>min-slaves-to-write x，主节点必须要有至少 x 个从节点连接，如果小于这个数，主节点会禁止写数据。</li>
+<li>min-slaves-max-lag x，主从数据复制和同步的延迟不能超过 x 秒，如果超过，主节点会禁止写数据。</li>
+</ol>
+<p>我们可以把 min-slaves-to-write 和 min-slaves-max-lag 这两个配置项搭配起来使用，分别给它们设置一定的阈值，假设为 N 和 T。这两个配置项组合后的要求是</p>
+<p><strong>主库连接的从库中至少有 N 个从库，和主库进行数据复制时的 ACK 消息延迟不能超过 T 秒，否则，主库就不会再接收客户端的写请求了。</strong></p>
+<p>即使原主库是假故障，它在假故障期间也无法响应哨兵心跳，也不能和从库进行同步，自然也就无法和从库进行 ACK 确认了。</p>
+<p>这样一来，min-slaves-to-write 和 min-slaves-max-lag 的组合要求就无法得到满足，<strong>原主库就会被限制接收客户端写请求，客户端也就不能在原主库中写入新数据了</strong>。<strong>等到新主库上线时，就只有新主库能接收和处理客户端请求，此时，新写的数据会被直接写到新主库中。而原主库会被哨兵降为从库，即使它的数据被清空了，也不会有新数据丢失。</strong></p>
+<p>假设我们将 min-slaves-to-write 设置为 1，把 min-slaves-max-lag 设置为 12s，把哨兵的 down-after-milliseconds 设置为 10s，主库因为某些原因卡住了 15s，导致哨兵判断主库客观下线，开始进行主从切换。</p>
+<p>同时，因为原主库卡住了 15s，没有一个从库能和原主库在 12s 内进行数据复制，原主库也无法接收客户端请求了。</p>
+<p>这样一来，主从切换完成后，也只有新主库能接收请求，不会发生脑裂，也就不会发生数据丢失的问题</p>
 <h1 id="Redis缓存穿透"><a href="#Redis缓存穿透" class="headerlink" title="Redis缓存穿透"></a>Redis缓存穿透</h1><p>缓存穿透是指查询一个根本不存在的数据，缓存层和持久层都不会命中，请求都会压到数据库，从而压垮数据库。</p>
 <p>比如用户一个不存在的用户id获取用户信息</p>
 <p>在日常工作中出于容错的考虑，如果从持久层查不到数据则不写入缓存层，缓存穿透将导致不存在的数据每次请求都要到持久层去查询，失去了缓存保护后端持久的意义。</p>
@@ -447,49 +491,19 @@
 <li>请求限流：不暂停，而是限制访问量，在业务系统的请求入口前端控制每秒进入系统的请求数，避免过多的请求被发送到数据库。</li>
 <li>事前预防：构建 Redis 缓存高可靠集群。如果 Redis 缓存的主节点故障宕机了，从节点还可以切换成为主节点，继续提供缓存服务，避免了由于缓存实例宕机而导致的缓存雪崩问题。</li>
 </ol>
-<h1 id="Redis-集群化"><a href="#Redis-集群化" class="headerlink" title="Redis 集群化"></a>Redis 集群化</h1><p>集群，即 Redis Cluster，是 Redis 3.0 开始引入的分布式存储方案。集群由多个节点(Node)组成，Redis 的数据分布在这些节点中。</p>
-<p>不同于主从复制模式，集群会提供多个master节点提供写服务，每个master节点中存储的数据都不一样，这些数据通过数据分片的方式被自动分割到不同的master节点上。</p>
-<p>为了保证集群的高可用，每个master节点下面还需要添加至少1个slave节点，这样当某个master节点发生故障后，可以从它的slave节点中选举一个作为新的master节点继续提供服务。不过当某个master节点和它下面所有的slave节点都发生故障时，就不可用了。</p>
-<p><img src="/../img/QQ%E6%88%AA%E5%9B%BE20221206135100.png" srcset="/img/loading.gif" lazyload alt="集群架构"></p>
-<p>在搭建分布式集群的时候首先要考虑的是如何将数据按照一定的区分规则映射到对应的节点上，每个节点的数据都是总数据的一部分，所有的节点合成一份总的数据，每个节点的数据相互独立，没有重复的数据。</p>
-<h2 id="hash分区"><a href="#hash分区" class="headerlink" title="hash分区"></a>hash分区</h2><p>hash分区一般有三种方式</p>
-<h3 id="hash取余"><a href="#hash取余" class="headerlink" title="hash取余"></a>hash取余</h3><p>对键值进行hash产生一个hsah数值，然后根据服务器的数量进行取模操作</p>
-<p><strong>当新增或删减节点时</strong>，节点数量发生变化，系统中所有的数据都需要<strong>重新计算映射关系</strong>，引发大规模数据迁移</p>
-<p>这种方式的突出优点是简单性，常用于数据库的分库分表规则，一般采用预分区的方式，提前根据数据量规划好分区数，比如划分为 512 或 1024 张表，保证可支撑未来一段时间的数据量，再根据负载情况将表迁移到其他数据库中</p>
-<h3 id="一致性hash"><a href="#一致性hash" class="headerlink" title="一致性hash"></a>一致性hash</h3><p>一致性哈希算法将 <strong>整个哈希值空间</strong> 组织成一个<strong>虚拟的圆环</strong>，范围一般是 0 - 2^32-1，对于每一个数据，根据 <code>key</code> 计算 hash 值，确定数据在环上的位置，<strong>然后从此位置沿顺时针行走</strong>，找到的第一台服务器就是其应该映射到的服务器</p>
-<p>其根本思想就是对所有的数据进行一次hash运算，然后将映射到对应节点上去，<strong>映射条件为距离最近的节点</strong>，这样就可以保证集群进行伸缩操作的时候影响的数据最小</p>
-<h3 id="哈希槽hash"><a href="#哈希槽hash" class="headerlink" title="哈希槽hash"></a>哈希槽hash</h3><p>该方案在<strong>一致性哈希分区的基础上</strong>，引入了<strong>虚拟节点</strong>的概念。Redis 集群使用的便是该方案，其中的虚拟节点称为<strong>槽（slot）</strong>。槽是介于数据和实际节点之间的虚拟概念，每个实际节点包含一定数量的槽，每个槽包含哈希值在一定范围内的数据。</p>
-<p>Redis 集群中内置了 16384 个哈希槽，当需要在 Redis 集群中放置一个 key-value时，redis 先对 key 使用crc16算法算出一个结果，然后把结果对 16384 求余数，这样每个 key 都会对应一个编号在 0-16383 之间的哈希槽，redis 会根据节点数量大致均等的将哈希槽映射到不同的节点。</p>
-<p><strong>使用哈希槽的好处就在于可以方便的添加或移除节点：</strong></p>
+<h1 id="缓存更新策略和一致性"><a href="#缓存更新策略和一致性" class="headerlink" title="缓存更新策略和一致性"></a>缓存更新策略和一致性</h1><p>Cache Aside（旁路缓存）策略是最常用的策略</p>
+<p>应用程序直接与「数据库、缓存」交互，并负责对缓存的维护，该策略又可以细分为「读策略」和「写策略」。</p>
+<p>写策略：<strong>先更新</strong>数据库中的数据，<strong>再删除</strong>缓存中的数据。</p>
+<p><strong>写策略的两步不能颠倒，不能先删除缓存再更新数据库，读写并发的时候会出现缓存和数据库数据不一致的问题</strong></p>
+<p>假设某个用户的年龄是 20，请求A要更新用户年龄为 21，如果先删除缓存中的内容。这时，另一个请求 B 要读取这个用户的年龄，它查询缓存发现未命中后，会从数据库中读取到年龄为 20，<strong>并且写入到缓存中</strong>，然后请求 A 继续更改数据库，将用户的年龄更新为 21。此时数据库和缓存就出现了数据不一致的情况。</p>
+<p><strong>也不能先更新缓存再更新数据库</strong></p>
+<p>假设「请求 A 」和「请求 B 」两个请求，同时更新「同一条」数据，A 请求先将缓存的数据更新为 1，然后在更新数据库前，B 请求来了， 将缓存的数据更新为 2，紧接着把数据库更新为 2，然后 A 请求将数据库的数据更新为 1。此时，数据库中的数据是 1，而缓存中的数据却是 2，出现了缓存和数据库中的数据不一致的现象。</p>
+<p>读策略：</p>
 <ol>
-<li>当需要增加节点时，只需要把其他节点的某些哈希槽挪到新节点就可以了；</li>
-<li>当需要移除节点时，只需要把移除节点上的哈希槽挪到其他节点就行了；</li>
+<li>如果读取的数据命中了缓存，则直接返回数据；</li>
+<li>如果读取的数据没有命中缓存，则从数据库中读取数据，然后将数据写入到缓存，再返回。</li>
 </ol>
-<p>Redis的作者认为它的哈希槽+crc算法计算hash的效果已经不错了，虽然没有一致性hash灵活，但实现很简单，节点增删时处理起来也很方便。</p>
-<p><img src="/../img/QQ%E6%88%AA%E5%9B%BE20221206135355.png" srcset="/img/loading.gif" lazyload alt="分区规则"></p>
-<p>Redis的分区有一个很显著的特点：<strong>分区规则是内存的一个逻辑模块，</strong>不需要像原来的关系数据库使用外部挂件进行分区，例如mysql分区通常还会通过mycat进行操作。</p>
-<h2 id="集群脑裂"><a href="#集群脑裂" class="headerlink" title="集群脑裂"></a>集群脑裂</h2><p>在 Redis 主从架构中，部署方式一般是「一主多从」，主节点提供写操作，从节点提供读操作。</p>
-<p> 如果主节点的网络突然发生了问题，它与所有的从节点都失联了，但是此时的主节点和客户端的网络是正常的，客户端并不知道 Redis 内部已经出现了问题，还在照样的向这个失联的主节点写数据，此时这些数据被旧主节点缓存到了缓冲区里，但是这些数据都是无法同步给从节点的。</p>
-<p>这时，哨兵也发现主节点失联了，它就认为主节点挂了（但实际上正常运行），于是哨兵就会在「从节点」中选举出一个 leader 作为主节点</p>
-<p>这时集群就有两个主节点了 —— <strong>脑裂出现了</strong>。</p>
-<p>然后，网络突然好了，哨兵因为之前已经选举出一个新主节点了，它就会把旧主节点降级为从节点，然后从节点会向新主节点请求数据同步</p>
-<p><strong>因为第一次同步是全量同步的方式，此时的从节点会清空掉自己本地的数据，然后再做全量同步。</strong></p>
-<p><strong>所以，之前客户端在过程 A 写入的数据就会丢失了，也就是集群产生脑裂数据丢失的问题</strong>。</p>
-<p>总结就是：由于网络问题，集群节点之间失去联系。主从数据不同步；重新平衡选举，产生两个主节点。等网络恢复，旧主节点会降级为从节点，再与新主节点进行同步复制的时候，从节点会清空自己的缓冲区，所以导致之前客户端写入的数据丢失了。</p>
-<p>如何解决：</p>
-<p>当主节点发现从节点下线或者通信的总数量小于阈值时，那么认为主节点失去了与从节点的连接，此时禁止主节点进行写数据，直接把错误返回给客户端。</p>
-<p>在 Redis 的配置文件中有两个参数我们可以设置：</p>
-<ol>
-<li>min-slaves-to-write x，主节点必须要有至少 x 个从节点连接，如果小于这个数，主节点会禁止写数据。</li>
-<li>min-slaves-max-lag x，主从数据复制和同步的延迟不能超过 x 秒，如果超过，主节点会禁止写数据。</li>
-</ol>
-<p>我们可以把 min-slaves-to-write 和 min-slaves-max-lag 这两个配置项搭配起来使用，分别给它们设置一定的阈值，假设为 N 和 T。这两个配置项组合后的要求是</p>
-<p><strong>主库连接的从库中至少有 N 个从库，和主库进行数据复制时的 ACK 消息延迟不能超过 T 秒，否则，主库就不会再接收客户端的写请求了。</strong></p>
-<p>即使原主库是假故障，它在假故障期间也无法响应哨兵心跳，也不能和从库进行同步，自然也就无法和从库进行 ACK 确认了。</p>
-<p>这样一来，min-slaves-to-write 和 min-slaves-max-lag 的组合要求就无法得到满足，<strong>原主库就会被限制接收客户端写请求，客户端也就不能在原主库中写入新数据了</strong>。<strong>等到新主库上线时，就只有新主库能接收和处理客户端请求，此时，新写的数据会被直接写到新主库中。而原主库会被哨兵降为从库，即使它的数据被清空了，也不会有新数据丢失。</strong></p>
-<p>假设我们将 min-slaves-to-write 设置为 1，把 min-slaves-max-lag 设置为 12s，把哨兵的 down-after-milliseconds 设置为 10s，主库因为某些原因卡住了 15s，导致哨兵判断主库客观下线，开始进行主从切换。</p>
-<p>同时，因为原主库卡住了 15s，没有一个从库能和原主库在 12s 内进行数据复制，原主库也无法接收客户端请求了。</p>
-<p>这样一来，主从切换完成后，也只有新主库能接收请求，不会发生脑裂，也就不会发生数据丢失的问题</p>
+<p><img src="/../img/6e3db3ba2f829ddc14237f5c7c00e7ce.png" srcset="/img/loading.gif" lazyload alt="6e3db3ba2f829ddc14237f5c7c00e7ce"></p>
 
                 
               </div>
