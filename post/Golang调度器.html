@@ -28,7 +28,7 @@
 <meta property="og:image" content="http://example.com/img/62031928-02a8f880-b21b-11e9-96a9-96820452463e.png">
 <meta property="og:image" content="http://example.com/img/netpoller-goroutines-scheduling.png">
 <meta property="article:published_time" content="2022-12-06T13:15:06.000Z">
-<meta property="article:modified_time" content="2022-12-07T12:47:45.021Z">
+<meta property="article:modified_time" content="2022-12-07T15:04:42.517Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="Golang">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.8k 字
+          5.5k 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          40 分钟
+          46 分钟
         
       </span>
     
@@ -297,7 +297,7 @@
 <li>创建和销毀：Thread创建和销毀都会有巨大的消耗，因为是内核态的，通常解决的办法就是线程池实现复用，避免频繁的创建和销毁。而 goroutine因为是由Go runtime负责管理的，全程在用户态进行，创建和销毁的消耗非常小。</li>
 <li>切换：当 threads 切换时，需要保存各种寄存器，以便将来恢复，而goroutines 切换只需保存三个寄存器，切换成本非常小</li>
 </ol>
-<h1 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h1><p><img src="/../img/62172655-9981cc00-b365-11e9-8912-b16b83930ad0.png" srcset="/img/loading.gif" lazyload alt="62172655-9981cc00-b365-11e9-8912-b16b83930ad0"></p>
+<p><img src="/../img/62172655-9981cc00-b365-11e9-8912-b16b83930ad0.png" srcset="/img/loading.gif" lazyload alt="62172655-9981cc00-b365-11e9-8912-b16b83930ad0"></p>
 <p>Go 程序的执行由两层组成：Go Program，Runtime。它们之间通过函数调用来实现内存管理、channel 通信、goroutines 创建等功能。用户程序进行的系统调用都会被 Runtime 拦截，以此来帮助它进行调度以及垃圾回收相关的工作</p>
 <p>可以说runtime相当于一个中介，将Goroutine抽象到内核态以及将内核线程抽象到用户态，并承接各类调度，通信，GC，让用户和内核各司其职，用户只能看见Goroutine，内核只能看见线程。这就是两级线程模型实现的核心所在</p>
 <p>用三个基础的结构体来实现goroutines的调度：</p>
@@ -317,22 +317,34 @@
 <li>Go的早期版本，并没有P这个结构，Go会给M直接分配一个全局队列，每个M会直接从队列中获取要运行的G，因此需要获取一个全局的锁，当并发量大的时候，锁就成了瓶颈，这反而降低了并发性能。而加入逻辑处理器，每个逻辑处理维护自己的本地队列，解决了全局锁带来的性能问题</li>
 <li>逻辑处理器实现了性能的最大化，当某个M阻塞时，P可以立即将G切换到另一个M上</li>
 </ol>
-<p>进入正题</p>
-<p>Go scheduler是Go runtime的一部分，它内嵌在 Go 程序里，和 Go 程序一起运行。因此它运行在用户空间，在 kernel 的上一层。</p>
+<p>还有一个前置知识，在golang中，Goroutine被分为三种</p>
+<ol>
+<li>g：执行普通代码的G</li>
+<li>g0：执行调度器代码的G，栈内存大小固定为8M，不可以动态伸缩</li>
+<li>main goroutine：执行初始化工作的G</li>
+</ol>
+<h1 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h1><p>Go scheduler是Go runtime的一部分，它内嵌在 Go 程序里，和 Go 程序一起运行。因此它运行在用户空间，在 kernel 的上一层。</p>
 <p><strong>Go scheduler 的职责就是将所有处于 runnable的 goroutine均匀分布到在P上运行的M</strong></p>
 <p>和Os scheduler <strong>抢占式调度（preemptive）</strong>不一样，Go scheduler 采用<strong>协作式调度（cooperating）</strong>。</p>
-<p>不过这个协作又和python的协作不太一样，对于传统的协作式调度，用户可以自行设定调度点，例如java和python中的yield（线程让出），但是由于在 Go 语言里，goroutine 调度的事情是由 Go runtime 来做，并非由用户控制，而只是存在于用户态中。</p>
-<h2 id="work-stealing"><a href="#work-stealing" class="headerlink" title="work stealing"></a>work stealing</h2><p>Go scheduler每一轮调度要做的工作就是找到处于 runnable 的 goroutine，并执行它。找的顺序如下：</p>
+<p>不过这个协作又和python的协作不太一样，对于传统的协作式调度，用户可以自行设定调度点，例如java和python中的yield（线程让出），但是由于在 Go 语言里，goroutine调度的事情是由Go runtime 来做，并非由用户控制，而只是存在于用户态中。</p>
+<p>我们来看看Goroutine的上下文结构体，它用来保存 goroutine 的调度信息：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">type</span> gobuf <span class="hljs-keyword">struct</span> &#123;<br>	sp   <span class="hljs-type">uintptr</span> <span class="hljs-comment">// Stack Pointer 栈指针</span><br>	pc   <span class="hljs-type">uintptr</span> <span class="hljs-comment">// Program Counter 程序计数器</span><br>	g    guintptr <span class="hljs-comment">// 持有当前 gobuf 的 goroutine</span><br>	ctxt unsafe.Pointer<br>	ret  sys.Uintreg<br>	lr   <span class="hljs-type">uintptr</span><br>	bp   <span class="hljs-type">uintptr</span> <span class="hljs-comment">//基指针寄存器</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Go scheduler会不断循环调用 **runtime.schedule()**去调度 goroutines，而每个 goroutine执行完成并退出之后，会再次调用 runtime.schedule()，使得调度器回到调度循环去执行其他的 goroutine，不断循环，永不停歇。 </p>
+<p>**runtime.schedule()**每一轮调度要做的工作就是找到处于 runnable 的 goroutine，并执行它，找的顺序如下：</p>
 <ol>
 <li>先从全局队列中寻找G</li>
 <li>若全局队列中未找到，寻找P的本地队列</li>
 <li>若都没有找到，就会启动<strong>work stealing</strong></li>
 <li>若work stealing失败，则阻塞</li>
 </ol>
-<p>若找到一个可执行的 goroutine后，就会一直执行下去，直到被阻塞。</p>
+<p>当我们使用 go 关键字启动一个新 goroutine 时，最终会调用 runtime.newproc –&gt; runtime.newproc1，来得到 G</p>
+<p>runtime.newproc1 会先从P的gfree缓存链表中查找可用的 g，若缓存未生效，则会新创建 g 给当前的业务函数，最后这个 g 会被传给 <strong>runtime.gogo</strong> 去真正执行</p>
+<p><strong>runtime.gogo</strong>由汇编语言实现，是真正去执行 goroutine 代码的函数，参数是上文提到的gobuf，它的作用的就是将M的堆栈信息切换为指定的Goroutine，这里涉及到一些PC,SP,BP寄存器指针的更新。</p>
+<h2 id="work-stealing"><a href="#work-stealing" class="headerlink" title="work stealing"></a>work stealing</h2><p>若找到一个可执行的 goroutine后，就会一直执行下去，直到被阻塞。</p>
 <p>当一个 P 发现自己的 LRQ 已经没有 G 时，会从其他 P 偷 一些 G 来运行，这就是<strong>work stealing</strong>。当 P2 上的一个G执行结束，它就会去 LRQ 获取下一个 G 来执行。如果 LRQ 已经空了，就是说本地可运行队列已经没有 G 需要执行，并且这时 GRQ 也没有 G 了。</p>
 <p>这时，P2 会随机选择一个 P（称为 P1），P2 会从 P1 的 LRQ “偷”过来一半的G，保证了在高并发状况下，所有的P都不会闲着。</p>
-<h2 id="netpoller（epoll版本）"><a href="#netpoller（epoll版本）" class="headerlink" title="netpoller（epoll版本）"></a>netpoller（epoll版本）</h2><p>当你的操作系统需要异步处理系统调用时，可以使用网络轮询器。通过在这些操作系统中使用 kqueue（MacOS），epoll（Linux）或 iocp（Windows）来实现。基于网络的系统调用可以由我们今天使用的许多操作系统异步处理。</p>
+<h1 id="netpoller（epoll版本）"><a href="#netpoller（epoll版本）" class="headerlink" title="netpoller（epoll版本）"></a>netpoller（epoll版本）</h1><p>当你的操作系统需要异步处理系统调用时，可以使用网络轮询器。通过在这些操作系统中使用 kqueue（MacOS），epoll（Linux）或 iocp（Windows）来实现。基于网络的系统调用可以由我们今天使用的许多操作系统异步处理。</p>
 <p>Golang为了处理网络IO也封装了异步系统调用，称为netpoller，通过对epoll的封装和优化，调度器可以防止 Goroutine在进行这些系统调用时阻塞M。而是封存 goroutine然后让出 CPU 的使用权从而令 P 可以去调度本地调度队列里的下一个 goroutine。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;sys/epoll.h&gt;</span>  </span><br><span class="hljs-type">int</span> <span class="hljs-title function_">epoll_create</span><span class="hljs-params">(<span class="hljs-type">int</span> size)</span>;  <br><span class="hljs-type">int</span> <span class="hljs-title function_">epoll_ctl</span><span class="hljs-params">(<span class="hljs-type">int</span> epfd, <span class="hljs-type">int</span> op, <span class="hljs-type">int</span> fd, <span class="hljs-keyword">struct</span> epoll_event *event)</span>;  <br><span class="hljs-type">int</span> <span class="hljs-title function_">epoll_wait</span><span class="hljs-params">(<span class="hljs-type">int</span> epfd, <span class="hljs-keyword">struct</span> epoll_event * events, <span class="hljs-type">int</span> maxevents, <span class="hljs-type">int</span> timeout)</span>;<br></code></pre></td></tr></table></figure>
 
@@ -356,9 +368,9 @@
 <p>Go scheduler会在循环调度的runtime.schedule() 函数以及 sysmon监控线程中调用 <strong>runtime.netpoll</strong>以获取可运行的goroutine列表</p>
 <p>和epoll的逻辑一样，runtime.netpoll里会调用epoll_wait从 epoll 的 <strong>eventpoll.rdllist就绪双向链表</strong>返回，从而得到 I&#x2F;O 就绪的 socket fd 列表，<strong>并根据取出最初调用 epoll_ctl 时保存的上下文信息，恢复 g</strong></p>
 <p>所以执行完netpoll之后，会返回一个就绪fd列表对应的 goroutine链表，接下来将就绪的goroutine通过调用injectglist加入到全局调度队列或者P的本地调度队列中，启动M绑定P去执行。</p>
-<p>Go runtime 在程序启动的时候会创建一个独立的 M 作为监控线程，叫 sysmon ，每 20us~10ms 运行一次。</p>
-<p>这个线程为系统级的 daemon 线程，无需P即可运行， </p>
-<p>sysmon 中以轮询的方式执行以下操作：</p>
+<p>Go runtime在程序启动的时候会创建一个独立的M作为监控线程，叫sysmon ，每 20us~10ms 运行一次。</p>
+<p>这个线程为系统级的 daemon 线程，无需P即可运行</p>
+<p>sysmon中以轮询的方式执行以下操作：</p>
 <ol>
 <li><strong>以非阻塞的方式调用runtime.netpoll</strong> ，从中找出能从网络 I&#x2F;O 中唤醒的G列表，并通过调用 injectglist 把 G 列表放入全局调度队列或者当前 P 本地调度队列等待被执行，调度触发时，有可能从这个全局 runnable 调度队列获取 g。然后再循环调用 startm ，直到所有 P 都不处于 _Pidle 状态。 </li>
 <li>调用 retake ，抢占长时间处于 _Psyscall 状态的 P。</li>
