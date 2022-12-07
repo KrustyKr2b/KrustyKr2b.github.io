@@ -1,0 +1,709 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="SamuelZhou">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="GoroutineGoroutine可以看作对thread加的一层抽象，它更轻量级，可以单独执行。 因为有了这层抽象，我们不会直接面对thread，我们只会看到代码里的goroutine。 操作系统却相反，管你什么 goroutine，我才没空理会。我安心地执行线程就可以了，线程才是我调度的基本单位。 而这也是基于两级线程模型实现的，Goroutine与内核线程是多对多的关系，也叫M:N模型  G">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang调度详解">
+<meta property="og:url" content="http://example.com/post/Golang%E8%B0%83%E5%BA%A6%E5%99%A8.html">
+<meta property="og:site_name" content="welcome">
+<meta property="og:description" content="GoroutineGoroutine可以看作对thread加的一层抽象，它更轻量级，可以单独执行。 因为有了这层抽象，我们不会直接面对thread，我们只会看到代码里的goroutine。 操作系统却相反，管你什么 goroutine，我才没空理会。我安心地执行线程就可以了，线程才是我调度的基本单位。 而这也是基于两级线程模型实现的，Goroutine与内核线程是多对多的关系，也叫M:N模型  G">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/61340362-8c001880-a874-11e9-9237-d97e6105cd62.png">
+<meta property="og:image" content="http://example.com/img/62172655-9981cc00-b365-11e9-8912-b16b83930ad0.png">
+<meta property="og:image" content="http://example.com/img/62031928-02a8f880-b21b-11e9-96a9-96820452463e.png">
+<meta property="og:image" content="http://example.com/img/netpoller-goroutines-scheduling.png">
+<meta property="article:published_time" content="2022-12-06T13:15:06.000Z">
+<meta property="article:modified_time" content="2022-12-07T07:46:12.194Z">
+<meta property="article:author" content="SamuelZhou">
+<meta property="article:tag" content="Golang">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/61340362-8c001880-a874-11e9-9237-d97e6105cd62.png">
+  
+  
+  
+  <title>Golang调度详解 - welcome</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>samuel`s world</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Golang调度详解"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        SamuelZhou
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-12-06 21:15" pubdate>
+          2022年12月6日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          40 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Golang调度详解</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Goroutine"><a href="#Goroutine" class="headerlink" title="Goroutine"></a>Goroutine</h1><p>Goroutine可以看作对thread加的一层抽象，它更轻量级，可以单独执行。</p>
+<p>因为有了这层抽象，我们不会直接面对thread，我们只会看到代码里的goroutine。</p>
+<p>操作系统却相反，管你什么 goroutine，我才没空理会。我安心地执行线程就可以了，线程才是我调度的基本单位。</p>
+<p>而这也是基于<strong>两级线程模型</strong>实现的，Goroutine与内核线程是多对多的关系，也叫M:N模型</p>
+<p><img src="/../img/61340362-8c001880-a874-11e9-9237-d97e6105cd62.png" srcset="/img/loading.gif" lazyload alt="61340362-8c001880-a874-11e9-9237-d97e6105cd62"></p>
+<p>Go runtime 会负责 goroutine的生老病死，从创建到销毁。Runtime 会在程序启动的时候，创建 M 个线程（CPU 执行调度的单位），之后创建的 N 个 goroutine 都会依附在这 M 个线程上执行。</p>
+<p>在同一时刻，一个线程上只能跑一个 goroutine。当 goroutine 发生阻塞时，<strong>runtime 会把当前 goroutine 调度走</strong>，让其他 goroutine 来执行。目的就是不让一个线程闲着，榨干 CPU 的每一滴油水。所以一个线程内的Goroutine一定是串行的。</p>
+<p><strong>Goroutine和thread有什么区别？</strong></p>
+<ol>
+<li>内存占用：创建一个 goroutine 的栈内存消耗为2 KB，实际运行过程中，如果栈空间不够用，会自动进行扩容。创建一个 thread 则需要消耗 1 MB 栈内存，对于一个用 Go 构建的 Web Server而言，对到来的每个请求，直接创建一个goroutine用来处理是非常轻松的一件事（可以读源码）。而如果使用线程如JAVA实现的BIO模式，每个请求对应一个线程则太浪费资源了，很快就会出 OOM 错误</li>
+<li>创建和销毀：Thread创建和销毀都会有巨大的消耗，因为是内核态的，通常解决的办法就是线程池实现复用，避免频繁的创建和销毁。而 goroutine因为是由Go runtime负责管理的，全程在用户态进行，创建和销毁的消耗非常小。</li>
+<li>切换：当 threads 切换时，需要保存各种寄存器，以便将来恢复，而goroutines 切换只需保存三个寄存器，切换成本非常小</li>
+</ol>
+<h1 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h1><p><img src="/../img/62172655-9981cc00-b365-11e9-8912-b16b83930ad0.png" srcset="/img/loading.gif" lazyload alt="62172655-9981cc00-b365-11e9-8912-b16b83930ad0"></p>
+<p>Go 程序的执行由两层组成：Go Program，Runtime。它们之间通过函数调用来实现内存管理、channel 通信、goroutines 创建等功能。用户程序进行的系统调用都会被 Runtime 拦截，以此来帮助它进行调度以及垃圾回收相关的工作</p>
+<p>可以说runtime相当于一个中介，将Goroutine抽象到内核态以及将内核线程抽象到用户态，并承接各类调度，通信，GC，让用户和内核各司其职，用户只能看见Goroutine，内核只能看见线程。这就是两级线程模型实现的核心所在</p>
+<p>用三个基础的结构体来实现goroutines的调度：</p>
+<ol>
+<li>G：代表一个 goroutine，包含：表示 goroutine 栈的一些字段，指示当前 goroutine 的状态，指示当前运行到的指令地址，也就是PC</li>
+<li>M：<strong>内核线程在用户态的抽象</strong>，包含正在运行的goroutine等字段。</li>
+<li>P：代表一个虚拟的Processor，<strong>Go 程序启动后，会给每个OS逻辑核心分配一个 P</strong>，它维护一个处于 Runnable状态的队列</li>
+</ol>
+<p><img src="/../img/62031928-02a8f880-b21b-11e9-96a9-96820452463e.png" srcset="/img/loading.gif" lazyload alt="62031928-02a8f880-b21b-11e9-96a9-96820452463e"></p>
+<p>这个图应该非常直观易懂，内核线程被抽象为M，这些M跑在个数最多为 <strong>GOMAXPROCS</strong> 的逻辑处理器P上</p>
+<p>Go 调度器中有两个不同的运行队列：<strong>全局运行队列(GRQ)<strong>和</strong>本地运行队列(LRQ)</strong></p>
+<p><strong>每个M必须依附于一个 P，每个P在同一时刻只能运行一个 M</strong>，每个P都有一个LRQ，用于管理分配给在<strong>P</strong>的上下文中执行的 Goroutine，这些Goroutine轮流被<strong>和P绑定的M</strong>进行上下文切换。</p>
+<p>GRQ存放尚未分配给P的 Goroutines，其中有一个过程是将 Goroutines从GRQ转移到LRQ</p>
+<p><strong>如果P上的M阻塞了，那就需要其他M来运行LRQ里的goroutine</strong></p>
+<p><em><strong>为什么需要P</strong></em></p>
+<ol>
+<li>Go的早期版本，并没有P这个结构，Go会给M直接分配一个全局队列，每个M会直接从队列中获取要运行的G，因此需要获取一个全局的锁，当并发量大的时候，锁就成了瓶颈，这反而降低了并发性能。而加入逻辑处理器，每个逻辑处理维护自己的本地队列，解决了全局锁带来的性能问题</li>
+<li>逻辑处理器实现了性能的最大化，当某个M阻塞时，P可以立即将G切换到另一个M上</li>
+</ol>
+<p>进入正题</p>
+<p>Go scheduler是Go runtime的一部分，它内嵌在 Go 程序里，和 Go 程序一起运行。因此它运行在用户空间，在 kernel 的上一层。</p>
+<p><strong>Go scheduler 的职责就是将所有处于 runnable的 goroutine均匀分布到在P上运行的M</strong></p>
+<p>和Os scheduler <strong>抢占式调度（preemptive）</strong>不一样，Go scheduler 采用<strong>协作式调度（cooperating）</strong>。</p>
+<p>不过这个协作又和python的协作不太一样，对于传统的协作式调度，用户可以自行设定调度点，例如java和python中的yield（线程让出），但是由于在 Go 语言里，goroutine 调度的事情是由 Go runtime 来做，并非由用户控制，而只是存在于用户态中。</p>
+<h2 id="work-stealing"><a href="#work-stealing" class="headerlink" title="work stealing"></a>work stealing</h2><p>Go scheduler每一轮调度要做的工作就是找到处于 runnable 的 goroutine，并执行它。找的顺序如下：</p>
+<ol>
+<li>先从全局队列中寻找G</li>
+<li>若全局队列中未找到，寻找P的本地队列</li>
+<li>若都没有找到，就会启动<strong>work stealing</strong></li>
+<li>若work stealing失败，则阻塞</li>
+</ol>
+<p>若找到一个可执行的 goroutine后，就会一直执行下去，直到被阻塞。</p>
+<p>当一个 P 发现自己的 LRQ 已经没有 G 时，会从其他 P 偷 一些 G 来运行，这就是<strong>work stealing</strong>。当 P2 上的一个G执行结束，它就会去 LRQ 获取下一个 G 来执行。如果 LRQ 已经空了，就是说本地可运行队列已经没有 G 需要执行，并且这时 GRQ 也没有 G 了。</p>
+<p>这时，P2 会随机选择一个 P（称为 P1），P2 会从 P1 的 LRQ “偷”过来一半的G，保证了在高并发状况下，所有的P都不会闲着。</p>
+<h2 id="netpoller（epoll版本）"><a href="#netpoller（epoll版本）" class="headerlink" title="netpoller（epoll版本）"></a>netpoller（epoll版本）</h2><p>当你的操作系统需要异步处理系统调用时，可以使用网络轮询器。通过在这些操作系统中使用 kqueue（MacOS），epoll（Linux）或 iocp（Windows）来实现。基于网络的系统调用可以由我们今天使用的许多操作系统异步处理。</p>
+<p>Golang为了处理网络IO也封装了异步系统调用，称为netpoller，通过对epoll的封装和优化，调度器可以防止 Goroutine在进行这些系统调用时阻塞M。而是封存 goroutine然后让出 CPU 的使用权从而令 P 可以去调度本地调度队列里的下一个 goroutine。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;sys/epoll.h&gt;</span>  </span><br><span class="hljs-type">int</span> <span class="hljs-title function_">epoll_create</span><span class="hljs-params">(<span class="hljs-type">int</span> size)</span>;  <br><span class="hljs-type">int</span> <span class="hljs-title function_">epoll_ctl</span><span class="hljs-params">(<span class="hljs-type">int</span> epfd, <span class="hljs-type">int</span> op, <span class="hljs-type">int</span> fd, <span class="hljs-keyword">struct</span> epoll_event *event)</span>;  <br><span class="hljs-type">int</span> <span class="hljs-title function_">epoll_wait</span><span class="hljs-params">(<span class="hljs-type">int</span> epfd, <span class="hljs-keyword">struct</span> epoll_event * events, <span class="hljs-type">int</span> maxevents, <span class="hljs-type">int</span> timeout)</span>;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">//分别对应上面三个系统调用</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">netpollinit</span><span class="hljs-params">()</span></span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">netpollopen</span><span class="hljs-params">(fd <span class="hljs-type">uintptr</span>, pd *pollDesc)</span></span> <span class="hljs-type">int32</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">netpoll</span><span class="hljs-params">(block <span class="hljs-type">bool</span>)</span></span> gList<br></code></pre></td></tr></table></figure>
+
+<p>netpoller把网络 I&#x2F;O 的控制权牢牢掌握在 Go 自己的 runtime 里，用户进程将始终存在于用户态，可以始终接受Go强大的 runtime scheduler来调度业务程序的并发，实现性能的最大化</p>
+<p><img src="/../img/netpoller-goroutines-scheduling.png" srcset="/img/loading.gif" lazyload alt="netpoller-goroutines-scheduling"></p>
+<p>首先，client 连接 server 的时候，listener通过 accept调用接收新 connection，每一个新connection都启动一个goroutine处理，accept调用会把该connection的fd连带所在的 goroutine上下文信息<strong>封装注册到epoll的监听列表里去</strong></p>
+<p>当goroutine调用conn.Read或者 conn.Write等需要阻塞等待的函数时，会被<strong>gopark</strong>给封存起来并使之休眠，让 P 去执行本地调度队列里的下一个可执行的 goroutine。<strong>通过调用gopark，goroutine会被放置在某个等待队列中，这里是放到了epoll的由红黑树实现的 eventpoll.rbr，此时 G 的状态由Grunning变为Gwaitting。</strong></p>
+<p>golang如何建立文件描述符和goroutine之间的关联？ <strong>pollDesc结构体</strong>就是完成这个任务的</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">type</span> pollDesc <span class="hljs-keyword">struct</span> &#123; <span class="hljs-comment">// Poller对象</span><br>    link *pollDesc <span class="hljs-comment">// 链表</span><br>    lock mutex <span class="hljs-comment">// 保护下面字段</span><br>    fd <span class="hljs-type">uintptr</span> <span class="hljs-comment">// fd是底层网络io文件描述符，整个生命期内，不能改变值</span><br>    closing <span class="hljs-type">bool</span><br>    seq <span class="hljs-type">uintptr</span> <span class="hljs-comment">// protect from stale(过时) timers and ready notifications</span><br>    rg <span class="hljs-type">uintptr</span> <span class="hljs-comment">// reader goroutine addr</span><br>    rt timer<br>    rd <span class="hljs-type">int64</span><br>    wg <span class="hljs-type">uintptr</span> <span class="hljs-comment">// writer goroutine addr</span><br>    wt timer<br>    wd <span class="hljs-type">int64</span><br>    user <span class="hljs-type">int32</span> <span class="hljs-comment">// user-set cookie用户自定义数据</span><br>&#125;<br><br><span class="hljs-keyword">type</span> pollCache <span class="hljs-keyword">struct</span> &#123; <span class="hljs-comment">// 全局Poller链表</span><br>    lock mutex <span class="hljs-comment">// 保护Poller链表</span><br>    first *pollDesc<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>gopark函数在协程的实现上扮演着非常重要的角色，用于协程的切换，gopark函数做的主要事情分为两点：</p>
+<ol>
+<li>解除当前goroutine的m的绑定关系，将当前goroutine状态机切换为等待状态；</li>
+<li>调用一次schedule()函数，在局部调度器P发起一轮新的调度。</li>
+</ol>
+<p>gopark源码中最重要的就是<code>mcall(park_m)</code> 函数，这个函数会切换当前线程的堆栈从g的堆栈切换到g0的堆栈，并保存当前协程的信息</p>
+</blockquote>
+<p>Go scheduler会在循环调度的runtime.schedule() 函数以及 sysmon监控线程中调用 <strong>runtime.netpoll</strong>以获取可运行的goroutine列表</p>
+<p>和epoll的逻辑一样，runtime.netpoll里会调用epoll_wait从 epoll 的 <strong>eventpoll.rdllist就绪双向链表</strong>返回，从而得到 I&#x2F;O 就绪的 socket fd 列表，<strong>并根据取出最初调用 epoll_ctl 时保存的上下文信息，恢复 g</strong></p>
+<p>所以执行完netpoll之后，会返回一个就绪fd列表对应的 goroutine链表，接下来将就绪的goroutine通过调用injectglist加入到全局调度队列或者P的本地调度队列中，启动M绑定P去执行。</p>
+<p>Go runtime 在程序启动的时候会创建一个独立的 M 作为监控线程，叫 sysmon ，每 20us~10ms 运行一次。</p>
+<p>这个线程为系统级的 daemon 线程，无需P即可运行， </p>
+<p>sysmon 中以轮询的方式执行以下操作：</p>
+<ol>
+<li><strong>以非阻塞的方式调用runtime.netpoll</strong> ，从中找出能从网络 I&#x2F;O 中唤醒的G列表，并通过调用 injectglist 把 G 列表放入全局调度队列或者当前 P 本地调度队列等待被执行，调度触发时，有可能从这个全局 runnable 调度队列获取 g。然后再循环调用 startm ，直到所有 P 都不处于 _Pidle 状态。 </li>
+<li>调用 retake ，抢占长时间处于 _Psyscall 状态的 P。</li>
+</ol>
+<p>和使用Unix系统中的select或是epoll不同地是，Golang的netpoller<strong>查询的是能被调度的goroutine</strong>而不是那些函数指针、包含了各种状态变量的struct等，这样你就不用管理这些状态，也不用重新检查函数指针等，这些都是你在传统Unix网络I&#x2F;O需要操心的问题。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Golang/">#Golang</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Golang调度详解</div>
+      <div>http://example.com/post/Golang调度器.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>SamuelZhou</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年12月6日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/post/Redis%E9%AB%98%E5%8F%AF%E7%94%A8.html" title="Redis高可用">
+                        <span class="hidden-mobile">Redis高可用</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
