@@ -31,7 +31,7 @@
 <meta property="og:image" content="http://example.com/img/token.png">
 <meta property="og:image" content="http://example.com/img/JWT.png">
 <meta property="article:published_time" content="2022-10-31T06:51:13.000Z">
-<meta property="article:modified_time" content="2022-12-04T13:17:54.836Z">
+<meta property="article:modified_time" content="2022-12-08T07:16:01.799Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="计算机基础知识">
 <meta name="twitter:card" content="summary_large_image">
@@ -233,7 +233,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          15k 字
+          16k 字
         
       </span>
     
@@ -244,7 +244,7 @@
         
         
         
-          124 分钟
+          130 分钟
         
       </span>
     
@@ -402,26 +402,17 @@
 <li>LAST-ACK 被动关闭,等待最后一个关闭传输连接确认，并等待所有分组消失</li>
 <li>CLOSING 如果通信双方同时发送FIN数据包，则同时进行关闭操作，则双方将同时进入TCP_CLOSING状态。 	具体的，本地发送一个FIN数据包以结束本地数据包发送，如果在等待应答期间，接收到远端发送的FIN数据包，则本地将状态设置为TCP_CLOSING状态。 	在接收到应答后，再继续装入到TCP_CLOSE_WAIT状态。</li>
 </ol>
-<h3 id="TCP的拥塞控制"><a href="#TCP的拥塞控制" class="headerlink" title="TCP的拥塞控制"></a>TCP的拥塞控制</h3><ol>
-<li><strong>当cwnd &lt; ssthresh时，慢启动，指数增长</strong></li>
-<li><strong>当cwnd &gt; ssthresh时，拥塞避免，线性增长</strong></li>
-<li><strong>出现三个冗余确认，快速恢复，ssthresh &#x3D; cwnd&#x2F;2 ; cwnd &#x3D; ssthresh+3*MSS；此后每收到一个冗余ACK就增加一个MSS，直到收到正确的ACK，cwnd&#x3D;ssthresh,进入慢增长</strong></li>
-<li><strong>出现timeout，ssthresh &#x3D; cwnd&#x2F;2 ; cwnd &#x3D; 1MSS</strong></li>
-</ol>
-<h2 id="TCP可靠传输机制的保证："><a href="#TCP可靠传输机制的保证：" class="headerlink" title="TCP可靠传输机制的保证："></a>TCP可靠传输机制的保证：</h2><ol>
-<li><p>检验和：用于检验一个分组中的比特错误</p>
-</li>
-<li><p>定时器：用于超时检验，发生超时事件时重传</p>
-</li>
-<li><p>序号：为一系列分组编号，可以检测出丢失分组以及冗余分组</p>
-</li>
-<li><p>ACK：用于告诉发送方分组被正确接收</p>
-</li>
-<li><p>NAK：用于告诉发送方分组未被正确接收</p>
-</li>
-<li><p>窗口：发送方被限制发送的序号范围</p>
-</li>
-</ol>
+<h1 id="TCP可靠传输机制"><a href="#TCP可靠传输机制" class="headerlink" title="TCP可靠传输机制"></a>TCP可靠传输机制</h1><h3 id="校验和"><a href="#校验和" class="headerlink" title="校验和"></a>校验和</h3><p>在数据传输的过程中，将发送的数据段以16位的整数循环进位相加。</p>
+<p>前面的进位不能丢弃，补在后面，最后取反，得到校验和，存入TCP报文段的相应位置</p>
+<h3 id="序列号和ACK-x2F-NAK"><a href="#序列号和ACK-x2F-NAK" class="headerlink" title="序列号和ACK&#x2F;NAK"></a>序列号和ACK&#x2F;NAK</h3><p>TCP传输时将每个字节的数据都进行了编号，这就是序列号，可以检测出丢失分组以及冗余分组。</p>
+<p>使用ACK&#x2F;NAK来确认对方是否收到了数据</p>
+<h3 id="超时重传"><a href="#超时重传" class="headerlink" title="超时重传"></a>超时重传</h3><p>在进行TCP传输时，由于确认应答与序列号机制，当发送方发送一部分数据后，都会等待接收方的ACK报文。</p>
+<p>如果迟迟没有等到应答报文，就会启动超时重传，简单理解就是发送方在发送完数据后会启动计时器，如果timeout，那么对刚才发送的数据进行重新发送。</p>
+<p>如果是因为网络原因导致发送方数据丢失，重传被成功接收，便进行ACK应答。</p>
+<p>如果是因为网络原因导致接收方ACK报文丢失，接收方发现接收的数据已存在（判断存在的根据就是序列号），那么直接丢弃，仍旧发送ACK应答。</p>
+<h4 id="选择性重传SR-selective-repeat"><a href="#选择性重传SR-selective-repeat" class="headerlink" title="选择性重传SR selective repeat"></a>选择性重传SR selective repeat</h4><p>发送方只重发没有确认的分组</p>
+<p>为每一个分组都添加timer，缓冲区的存在可以暂存失序但正确的分组</p>
+<p>待重传分组到达并恢复顺序后，再统一交付给上层</p>
 <h4 id="GBN-回退N步-go-back-N"><a href="#GBN-回退N步-go-back-N" class="headerlink" title="GBN 回退N步 go-back-N"></a>GBN 回退N步 go-back-N</h4><p>将序号队列分为四部分</p>
 <ol>
 <li>已被确认</li>
@@ -435,10 +426,20 @@
 <p>1234 +rcv ack1 &#x3D;&gt; 2345</p>
 <p>ack2 timeout &#x3D;&gt;re_send (2345)</p>
 <p>接受方无buffer，失序分组会被丢弃，所以需要重发来重新确认顺序</p>
-<h4 id="选择性重传SR-selective-repeat"><a href="#选择性重传SR-selective-repeat" class="headerlink" title="选择性重传SR selective repeat"></a>选择性重传SR selective repeat</h4><p>接收方添加buffer，按序提交给上层</p>
-<p>发送方只重发没有确认的分组</p>
-<p>为每一个分组都添加timer，缓冲区的存在可以暂存失序但正确的分组</p>
-<p>待重传分组到达并恢复顺序后，再统一交付给上层</p>
+<h3 id="连接管理"><a href="#连接管理" class="headerlink" title="连接管理"></a>连接管理</h3><p>三次握手和四次挥手</p>
+<h3 id="滑动窗口和流量控制"><a href="#滑动窗口和流量控制" class="headerlink" title="滑动窗口和流量控制"></a>滑动窗口和流量控制</h3><p>如果发送端的发送速度太快，导致接收端的结束缓冲区很快的填充满了，此时如果发送端仍旧发送数据，那么接下来发送的数据都会丢包。而TCP根据接收端对数据的处理能力，决定发送端的发送速度，这个机制就是流量控制。</p>
+<p>在TCP协议的报头信息当中，有一个16位字段的窗口大小。窗口大小的内容实际上是接收端接收数据缓冲区的剩余大小。接收端会在确认应答发送ACK报文时，将自己的即时窗口大小填入，并跟随ACK报文一起发送过去。</p>
+<p>而发送方根据ACK报文里的窗口大小的值的改变进而改变自己的发送速度。如果接收到窗口大小的值为0，那么发送方将停止发送数据。并定期的向接收端发送窗口探测数据段，让接收端把窗口大小告诉发送端。</p>
+<h3 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h3><p>防止过多的数据注入到网络中，这样可以使网络中的路由器或链路过载，如果网络出现拥塞，分组将会丢失，此时发送方会继续重传，从而导致网络拥塞程度更高。</p>
+<p>因此当出现拥塞时，应当控制发送方的速率。这一点和流量控制很像，但是出发点不同。流量控制是为了让接收方能来得及接收（端对端的通信），而拥塞控制是为了降低整个网络的拥塞程度（全局性）</p>
+<p><strong>cwnd：拥塞窗口</strong></p>
+<p><strong>ssthresh：拥塞阈值</strong></p>
+<ol>
+<li><strong>当cwnd &lt; ssthresh时，慢启动，指数增长</strong></li>
+<li><strong>当cwnd &gt; ssthresh时，拥塞避免，线性增长</strong></li>
+<li><strong>出现三个冗余确认，快速恢复，ssthresh &#x3D; cwnd&#x2F;2 ; cwnd &#x3D; ssthresh+3*MSS；此后每收到一个冗余ACK就增加一个MSS，直到收到正确的ACK，cwnd&#x3D;ssthresh,进入慢增长</strong></li>
+<li><strong>出现timeout，ssthresh &#x3D; cwnd&#x2F;2 ; cwnd &#x3D; 1MSS</strong></li>
+</ol>
 <h3 id="TCP协议存在什么缺陷？"><a href="#TCP协议存在什么缺陷？" class="headerlink" title="TCP协议存在什么缺陷？"></a>TCP协议存在什么缺陷？</h3><ol>
 <li>存在队头阻塞的问题，必须保证缓存内的数据报全部到达且有序，才能向上层交付，否则会被一直阻塞</li>
 <li>网络迁移时需要重新进行握手建立连接</li>
