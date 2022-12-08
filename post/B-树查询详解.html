@@ -16,17 +16,20 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示： ![双向链表](">
+    <meta name="description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示：  这也就是聚簇索">
 <meta property="og:type" content="article">
 <meta property="og:title" content="B+树查询详解">
 <meta property="og:url" content="http://example.com/post/B-%E6%A0%91%E6%9F%A5%E8%AF%A2%E8%AF%A6%E8%A7%A3.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示： ![双向链表](">
+<meta property="og:description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示：  这也就是聚簇索">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/640.png">
+<meta property="og:image" content="http://example.com/img/1.png">
+<meta property="og:image" content="http://example.com/img/2.png">
 <meta property="og:image" content="http://example.com/img/B+tree.png">
+<meta property="og:image" content="http://example.com/img/3.png">
 <meta property="article:published_time" content="2022-12-08T08:02:58.000Z">
-<meta property="article:modified_time" content="2022-12-08T08:34:23.734Z">
+<meta property="article:modified_time" content="2022-12-08T08:38:52.255Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,7 +233,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.6k 字
+          1.5k 字
         
       </span>
     
@@ -241,7 +244,7 @@
         
         
         
-          14 分钟
+          13 分钟
         
       </span>
     
@@ -288,11 +291,11 @@
 <p>数据页的结构：</p>
 <p><img src="/../img/640.png" srcset="/img/loading.gif" lazyload></p>
 <p>在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示：</p>
-<p>![双向链表](..&#x2F;img&#x2F;640 (1).png)</p>
+<p><img src="/../img/1.png" srcset="/img/loading.gif" lazyload alt="双向链表"></p>
 <p>这也就是聚簇索引B+树的叶子节点，采用链表的结构是让数据页之间形成逻辑上的连续，</p>
 <p>数据页的主要作用是存储记录，也就是数据库的数据，<strong>数据页中的记录按照「主键」顺序组成单向链表</strong>，单向链表的特点就是插入、删除非常方便，但是检索效率不高，最差的情况下需要遍历链表上的所有节点才能完成检索。</p>
 <p>因此，<strong>数据页内部有一个页目录</strong>，起到记录的索引作用，数据页中的页目录就是为了能快速找到记录。</p>
-<p>![数据页内详细结构](..&#x2F;img&#x2F;640 (2).png)</p>
+<p><img src="/../img/2.png" srcset="/img/loading.gif" lazyload alt="数据页内详细结构"></p>
 <p>页目录的创建过程</p>
 <ol>
 <li>将所有的记录划分成几个组，这些记录包括最小记录和最大记录，但不包括标记为“已删除”的记录；</li>
@@ -307,7 +310,7 @@
 <li>再从 3 号槽指向的主键值为 9 记录开始向下搜索 2 次，定位到主键为 11 的记录，取出该条记录的信息即为我们想要查找的内容。</li>
 </ol>
 <h1 id="B-树"><a href="#B-树" class="headerlink" title="B+树"></a>B+树</h1><p><img src="/../img/B+tree.png" srcset="/img/loading.gif" lazyload alt="B+树"></p>
-<p>![B+树](..&#x2F;img&#x2F;640 (3).png)</p>
+<p><img src="/../img/3.png" srcset="/img/loading.gif" lazyload alt="B+树"></p>
 <p>我们再看看 B+ 树如何实现快速查找主键为 6 的记录，以上图为例子：</p>
 <ol>
 <li>从根节点开始，通过二分法快速定位到符合页内范围包含查询值的页，因为查询的主键值为 6，在[1, 7)范围之间，所以到页 30 中查找更详细的目录项；</li>
