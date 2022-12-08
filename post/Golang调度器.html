@@ -28,7 +28,7 @@
 <meta property="og:image" content="http://example.com/img/62031928-02a8f880-b21b-11e9-96a9-96820452463e.png">
 <meta property="og:image" content="http://example.com/img/netpoller-goroutines-scheduling.png">
 <meta property="article:published_time" content="2022-12-06T13:15:06.000Z">
-<meta property="article:modified_time" content="2022-12-07T15:04:42.517Z">
+<meta property="article:modified_time" content="2022-12-08T04:41:15.409Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="Golang">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          5.5k 字
+          6k 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          46 分钟
+          50 分钟
         
       </span>
     
@@ -316,6 +316,14 @@
 <ol>
 <li>Go的早期版本，并没有P这个结构，Go会给M直接分配一个全局队列，每个M会直接从队列中获取要运行的G，因此需要获取一个全局的锁，当并发量大的时候，锁就成了瓶颈，这反而降低了并发性能。而加入逻辑处理器，每个逻辑处理维护自己的本地队列，解决了全局锁带来的性能问题</li>
 <li>逻辑处理器实现了性能的最大化，当某个M阻塞时，P可以立即将G切换到另一个M上</li>
+</ol>
+<p><em><strong>为什么没有Goroutine ID</strong></em></p>
+<p>我们知道，每个线程都有一个Thread Id，当进行偏向锁的加锁时，会在对象头内保存可重入的线程ID，而且线程ID也可以很容易地实现thread-local storage，只需要以线程的 ID 作为 key 的一个 map 就可以实现线程私有变量。但是Goroutine却没有这个标志位，应该说，go语言的开发者没有提供获取ID的API，为啥要这么设计呢？</p>
+<ol>
+<li>Goroutine-local storage 的GC非常麻烦，成本远远超过它的收益</li>
+<li>go开发者认为，goroutine就应该是无名之辈，如果为它们指定ID，他们每一个都会变得特别，而无法以同等身份来进行并发计算</li>
+<li>如果将每个请求状态与goroutine id相关联，则客户端在服务请求时将无法使用更多的goroutine。比如net&#x2F;http中。</li>
+<li>使用图形系统库(这些库要求所有处理都发生在“主线程”上)时，在并发语言中部署会极大受限。特殊goroutine的存在迫使程序员更改程序，以避免意外操作错误的线程而导致的崩溃和其他问题。</li>
 </ol>
 <p>还有一个前置知识，在golang中，Goroutine被分为三种</p>
 <ol>
