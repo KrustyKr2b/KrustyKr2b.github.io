@@ -16,17 +16,17 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示： ![](..&amp;#">
+    <meta name="description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示： ![双向链表](">
 <meta property="og:type" content="article">
 <meta property="og:title" content="B+树查询详解">
 <meta property="og:url" content="http://example.com/post/B-%E6%A0%91%E6%9F%A5%E8%AF%A2%E8%AF%A6%E8%A7%A3.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示： ![](..&amp;#">
+<meta property="og:description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示： ![双向链表](">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/640.png">
 <meta property="og:image" content="http://example.com/img/B+tree.png">
 <meta property="article:published_time" content="2022-12-08T08:02:58.000Z">
-<meta property="article:modified_time" content="2022-12-08T08:31:36.222Z">
+<meta property="article:modified_time" content="2022-12-08T08:34:23.734Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary_large_image">
@@ -288,11 +288,11 @@
 <p>数据页的结构：</p>
 <p><img src="/../img/640.png" srcset="/img/loading.gif" lazyload></p>
 <p>在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示：</p>
-<p>![](..&#x2F;img&#x2F;640 (1).png)</p>
+<p>![双向链表](..&#x2F;img&#x2F;640 (1).png)</p>
 <p>这也就是聚簇索引B+树的叶子节点，采用链表的结构是让数据页之间形成逻辑上的连续，</p>
 <p>数据页的主要作用是存储记录，也就是数据库的数据，<strong>数据页中的记录按照「主键」顺序组成单向链表</strong>，单向链表的特点就是插入、删除非常方便，但是检索效率不高，最差的情况下需要遍历链表上的所有节点才能完成检索。</p>
 <p>因此，<strong>数据页内部有一个页目录</strong>，起到记录的索引作用，数据页中的页目录就是为了能快速找到记录。</p>
-<p>![](..&#x2F;img&#x2F;640 (2).png)</p>
+<p>![数据页内详细结构](..&#x2F;img&#x2F;640 (2).png)</p>
 <p>页目录的创建过程</p>
 <ol>
 <li>将所有的记录划分成几个组，这些记录包括最小记录和最大记录，但不包括标记为“已删除”的记录；</li>
@@ -306,8 +306,8 @@
 <li>再使用二分搜索出 2 号和 4 槽的中间位是 (2+4)&#x2F;2&#x3D; 3，3 号槽里最大的记录为 12。因为 11 &lt; 12，所以主键为 11 的记录在 3 号槽里；</li>
 <li>再从 3 号槽指向的主键值为 9 记录开始向下搜索 2 次，定位到主键为 11 的记录，取出该条记录的信息即为我们想要查找的内容。</li>
 </ol>
-<h1 id="B-树"><a href="#B-树" class="headerlink" title="B+树"></a>B+树</h1><p><img src="/../img/B+tree.png" srcset="/img/loading.gif" lazyload></p>
-<p>![](..&#x2F;img&#x2F;640 (3).png)</p>
+<h1 id="B-树"><a href="#B-树" class="headerlink" title="B+树"></a>B+树</h1><p><img src="/../img/B+tree.png" srcset="/img/loading.gif" lazyload alt="B+树"></p>
+<p>![B+树](..&#x2F;img&#x2F;640 (3).png)</p>
 <p>我们再看看 B+ 树如何实现快速查找主键为 6 的记录，以上图为例子：</p>
 <ol>
 <li>从根节点开始，通过二分法快速定位到符合页内范围包含查询值的页，因为查询的主键值为 6，在[1, 7)范围之间，所以到页 30 中查找更详细的目录项；</li>
@@ -317,7 +317,7 @@
 <p>可以看到，在定位记录所在哪一个页时，也是通过二分法快速定位到包含该记录的页。定位到该页后，又会在该页内进行二分法快速定位记录所在的分组（槽号），最后在分组内进行遍历查找。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>B+树的查询依靠页内目录，InnoDB会为每个数据页建立页内目录，数据页的记录会被分为若干个组，一个组对应目录的一个槽，槽内存储的实际上是偏移地址</p>
 <p>每一个槽会指向这些组中的最大记录，因为第一个分组只能有一个，所以页目录的第一个槽指向整个页最小的记录，最后一个槽指向最大的记录</p>
-<p>当我们要进行查询时，使用二分法分别在各个数据页中进行查询，直到到达叶节点。如果是范围查询，因为B+树页节点依靠主键排序，则可以直接依靠双向链表的前驱指针和后继指针进行范围结果输出。</p>
+<p>当我们要进行查询时，使用二分法分别在各个数据页中进行查询，直到到达叶节点。如果是范围查询，因为B+树页节点依靠主键排序，则可以直接依靠双向链表的前驱指针和后继指针进行范围结果输出。 </p>
 
                 
               </div>
