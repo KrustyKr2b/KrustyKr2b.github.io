@@ -26,9 +26,11 @@
 <meta property="og:image" content="http://example.com/img/61340362-8c001880-a874-11e9-9237-d97e6105cd62.png">
 <meta property="og:image" content="http://example.com/img/62172655-9981cc00-b365-11e9-8912-b16b83930ad0.png">
 <meta property="og:image" content="http://example.com/img/62031928-02a8f880-b21b-11e9-96a9-96820452463e.png">
+<meta property="og:image" content="http://example.com/img/62091677-b904f000-b2a4-11e9-8972-60ace0807ba4.png">
+<meta property="og:image" content="http://example.com/img/62091486-c2da2380-b2a3-11e9-8cf9-0e63d7f774d8.png">
 <meta property="og:image" content="http://example.com/img/netpoller-goroutines-scheduling.png">
 <meta property="article:published_time" content="2022-12-06T13:15:06.000Z">
-<meta property="article:modified_time" content="2022-12-08T04:43:17.194Z">
+<meta property="article:modified_time" content="2022-12-08T05:32:47.313Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="Golang">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,7 +232,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          6k 字
+          6.2k 字
         
       </span>
     
@@ -241,7 +243,7 @@
         
         
         
-          50 分钟
+          52 分钟
         
       </span>
     
@@ -349,6 +351,12 @@
 <p>当我们使用 go 关键字启动一个新 goroutine 时，最终会调用 runtime.newproc –&gt; runtime.newproc1，来得到 G</p>
 <p>runtime.newproc1 会先从P的gfree缓存链表中查找可用的 g，若缓存未生效，则会新创建 g 给当前的业务函数，最后这个 g 会被传给 <strong>runtime.gogo</strong> 去真正执行</p>
 <p><strong>runtime.gogo</strong>由汇编语言实现，是真正去执行 goroutine 代码的函数，参数是上文提到的gobuf，它的作用的就是将M的堆栈信息切换为指定的Goroutine，这里涉及到一些PC,SP,BP寄存器指针的更新。</p>
+<h2 id="Scheduler面对同步系统调用"><a href="#Scheduler面对同步系统调用" class="headerlink" title="Scheduler面对同步系统调用"></a>Scheduler面对同步系统调用</h2><p><img src="/../img/62091677-b904f000-b2a4-11e9-8972-60ace0807ba4.png" srcset="/img/loading.gif" lazyload alt="62091677-b904f000-b2a4-11e9-8972-60ace0807ba4"></p>
+<p>调度器介入后，识别出G1已导致M1阻塞，此时，<strong>调度器将M1与P分离</strong>，同时也将G1带走。</p>
+<p>然后调度器引入新的M2来服务P。此时，可以从 LRQ 中选择G2并在M2上进行上下文切换。</p>
+<p>M1则会被暂停，待到需要时再“放”出来。</p>
+<h2 id="Scheduler面对异步系统调用"><a href="#Scheduler面对异步系统调用" class="headerlink" title="Scheduler面对异步系统调用"></a>Scheduler面对异步系统调用</h2><p><img src="/../img/62091486-c2da2380-b2a3-11e9-8cf9-0e63d7f774d8.png" srcset="/img/loading.gif" lazyload alt="62091486-c2da2380-b2a3-11e9-8cf9-0e63d7f774d8"></p>
+<p>M 不会被阻塞，G 的异步请求会被“代理人” network poller 接手，G 也会被绑定到 network poller，等到系统调用结束，G 才会重新回到 P 上。M 由于没被阻塞，它因此可以继续执行 LRQ 里的其他 G</p>
 <h2 id="work-stealing"><a href="#work-stealing" class="headerlink" title="work stealing"></a>work stealing</h2><p>若找到一个可执行的 goroutine后，就会一直执行下去，直到被阻塞。</p>
 <p>当一个 P 发现自己的 LRQ 已经没有 G 时，会从其他 P 偷 一些 G 来运行，这就是<strong>work stealing</strong>。当 P2 上的一个G执行结束，它就会去 LRQ 获取下一个 G 来执行。如果 LRQ 已经空了，就是说本地可运行队列已经没有 G 需要执行，并且这时 GRQ 也没有 G 了。</p>
 <p>这时，P2 会随机选择一个 P（称为 P1），P2 会从 P1 的 LRQ “偷”过来一半的G，保证了在高并发状况下，所有的P都不会闲着。</p>
