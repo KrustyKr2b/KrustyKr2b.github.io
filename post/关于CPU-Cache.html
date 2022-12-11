@@ -26,7 +26,7 @@
 <meta property="og:image" content="http://example.com/img/1313640710-5b75376ab90a9_fix732.png">
 <meta property="og:image" content="d:/samuelBlog/folder/source/img/3205926858-5b753903cd919.png">
 <meta property="article:published_time" content="2022-12-06T13:02:22.000Z">
-<meta property="article:modified_time" content="2022-12-11T08:29:05.921Z">
+<meta property="article:modified_time" content="2022-12-11T08:41:49.542Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="计算机组成原理">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          6.4k 字
+          6.8k 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          54 分钟
+          57 分钟
         
       </span>
     
@@ -292,37 +292,46 @@
 <li>L2 Cache容量更大（如256K）、速度更低, 一般情况下，每个核上都有一个独立的L2 Cache。</li>
 <li>L3 Cache最接近内存，容量最大（如12MB），速度最低，在同一个CPU插槽之间的核共享一个L3 Cache。</li>
 </ol>
-<p>CPU从内存读取数据到CPU Cache的过程中，是一小块一小块来读取数据的，而不是按照单个数组元素来读取数据的。</p>
+<p>CPU从内存读取数据到CPU Cache的过程中，是一小块一小块来读取数据的，而不是按照单个元素来读取数据的。</p>
 <p>这样一小块一小块的数据，在CPU Cache里面，叫做Cache Line，<strong>Cache line是高速缓存系统的最小交换单位</strong></p>
 <p>在我们日常使用的 Intel 服务器或者 PC 里，Cache Line 的大小通常是 <strong>64 字节</strong></p>
-<h1 id="MESI协议"><a href="#MESI协议" class="headerlink" title="MESI协议"></a>MESI协议</h1><p>MESI协议描述了Cache line的四种状态：</p>
+<h2 id="MESI协议"><a href="#MESI协议" class="headerlink" title="MESI协议"></a>MESI协议</h2><p>MESI协议规定Cache line必须处于这四种状态中：</p>
 <ol>
 <li>M（修改, Modified）: 当前CPU cache拥有最新数据（拥有最新的cache line），其他CPU拥有失效数据（cache line的状态是invalid），虽然当前CPU中的数据和主存是不一致的，但是以当前CPU的数据为准。</li>
 <li>E（专有, Exclusive）: 只有当前CPU中有数据，其他CPU中没有改数据，当前CPU的数据和主存中的数据是一致的。</li>
 <li>S（共享, Shared）: 当前CPU和其他CPU中都有共同数据，并且和主存中的数据一致。</li>
 <li>I（无效, Invalid）: 当前CPU中的数据失效，数据应该从主存中获取，其他CPU中可能有数据也可能无数据，当前CPU中的数据和主存被认为是不一致的。</li>
 </ol>
-<h1 id="缓存的一致性"><a href="#缓存的一致性" class="headerlink" title="缓存的一致性"></a>缓存的一致性</h1><p>每个内核都有自己所需的cache line的副本，取值运算都在副本中进行。这就是为什么多线程应用中内存的变化会造成性能噩梦。</p>
+<p>MESI是一种<strong>写失效（Write Invalidate）协议</strong></p>
+<ol>
+<li>当一个CPU写入数据时</li>
+<li>在这个CPU核心写入Cache之后，它会去广播一个“失效”请求告诉所有其他的CPU核心。</li>
+<li>其他的CPU核心，只是去判断自己是否也有一个“失效”版本的Cache line，然后把这个也标记成失效</li>
+</ol>
+<p>相对的，也有一种<strong>写广播（Write Broadcast）协议</strong>：一个写入请求广播到所有的CPU核心，同时更新各个核心里的Cache line</p>
+<p>写失效只需要告诉其他的CPU核心，哪一个地址失效了</p>
+<p>但是写广播还需要把对应的数据传输给其他CPU核心，而写广播需要占用更多的总线带宽</p>
+<h2 id="总线嗅探机制"><a href="#总线嗅探机制" class="headerlink" title="总线嗅探机制"></a>总线嗅探机制</h2><p>即Snoopy 协议，帮助实现MESI协议，这种协议更像是一种数据通知技术，CPU和内存通过总线（BUS）互通消息。</p>
+<p>CPU感知其他CPU的行为（比如读、写某个缓存行）就是是通过嗅探（Snoop）其他CPU发出的请求消息完成的。</p>
+<p>CPU Cache 通过这个协议可以识别其它Cache上的数据状态。、，有时CPU也需要针对总线中的某些请求消息进行响应，如果有数据共享的话，可以通过广播机制将共享数据的状态通知给其它 CPU Cache。这个协议要求每个 CPU Cache 都可以窥探数据事件的通知并做出相应的反应。</p>
+<h2 id="缓存的一致性"><a href="#缓存的一致性" class="headerlink" title="缓存的一致性"></a>缓存的一致性</h2><p>每个内核都有自己所需的cache line的副本，取值运算都在副本中进行。这就是为什么多线程应用中内存的变化会造成性能噩梦。</p>
 <p>当并行的多个线程正在访问相同的数据值，甚至是相邻的数据值时，它们将访问同一cache line上的数据。</p>
 <p>为了提高写的性能，主流的 CPU采用的是 Write Back 的策略：写操作先在 cache 上，然后再 flush 到内存上</p>
 <p><img src="D:/samuelBlog/folder/source/img/3205926858-5b753903cd919.png" srcset="/img/loading.gif" lazyload alt="3205926858-5b753903cd919"></p>
-<p>如果某个核心上的一个线程对其cache line的副本进行了更改，那么同一cache line的所有其他副本<strong>都必须标记为dirty</strong>。当线程尝试对dirty cache line进行读写访问时，需要放弃此次cache line访问，转而向主存访问(大约 100 到 300 个时钟周期)来获得cache line的新副本，以保证数据的一致性</p>
-<blockquote>
-<p>Snoopy 协议，即总线嗅探机制，这种协议更像是一种数据通知的总线型的技术。CPU Cache 通过这个协议可以识别其它Cache上的数据状态。如果有数据共享的话，可以通过广播机制将共享数据的状态通知给其它 CPU Cache。这个协议要求每个 CPU Cache 都可以窥探数据事件的通知并做出相应的反应。</p>
-</blockquote>
+<p>如果某个核心上的一个线程对其cache line的副本进行了更改，那么根据总线MESI协议，同一cache line的所有其他副本<strong>都必须标记为失效</strong>。当线程尝试对dirty cache line进行读写访问时，需要放弃此次cache line访问，转而向主存访问(大约 100 到 300 个时钟周期)来获得cache line的新副本，以保证数据的一致性。</p>
 <p>也许在一个 2 核处理器上这不是什么大问题，但是如果一个 32 核处理器在同一cache line上同时运行 32 个线程来访问和改变数据，那会发生什么？处理器到处理器的通信延迟更大。应用程序将会在主存中周转，性能将会大幅下降。</p>
 <h2 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h2><p>从性能角度考虑，没有必要在修改后就立即flush修改的值——如果多次修改后才使用，那么只需要最后一次同步即可，在这之前的同步都是性能浪费。因此，可见性的定义要弱一些，只需要保证：<strong>当一个线程修改了线程共享变量的值，其它线程在使用前，能够得到最新的修改值</strong>。</p>
 <blockquote>
 <p>可见性可以认为是最弱的“一致性”（弱一致），只保证用户见到的数据是一致的，但不保证任意时刻，存储的数据都是一致的（强一致）。</p>
 </blockquote>
 <p><em>各种高级语言（包括Java）的多线程内存模型中，在线程栈内自己维护一份缓存是常见的优化措施，但显然在CPU级别的缓存一致性问题面前，一切都失效了。</em></p>
-<h1 id="伪共享问题"><a href="#伪共享问题" class="headerlink" title="伪共享问题"></a>伪共享问题</h1><p>缓存一致性会带来另一个问题，不同的处理器拥有完全或部分分离的缓存。</p>
+<h2 id="伪共享问题"><a href="#伪共享问题" class="headerlink" title="伪共享问题"></a>伪共享问题</h2><p>缓存一致性会带来另一个问题，不同的处理器拥有完全或部分分离的缓存。</p>
 <p><strong>当一个处理器改变了属于它自己缓存中的一个值，其它处理器就再也无法使用它自己原来的值，因为其对应的内存位置将被刷新(invalidate)到所有缓存。而且由于缓存操作是以缓存行而不是字节为粒度，所有缓存中整个缓存行将被刷新！</strong></p>
 <p>举个例子</p>
 <ol>
 <li>如果线程A要对变量a进行操作，于是以64bit的大小将a和其附近的所有变量都装入cache line</li>
 <li>此时B要对b进行操作，于是也以64bit的大小将b和其附近的所有变量都装入cache line</li>
-<li>如果a紧邻b，那么这<strong>两个变量共享共享了缓存行</strong></li>
+<li>如果a紧邻b，根据局部性原理，这<strong>两个变量共享共享了缓存行</strong></li>
 <li>线程A对a进行修改后，将a写回主存，那么B的缓存行就失效了（B：我还没操作呢，怎么就失效了）</li>
 <li>B就只能乖乖从主存再加载数据，大大影响了性能，这就出现了伪共享问题</li>
 </ol>
