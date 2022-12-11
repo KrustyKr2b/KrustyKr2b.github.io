@@ -16,30 +16,27 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示：  这也就是聚簇索">
+    <meta name="description" content="6257.删除每行中的最大值 给你一个 m x n 大小的矩阵 grid ，由若干正整数组成。 执行下述操作，直到 grid 变为空矩阵：  从每一行删除值最大的元素。如果存在多个这样的值，删除其中任何一个。 将所有被删除元素中的最大值相加。  每执行一次操作，矩阵中列的数据量就会减1 返回执行上述操作后的答案  12345上图展示在每一步中需要移除的值。- 在第一步操作中，从第一行删除 4 ，从">
 <meta property="og:type" content="article">
-<meta property="og:title" content="B+树查询详解">
-<meta property="og:url" content="http://example.com/post/B-%E6%A0%91%E6%9F%A5%E8%AF%A2%E8%AF%A6%E8%A7%A3.html">
+<meta property="og:title" content="周赛笔记12&#x2F;11&#x2F;2022">
+<meta property="og:url" content="http://example.com/post/%E5%91%A8%E8%B5%9B%E7%AC%94%E8%AE%B012-11-2022.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="数据页数据库的 I&#x2F;O 操作的最小单位是页，InnoDB 数据页的默认大小是 16KB，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。 数据页的结构：  在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示：  这也就是聚簇索">
+<meta property="og:description" content="6257.删除每行中的最大值 给你一个 m x n 大小的矩阵 grid ，由若干正整数组成。 执行下述操作，直到 grid 变为空矩阵：  从每一行删除值最大的元素。如果存在多个这样的值，删除其中任何一个。 将所有被删除元素中的最大值相加。  每执行一次操作，矩阵中列的数据量就会减1 返回执行上述操作后的答案  12345上图展示在每一步中需要移除的值。- 在第一步操作中，从第一行删除 4 ，从">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/640.png">
-<meta property="og:image" content="http://example.com/img/1.png">
-<meta property="og:image" content="http://example.com/img/2.png">
-<meta property="og:image" content="http://example.com/img/B+tree.png">
-<meta property="og:image" content="http://example.com/img/3.png">
-<meta property="article:published_time" content="2022-12-08T08:02:58.000Z">
-<meta property="article:modified_time" content="2022-12-08T08:38:52.255Z">
+<meta property="og:image" content="http://example.com/img/q1ex1.jpg">
+<meta property="og:image" content="http://example.com/img/drawio.png">
+<meta property="article:published_time" content="2022-12-11T09:14:45.000Z">
+<meta property="article:modified_time" content="2022-12-11T09:22:44.607Z">
 <meta property="article:author" content="SamuelZhou">
-<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="LeetCode初见">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/640.png">
+<meta name="twitter:image" content="http://example.com/img/q1ex1.jpg">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>B+树查询详解 - welcome</title>
+  <title>周赛笔记12/11/2022 - welcome</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -205,7 +202,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="B+树查询详解"></span>
+            <span id="subtitle" data-typed-text="周赛笔记12/11/2022"></span>
           
         </div>
 
@@ -221,8 +218,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-12-08 16:02" pubdate>
-          2022年12月8日 下午
+        <time datetime="2022-12-11 17:14" pubdate>
+          2022年12月11日 下午
         </time>
       </span>
     
@@ -233,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.5k 字
+          1.6k 字
         
       </span>
     
@@ -244,7 +241,7 @@
         
         
         
-          13 分钟
+          14 分钟
         
       </span>
     
@@ -282,45 +279,32 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">B+树查询详解</h1>
+            <h1 style="display: none">周赛笔记12/11/2022</h1>
             
             
               <div class="markdown-body">
                 
-                <h1 id="数据页"><a href="#数据页" class="headerlink" title="数据页"></a>数据页</h1><p>数据库的 I&#x2F;O 操作的最小单位是页，<strong>InnoDB 数据页的默认大小是 16KB</strong>，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。</p>
-<p>数据页的结构：</p>
-<p><img src="/../img/640.png" srcset="/img/loading.gif" lazyload></p>
-<p>在 File Header 中有两个指针，分别指向上一个数据页和下一个数据页，连接起来的页相当于一个双向的链表，如下图所示：</p>
-<p><img src="/../img/1.png" srcset="/img/loading.gif" lazyload alt="双向链表"></p>
-<p>这也就是聚簇索引B+树的叶子节点，采用链表的结构是让数据页之间形成逻辑上的连续，</p>
-<p>数据页的主要作用是存储记录，也就是数据库的数据，<strong>数据页中的记录按照「主键」顺序组成单向链表</strong>，单向链表的特点就是插入、删除非常方便，但是检索效率不高，最差的情况下需要遍历链表上的所有节点才能完成检索。</p>
-<p>因此，<strong>数据页内部有一个页目录</strong>，起到记录的索引作用，数据页中的页目录就是为了能快速找到记录。</p>
-<p><img src="/../img/2.png" srcset="/img/loading.gif" lazyload alt="数据页内详细结构"></p>
-<p>页目录的创建过程</p>
-<ol>
-<li>将所有的记录划分成几个组，这些记录包括最小记录和最大记录，但不包括标记为“已删除”的记录；</li>
-<li>每个记录组的最后一条记录就是组内最大的那条记录，并且最后一条记录的头信息中会存储该组一共有多少条记录，作为 n_owned 字段（上图中粉红色字段）</li>
-<li>页目录用来存储每组最后一条记录的地址偏移量，这些地址偏移量会按照先后顺序存储起来，每组的地址偏移量也被称之为槽（slot），每个槽相当于指针<strong>指向了不同组的最后一个记录</strong>。</li>
-</ol>
-<p><strong>页目录就是由多个槽组成的，槽相当于分组记录的索引</strong>。记录是按照「主键值」从小到大排序的，所以<strong>我们通过槽查找记录时，可以使用二分法快速定位要查询的记录在哪个槽（哪个记录分组），定位到槽后，再遍历槽内的所有记录，找到对应的记录</strong>，无需从最小记录开始遍历整个页中的记录链表。</p>
-<p>5 个槽的编号分别为 0，1，2，3，4，我想查找主键为 11 的用户记录：</p>
-<ol>
-<li>先二分得出槽中间位是 (0+4)&#x2F;2&#x3D;2 ，2号槽里最大的记录为 8。因为 11 &gt; 8，所以需要从 2 号槽后继续搜索记录；</li>
-<li>再使用二分搜索出 2 号和 4 槽的中间位是 (2+4)&#x2F;2&#x3D; 3，3 号槽里最大的记录为 12。因为 11 &lt; 12，所以主键为 11 的记录在 3 号槽里；</li>
-<li>再从 3 号槽指向的主键值为 9 记录开始向下搜索 2 次，定位到主键为 11 的记录，取出该条记录的信息即为我们想要查找的内容。</li>
-</ol>
-<h1 id="B-树"><a href="#B-树" class="headerlink" title="B+树"></a>B+树</h1><p><img src="/../img/B+tree.png" srcset="/img/loading.gif" lazyload alt="B+树"></p>
-<p><img src="/../img/3.png" srcset="/img/loading.gif" lazyload alt="B+树"></p>
-<p>我们再看看 B+ 树如何实现快速查找主键为 6 的记录，以上图为例子：</p>
-<ol>
-<li>从根节点开始，通过二分法快速定位到符合页内范围包含查询值的页，因为查询的主键值为 6，在[1, 7)范围之间，所以到页 30 中查找更详细的目录项；</li>
-<li>在非叶子节点（页30）中，继续通过二分法快速定位到符合页内范围包含查询值的页，主键值大于 5，所以就到叶子节点（页16）查找记录；</li>
-<li>接着，在叶子节点（页16）中，通过槽查找记录时，使用二分法快速定位要查询的记录在哪个槽（哪个记录分组），定位到槽后，再遍历槽内的所有记录，找到主键为 6 的记录。</li>
-</ol>
-<p>可以看到，在定位记录所在哪一个页时，也是通过二分法快速定位到包含该记录的页。定位到该页后，又会在该页内进行二分法快速定位记录所在的分组（槽号），最后在分组内进行遍历查找。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>B+树的查询依靠页内目录，InnoDB会为每个数据页建立页内目录，数据页的记录会被分为若干个组，一个组对应目录的一个槽，槽内存储的实际上是偏移地址</p>
-<p>每一个槽会指向这些组中的最大记录，因为第一个分组只能有一个，所以页目录的第一个槽指向整个页最小的记录，最后一个槽指向最大的记录</p>
-<p>当我们要进行查询时，使用二分法分别在各个数据页中进行查询，直到到达叶节点。如果是范围查询，因为B+树页节点依靠主键排序，则可以直接依靠双向链表的前驱指针和后继指针进行范围结果输出。 </p>
+                <p>6257.删除每行中的最大值</p>
+<p>给你一个 <code>m x n</code> 大小的矩阵 <code>grid</code> ，由若干正整数组成。</p>
+<p>执行下述操作，直到 <code>grid</code> 变为空矩阵：</p>
+<ul>
+<li>从每一行删除值最大的元素。如果存在多个这样的值，删除其中任何一个。</li>
+<li>将所有被删除元素中的最大值相加。</li>
+</ul>
+<p>每执行一次操作，矩阵中列的数据量就会减1</p>
+<p>返回执行上述操作后的答案</p>
+<p><img src="/../img/q1ex1.jpg" srcset="/img/loading.gif" lazyload></p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">上图展示在每一步中需要移除的值。<br>- 在第一步操作中，从第一行删除<span class="hljs-number"> 4 </span>，从第二行删除 3（注意，有两个单元格中的值为<span class="hljs-number"> 3 </span>，我们可以删除任一）。在答案上加<span class="hljs-number"> 4 </span>。<br>- 在第二步操作中，从第一行删除<span class="hljs-number"> 2 </span>，从第二行删除<span class="hljs-number"> 3 </span>。在答案上加<span class="hljs-number"> 3 </span>。<br>- 在第三步操作中，从第一行删除<span class="hljs-number"> 1 </span>，从第二行删除<span class="hljs-number"> 1 </span>。在答案上加<span class="hljs-number"> 1 </span>。<br>最终，答案 =<span class="hljs-number"> 4 </span>+<span class="hljs-number"> 3 </span>+<span class="hljs-number"> 1 </span>=<span class="hljs-number"> 8 </span>。<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">deleteGreatestValue</span><span class="hljs-params">(<span class="hljs-type">int</span>[][] grid)</span> &#123;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">res</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">n</span> <span class="hljs-operator">=</span> grid[<span class="hljs-number">0</span>].length;<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>;i&lt;n;i++)&#123;<br>            <span class="hljs-type">int</span> <span class="hljs-variable">max</span> <span class="hljs-operator">=</span> Integer.MIN_VALUE;<br>            <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span>[] temp: grid)&#123;<br>                <span class="hljs-type">Pair</span> <span class="hljs-variable">p</span> <span class="hljs-operator">=</span> findMax(temp);<br>                max = Math.max(max,p.val);<br>                <span class="hljs-comment">//将删除的值置为0</span><br>                temp[p.i]=<span class="hljs-number">0</span>;<br>            &#125;<br>            res+=max;<br>        &#125;<br>        <span class="hljs-keyword">return</span> res;<br>    &#125;<br>    Pair <span class="hljs-title function_">findMax</span><span class="hljs-params">(<span class="hljs-type">int</span>[] arr)</span>&#123;<br>        <span class="hljs-comment">//二叉堆找最大值</span><br>        PriorityQueue&lt;Pair&gt; pq = <span class="hljs-keyword">new</span> <span class="hljs-title class_">PriorityQueue</span>&lt;&gt;(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Comparator</span>&lt;Pair&gt;()&#123;<br>            <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">compare</span><span class="hljs-params">(Pair o1, Pair o2)</span> &#123;<br>                <span class="hljs-keyword">return</span> o2.val - o1.val;<br>            &#125;<br>        &#125;);<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>;i&lt;arr.length;i++)&#123;<br>            pq.add(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Pair</span>(i,arr[i]));<br>        &#125;<br>        <span class="hljs-keyword">return</span> pq.peek();<br>    &#125;<br>&#125;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Pair</span>&#123;<br>    <span class="hljs-type">int</span> i;<br>    <span class="hljs-type">int</span> val;<br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Pair</span><span class="hljs-params">(<span class="hljs-type">int</span> i, <span class="hljs-type">int</span> val)</span>&#123;<br>        <span class="hljs-built_in">this</span>.i = i;<br>        <span class="hljs-built_in">this</span>.val = val;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>2487.从链表中移除节点</p>
+<p>给你一个链表的头节点 <code>head</code> 。</p>
+<p>对于列表中的每个节点 <code>node</code> ，如果其右侧存在一个具有 <strong>严格更大</strong> 值的节点，则移除 <code>node</code> 。</p>
+<p>返回修改后链表的头节点 <code>head</code> 。</p>
+<p> <img src="/../img/drawio.png" srcset="/img/loading.gif" lazyload alt="drawio"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//单调栈思想，大的元素会挤掉小元素，保证了栈底永远是最大元素</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> &#123;<br>    <span class="hljs-keyword">public</span> ListNode <span class="hljs-title function_">removeNodes</span><span class="hljs-params">(ListNode head)</span> &#123;<br>        <span class="hljs-comment">//使用双端队列，保证性能的同时还支持从栈底出列</span><br>        ArrayDeque&lt;ListNode&gt; ad = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayDeque</span>();<br>        <span class="hljs-type">ListNode</span> <span class="hljs-variable">dummy</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ListNode</span>(-<span class="hljs-number">1</span>);<br>        <span class="hljs-type">ListNode</span> <span class="hljs-variable">temp</span> <span class="hljs-operator">=</span> dummy;<br>        <span class="hljs-keyword">while</span>(head!=<span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-keyword">while</span>(!ad.isEmpty())&#123;<br>                <span class="hljs-keyword">if</span>(ad.peek().val&lt;head.val) ad.pop();<br>                <span class="hljs-keyword">else</span> <span class="hljs-keyword">break</span>;<br>            &#125;<br>            ad.push(head);<br>            head=head.next;<br>        &#125;<br>        <span class="hljs-keyword">while</span>(!ad.isEmpty())&#123;<br>            temp.next = ad.removeLast();<br>            temp=temp.next;<br>        &#125;<br>        <span class="hljs-keyword">return</span> dummy.next;  <br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
 
                 
               </div>
@@ -333,7 +317,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/MySQL/">#MySQL</a>
+        <a href="/tags/LeetCode%E5%88%9D%E8%A7%81/">#LeetCode初见</a>
       
     </div>
   
@@ -345,8 +329,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>B+树查询详解</div>
-      <div>http://example.com/post/B-树查询详解.html</div>
+      <div>周赛笔记12/11/2022</div>
+      <div>http://example.com/post/周赛笔记12-11-2022.html</div>
     </div>
     <div class="license-meta">
       
@@ -358,7 +342,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2022年12月8日</div>
+          <div>2022年12月11日</div>
         </div>
       
       
@@ -390,18 +374,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/post/%E5%91%A8%E8%B5%9B%E7%AC%94%E8%AE%B012-11-2022.html" title="周赛笔记12/11/2022">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">周赛笔记12/11/2022</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/post/Golang%E8%B0%83%E5%BA%A6%E5%99%A8.html" title="Golang调度详解">
-                        <span class="hidden-mobile">Golang调度详解</span>
+                      <a href="/post/B-%E6%A0%91%E6%9F%A5%E8%AF%A2%E8%AF%A6%E8%A7%A3.html" title="B+树查询详解">
+                        <span class="hidden-mobile">B+树查询详解</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

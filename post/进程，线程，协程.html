@@ -16,18 +16,18 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="进程 an instance of a computer program that is being executed 进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。  与程序不同的是，进程具有动态性和生命周期，是系统进行资源分配和调度的独立单位。 进程的结构：  控制块 数据段 程序段  线程的Linux实现而在windows中，线程被抽象为一种比进程更轻量级">
+    <meta name="description" content="进程的Linux实现 an instance of a computer program that is being executed 进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。  与程序不同的是，进程具有动态性和生命周期，是系统进行资源分配和调度的独立单位。 进程的结构：  控制块 数据段 程序段  线程的Linux实现而在windows中，线程被抽象为一">
 <meta property="og:type" content="article">
 <meta property="og:title" content="进程，线程和协程详解">
 <meta property="og:url" content="http://example.com/post/%E8%BF%9B%E7%A8%8B%EF%BC%8C%E7%BA%BF%E7%A8%8B%EF%BC%8C%E5%8D%8F%E7%A8%8B.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="进程 an instance of a computer program that is being executed 进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。  与程序不同的是，进程具有动态性和生命周期，是系统进行资源分配和调度的独立单位。 进程的结构：  控制块 数据段 程序段  线程的Linux实现而在windows中，线程被抽象为一种比进程更轻量级">
+<meta property="og:description" content="进程的Linux实现 an instance of a computer program that is being executed 进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。  与程序不同的是，进程具有动态性和生命周期，是系统进行资源分配和调度的独立单位。 进程的结构：  控制块 数据段 程序段  线程的Linux实现而在windows中，线程被抽象为一">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/thread.png">
 <meta property="og:image" content="http://example.com/img/javaThread.png">
 <meta property="og:image" content="http://example.com/img/GMP-scheduler.png">
 <meta property="article:published_time" content="2022-10-20T08:53:01.000Z">
-<meta property="article:modified_time" content="2022-12-06T14:23:02.202Z">
+<meta property="article:modified_time" content="2022-12-11T09:13:03.647Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="Java基础知识">
 <meta name="twitter:card" content="summary_large_image">
@@ -231,7 +231,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          9.7k 字
+          9.6k 字
         
       </span>
     
@@ -285,7 +285,7 @@
             
               <div class="markdown-body">
                 
-                <h1 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h1><blockquote>
+                <h1 id="进程的Linux实现"><a href="#进程的Linux实现" class="headerlink" title="进程的Linux实现"></a>进程的Linux实现</h1><blockquote>
 <p>an instance of a computer program that is being executed</p>
 <p>进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。</p>
 </blockquote>
@@ -296,8 +296,8 @@
 <li>数据段</li>
 <li>程序段</li>
 </ol>
-<h1 id="线程的Linux实现"><a href="#线程的Linux实现" class="headerlink" title="线程的Linux实现"></a>线程的Linux实现</h1><p>而在windows中，线程被抽象为一种比进程更轻量级的可以独立处理事件的单元，支持真线程的系统一定要有线程控制块：TCB，操作系统既要进行进程管理，又要进行线程管理，设计层面是比较复杂的。windows上一定会有相关线程操作的系统调用接口。</p>
-<p>而在Linux中却不一样，从内核的角度来看，并没有线程这个概念，Linux把所有的线程都当作进程来处理，内核也并没有定义独特的调度算法和数据结构来实现线程，线程就是一个与父进程共享资源的进程而已，Linux在创建线程时，会直接创建进程并分配task_struct，同时指定共享资源，所以对于内核来说，它就是进程，线程在Linux中是一个实现进程共享资源的机制。</p>
+<h1 id="线程的Linux实现"><a href="#线程的Linux实现" class="headerlink" title="线程的Linux实现"></a>线程的Linux实现</h1><p>而在windows中，线程被抽象为一种比进程更轻量级的可以独立处理事件的单元，操作系统提供了线程控制块：TCB。这是一种和PCB不同的数据结构</p>
+<p>而在Linux中却不一样，从内核的角度来看，并没有线程这个概念，Linux把所有的线程都当作进程来处理，<strong>内核也并没有定义独特的调度算法和数据结构来实现线程，线程就是一个与父进程共享资源的进程而已</strong>，Linux在创建线程时，会直接创建进程并分配task_struct，同时指定共享资源，所以对于内核来说，它就是进程，线程在Linux中是一个实现进程共享资源的机制。</p>
 <p>在 Linux 中每一个进程都由 task_struct 数据结构来定义。task_struct 就是我们通常所说的 PCB，当我们调用 fork()  时，系统会为我们产生一个 task_struct 结构。然后从父进程，那里继承一些数据，并将PCB插入任务队列中，以待进行进程管理。</p>
 <p>对于线程来说，需要在clone()中指定共享资源</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c">clone(CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND,<span class="hljs-number">0</span>);<br><span class="hljs-comment">//VM：共享地址空间</span><br><span class="hljs-comment">//FS：共享文件系统信息</span><br><span class="hljs-comment">//FILES:共享打开的文件</span><br><span class="hljs-comment">//SIGHAND：共享阻断信号</span><br></code></pre></td></tr></table></figure>
@@ -309,17 +309,42 @@
 <p>内核线程没有独立的地址空间。其指向地址空间的mm指针设置为null，只存在于内核空间（task_struct结构中的mm指针：指向进程所拥有的内存描述符）</p>
 <p><strong>多线程的优点：并发性提高，占用资源比进程更少。</strong></p>
 <p><strong>多线程缺点：存在大量临界资源，势必会造成各种互斥。编程难度提高，线程的调度和同步需要更多额外的开销。</strong></p>
-<h2 id="线程的通信方式"><a href="#线程的通信方式" class="headerlink" title="线程的通信方式"></a>线程的通信方式</h2><h3 id="管道："><a href="#管道：" class="headerlink" title="管道："></a>管道：</h3><p>分为匿名管道和命名管道，实质是一个缓冲区，管道的作用正如其名，需要通信的两个进程在管道的两端，进程利用管道传递信息。管道对于管道两端的进程而言，就是一个文件，但是这个文件比较特殊，它不属于文件系统并且只存在于内存中。</p>
-<h3 id="信号signal："><a href="#信号signal：" class="headerlink" title="信号signal："></a>信号signal：</h3><p>信号是软件层次上对中断机制的一种模拟，是一种异步通信方式，进程不必通过任何操作来等待信号的到达。信号可以在用户空间进程和内核之间直接交互，内核可以利用信号来通知用户空间的进程发生了哪些系统事件。</p>
-<h3 id="信号量Semaphore："><a href="#信号量Semaphore：" class="headerlink" title="信号量Semaphore："></a>信号量Semaphore：</h3><p>信号量实质上就是一个标识可用资源数量的计数器，它的值总是非负整数。而只有0和1两种取值的信号量叫做二进制信号量（或二值信号量），可用用来标识某个资源是否可用。</p>
-<h3 id="共享内存"><a href="#共享内存" class="headerlink" title="共享内存:"></a>共享内存:</h3><p>使得多个进程可以可以直接读写同一块内存空间，是针对其他通信机制运行效率较低而设计的。为了在多个进程间交换信息，内核专门留出了一块内存区，可以由需要访问的进程将其映射到自己的私有地址空间。进程就可以直接读写这一块内存而不需要进行数据的拷贝，从而大大提高效率</p>
-<h3 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列:"></a>消息队列:</h3><p>消息队列是消息的链表，具有特定的格式,存放在内存中并由消息队列标识符标识，并且允许一个或多个进程向它写入与读取消息</p>
-<h3 id="套接字"><a href="#套接字" class="headerlink" title="套接字:"></a>套接字:</h3><p>不同客户端的进程间的通信方式</p>
+<h2 id="线程的通信方式"><a href="#线程的通信方式" class="headerlink" title="线程的通信方式"></a>线程的通信方式</h2><table>
+<thead>
+<tr>
+<th>通信方式</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>管道</td>
+<td>分为匿名管道和命名管道，实质是一个缓冲区，管道的作用正如其名，需要通信的两个进程在管道的两端，进程利用管道传递信息。管道对于管道两端的进程而言，就是一个文件，但是这个文件比较特殊，它不属于文件系统并且只存在于内存中。</td>
+</tr>
+<tr>
+<td>信号signal</td>
+<td>信号是软件层次上对中断机制的一种模拟，是一种异步通信方式，进程不必通过任何操作来等待信号的到达。信号可以在用户空间进程和内核之间直接交互，内核可以利用信号来通知用户空间的进程发生了哪些系统事件。</td>
+</tr>
+<tr>
+<td>信号量Semaphore</td>
+<td>信号量实质上就是一个标识可用资源数量的计数器，它的值总是非负整数。而只有0和1两种取值的信号量叫做二进制信号量（或二值信号量），可用用来标识某个资源是否可用。</td>
+</tr>
+<tr>
+<td>共享内存</td>
+<td>使得多个进程可以可以直接读写同一块内存空间，是针对其他通信机制运行效率较低而设计的。为了在多个进程间交换信息，内核专门留出了一块内存区，可以由需要访问的进程将其映射到自己的私有地址空间。进程就可以直接读写这一块内存而不需要进行数据的拷贝，从而大大提高效率</td>
+</tr>
+<tr>
+<td>消息队列</td>
+<td>消息队列是消息的链表，具有特定的格式,存放在内存中并由消息队列标识符标识，并且允许一个或多个进程向它写入与读取消息</td>
+</tr>
+<tr>
+<td>套接字</td>
+<td>不同客户端的进程间的通信方式，套接字上联应用进程，下联网络协议栈，是进程通过网络协议进行通信的接口。</td>
+</tr>
+</tbody></table>
 <h1 id="用户空间和内核空间"><a href="#用户空间和内核空间" class="headerlink" title="用户空间和内核空间"></a>用户空间和内核空间</h1><p>操作系统为了支持多个应用同时运行，需要保证不同进程之间相对独立，一个进程的崩溃不会影响其他进程，恶意进程不能读取其他进程的数据。于是内存空间被划分为两部分，<strong>内核空间和用户空间</strong>，内核空间的代码和数据拥有更高的权限，而用户空间的代码不能访问高级别的空间，因此保护了操作系统自身的内存数据。</p>
 <p><strong>用户态</strong>：指进程运行在用户地址空间中的状态，被执行的代码要受到 CPU 的很多检查。进程只能访问地址空间中规定的页面的虚拟地址。</p>
 <p><strong>内核态</strong>：指进程运行在内核地址空间中的状态，此时 CPU 可以执行任何指令。运行的代码也不受任何的限制，可以自由地访问任何有效地址，也可以直接进行端口的访问。所有系统资源的管理都是在内核态去做的，比如创建一个线程需要分配资源，就需要进入内核态，来完成。</p>
-<h2 id="进程上下文"><a href="#进程上下文" class="headerlink" title="进程上下文"></a>进程上下文</h2><p>在Linux中，用户程序装入系统形成一个进程的实质是系统为用户程序提供一个完整的运行环境</p>
-<p>进程的运行环境是由它的程序代码和程序运行所需要的数据结构以及硬件环境组成的，进程的运行环境主要包括：</p>
+<h2 id="进程上下文"><a href="#进程上下文" class="headerlink" title="进程上下文"></a>进程上下文</h2><p>进程的上下文是由它的程序代码和程序运行所需要的数据结构以及硬件环境组成的，进程的运行环境主要包括：</p>
 <ol>
 <li>进程空间中的代码和数据、进程堆栈和共享内存区等。</li>
 <li>环境变量：提供进程运行所需的环境信息。</li>
@@ -331,11 +356,11 @@
 <p><strong>在Linux中把系统提供给进程的的处于动态变化的运行环境总和称为进程上下文，系统中的每一个进程都有自己的上下文。</strong></p>
 <p>当前进程因时间片用完或者因等待某个事件而阻塞时，进程调度需要把处理器的使用权从当前进程交给另一个进程，这个过程叫做进程切换。</p>
 <p>此时，被调用进程成为当前进程。在进程切换时系统要把当前进程的上下文保存在指定的内存区域（该进程的任务状态段TSS中），然后把下一个使用处理器运行的进程的上下文设置成当前进程的上下文。当一个进程经过调度再次使用CPU运行时，系统要恢复该进程保存的上下文。所以，<strong>进程的切换也就是上下文切换</strong>。</p>
-<p>在系统内核为用户进程服务时，通常是进程通过系统调用执行内核代码，此时内核为用户进程服务，可以说内核在代替当前进程执行某种服务。所以可以认为，<strong>内核态就是内核运行在进程上下文中的状态，也就是陷入内核态</strong>。</p>
+<p>在系统内核为用户进程服务时，通常是进程通过系统调用执行内核代码，此时<strong>内核为用户进程服务</strong>，可以说内核在代替当前进程执行某种服务。</p>
+<p>所以可以认为，<strong>内核态就是内核运行在进程上下文中的状态，也就是陷入内核态</strong>。</p>
 <p><strong>中断上下文</strong>：硬件通过触发信号，导致内核调用中断处理程序，进入内核空间。这个过程中，硬件的一些变量和参数也要传递给内核，内核通过这些参数进行中断处理。所谓的“中断上下文”，其实也可以看作就是硬<strong>件传递过来的这些参数和内核需要保存的一些其他环境</strong>（主要是当前被打断执行的进程环境）</p>
-<h1 id="从用户态进入内核态：中断"><a href="#从用户态进入内核态：中断" class="headerlink" title="从用户态进入内核态：中断"></a>从用户态进入内核态：中断</h1><p>中断是CPU的一个功能：CPU停下工作后，保留现场，自动的转去执行相应的处理程序，CPU的控制权发生改变，处理完该事件后再返回断点继续执行。<strong>避免了CPU的轮询检查</strong>，而是转换为事件驱动，向CPU发送中断事件，强制让CPU来执行中断处理程序。发生中断，CPU会立即进入<strong>内核态</strong>，针对不同的中断信号，采取不同的处理方式。**中断是CPU从用户态进入核心态的唯一途径(如系统调用)**。</p>
-<h2 id="硬中断"><a href="#硬中断" class="headerlink" title="硬中断"></a>硬中断</h2><p>硬中断时由外部事件引起的，具有<strong>随机性和突发性</strong>，比如键盘，鼠标的输入，磁盘的读写，缺页。硬中断的中断号是<strong>由中断控制器提供的</strong>，硬中断是<strong>可以屏蔽</strong>掉的。</p>
-<p>流程如下</p>
+<h1 id="从用户态进入内核态：中断"><a href="#从用户态进入内核态：中断" class="headerlink" title="从用户态进入内核态：中断"></a>从用户态进入内核态：中断</h1><p>中断是CPU的一个功能：<strong>CPU停下工作，保留现场，自动的转去执行相应的处理程序</strong>，处理完该事件后再返回断点继续执行。<strong>避免了CPU的轮询检查</strong>，而是转换为事件驱动，向CPU发送中断事件，强制让CPU来执行中断处理程序。发生中断，CPU会立即进入<strong>内核态</strong>，针对不同的中断信号，采取不同的处理方式。**中断是CPU从用户态进入核心态的唯一途径(如系统调用)**。</p>
+<h2 id="硬中断"><a href="#硬中断" class="headerlink" title="硬中断"></a>硬中断</h2><p>硬中断时由外部事件引起的，具有<strong>随机性和突发性</strong>，比如键盘，鼠标的输入，磁盘的读写，缺页。硬中断的中断号是<strong>由中断控制器提供的</strong>，硬中断是<strong>可以屏蔽</strong>掉的。流程如下：</p>
 <ol>
 <li><strong>外设</strong> 将中断请求发送给中断控制器；</li>
 <li><strong>中断控制器</strong> 根据中断优先级，有序地将中断号传递给 CPU；</li>
@@ -345,7 +370,7 @@
 </ol>
 <h2 id="软中断（被动）"><a href="#软中断（被动）" class="headerlink" title="软中断（被动）"></a>软中断（被动）</h2><p>CPU的内部事件或者程序引起的中断，如程序故障，电压故障。</p>
 <h2 id="软中断（主动）"><a href="#软中断（主动）" class="headerlink" title="软中断（主动）"></a>软中断（主动）</h2><p>也称作<strong>系统调用</strong>，用户进程<strong>主动要求</strong>进入内核态。用户进程通过系统调用申请操作系统提供服务。</p>
-<p> 系统调用使用的是一个特别的中断实现的。具体是:调用 int $<strong>0x80</strong>的汇编指令，将产生向量为0x80的编程异常（软中断）</p>
+<p> 系统调用使用的是一个特别的中断实现的。具体是:调用 int $<strong>0x80的汇编指令</strong>，将产生向量为0x80的编程异常（软中断）</p>
 <p>软中断模拟了硬中断的处理过程：</p>
 <ol>
 <li>无</li>
