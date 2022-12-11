@@ -16,17 +16,17 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="从主存访问数据有很高的延迟成本(大约 100 到 300 个时钟周期)，因此处理器核心使用本地高速缓存来将数据保存在需要的硬件线程附近。 从缓存访问数据的成本要低得多(大约 3 到 40 个时钟周期)，这取决于所访问的缓存。 如今，提高性能的一个方面是关于如何有效地将数据放入处理器以减少这些数据访问延迟。编写多线程应用程序也需要考虑 CPU 缓存的机制。  由图可知，一般是三级缓存：L3-&gt;">
+    <meta name="description" content="CPU-Cache从主存访问数据有很高的延迟成本(大约 100 到 300 个时钟周期)，因此处理器核心使用本地高速缓存来将数据保存在需要的硬件线程附近。从缓存访问数据的成本要低得多(大约 3 到 40 个时钟周期)，这取决于所访问的缓存。   由图可知，一般是三级缓存：L3-&gt;L2-&gt;L1速度依次递减  L1 Cache最接近CPU, 容量最小（如32K、64K等）、速度最高，每个核">
 <meta property="og:type" content="article">
 <meta property="og:title" content="关于CPU Cache">
 <meta property="og:url" content="http://example.com/post/%E5%85%B3%E4%BA%8ECPU-Cache.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="从主存访问数据有很高的延迟成本(大约 100 到 300 个时钟周期)，因此处理器核心使用本地高速缓存来将数据保存在需要的硬件线程附近。 从缓存访问数据的成本要低得多(大约 3 到 40 个时钟周期)，这取决于所访问的缓存。 如今，提高性能的一个方面是关于如何有效地将数据放入处理器以减少这些数据访问延迟。编写多线程应用程序也需要考虑 CPU 缓存的机制。  由图可知，一般是三级缓存：L3-&gt;">
+<meta property="og:description" content="CPU-Cache从主存访问数据有很高的延迟成本(大约 100 到 300 个时钟周期)，因此处理器核心使用本地高速缓存来将数据保存在需要的硬件线程附近。从缓存访问数据的成本要低得多(大约 3 到 40 个时钟周期)，这取决于所访问的缓存。   由图可知，一般是三级缓存：L3-&gt;L2-&gt;L1速度依次递减  L1 Cache最接近CPU, 容量最小（如32K、64K等）、速度最高，每个核">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/1313640710-5b75376ab90a9_fix732.png">
 <meta property="og:image" content="d:/samuelBlog/folder/source/img/3205926858-5b753903cd919.png">
 <meta property="article:published_time" content="2022-12-06T13:02:22.000Z">
-<meta property="article:modified_time" content="2022-12-08T08:38:55.654Z">
+<meta property="article:modified_time" content="2022-12-11T08:29:05.921Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="计算机组成原理">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.6k 字
+          6.4k 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          14 分钟
+          54 分钟
         
       </span>
     
@@ -284,23 +284,38 @@
             
               <div class="markdown-body">
                 
-                <p>从主存访问数据有很高的延迟成本(大约 100 到 300 个时钟周期)，因此处理器核心使用<strong>本地高速缓存</strong>来将数据保存在需要的硬件线程附近。</p>
-<p>从缓存访问数据的成本要低得多(大约 3 到 40 个时钟周期)，这取决于所访问的缓存。 如今，提高性能的一个方面是关于如何有效地将数据放入处理器以减少这些数据访问延迟。编写多线程应用程序也需要考虑 CPU 缓存的机制。</p>
+                <h1 id="CPU-Cache"><a href="#CPU-Cache" class="headerlink" title="CPU-Cache"></a>CPU-Cache</h1><p>从主存访问数据有很高的延迟成本(大约 100 到 300 个时钟周期)，因此处理器核心使用<strong>本地高速缓存</strong>来将数据保存在需要的硬件线程附近。从缓存访问数据的成本要低得多(大约 3 到 40 个时钟周期)，这取决于所访问的缓存。 </p>
 <p><img src="/../img/1313640710-5b75376ab90a9_fix732.png" srcset="/img/loading.gif" lazyload alt="1313640710-5b75376ab90a9_fix732"></p>
 <p>由图可知，一般是三级缓存：L3-&gt;L2-&gt;L1速度依次递减</p>
+<ol>
+<li>L1 Cache最接近CPU, 容量最小（如32K、64K等）、速度最高，每个核上都有一个L1 Cache。</li>
+<li>L2 Cache容量更大（如256K）、速度更低, 一般情况下，每个核上都有一个独立的L2 Cache。</li>
+<li>L3 Cache最接近内存，容量最大（如12MB），速度最低，在同一个CPU插槽之间的核共享一个L3 Cache。</li>
+</ol>
 <p>CPU从内存读取数据到CPU Cache的过程中，是一小块一小块来读取数据的，而不是按照单个数组元素来读取数据的。</p>
-<p>这样一小块一小块的数据，在CPU Cache里面，叫做Cache Line，Cache line是高速缓存系统的最小交换单位</p>
+<p>这样一小块一小块的数据，在CPU Cache里面，叫做Cache Line，<strong>Cache line是高速缓存系统的最小交换单位</strong></p>
 <p>在我们日常使用的 Intel 服务器或者 PC 里，Cache Line 的大小通常是 <strong>64 字节</strong></p>
+<h1 id="MESI协议"><a href="#MESI协议" class="headerlink" title="MESI协议"></a>MESI协议</h1><p>MESI协议描述了Cache line的四种状态：</p>
+<ol>
+<li>M（修改, Modified）: 当前CPU cache拥有最新数据（拥有最新的cache line），其他CPU拥有失效数据（cache line的状态是invalid），虽然当前CPU中的数据和主存是不一致的，但是以当前CPU的数据为准。</li>
+<li>E（专有, Exclusive）: 只有当前CPU中有数据，其他CPU中没有改数据，当前CPU的数据和主存中的数据是一致的。</li>
+<li>S（共享, Shared）: 当前CPU和其他CPU中都有共同数据，并且和主存中的数据一致。</li>
+<li>I（无效, Invalid）: 当前CPU中的数据失效，数据应该从主存中获取，其他CPU中可能有数据也可能无数据，当前CPU中的数据和主存被认为是不一致的。</li>
+</ol>
 <h1 id="缓存的一致性"><a href="#缓存的一致性" class="headerlink" title="缓存的一致性"></a>缓存的一致性</h1><p>每个内核都有自己所需的cache line的副本，取值运算都在副本中进行。这就是为什么多线程应用中内存的变化会造成性能噩梦。</p>
 <p>当并行的多个线程正在访问相同的数据值，甚至是相邻的数据值时，它们将访问同一cache line上的数据。</p>
-<p>为了提高写的性能，一般来说，主流的 CPU采用的是 Write Back 的策略（写操作先在 cache 上，然后再 flush 到内存上），因为直接写内存实在是太慢了。</p>
+<p>为了提高写的性能，主流的 CPU采用的是 Write Back 的策略：写操作先在 cache 上，然后再 flush 到内存上</p>
 <p><img src="D:/samuelBlog/folder/source/img/3205926858-5b753903cd919.png" srcset="/img/loading.gif" lazyload alt="3205926858-5b753903cd919"></p>
 <p>如果某个核心上的一个线程对其cache line的副本进行了更改，那么同一cache line的所有其他副本<strong>都必须标记为dirty</strong>。当线程尝试对dirty cache line进行读写访问时，需要放弃此次cache line访问，转而向主存访问(大约 100 到 300 个时钟周期)来获得cache line的新副本，以保证数据的一致性</p>
 <blockquote>
 <p>Snoopy 协议，即总线嗅探机制，这种协议更像是一种数据通知的总线型的技术。CPU Cache 通过这个协议可以识别其它Cache上的数据状态。如果有数据共享的话，可以通过广播机制将共享数据的状态通知给其它 CPU Cache。这个协议要求每个 CPU Cache 都可以窥探数据事件的通知并做出相应的反应。</p>
 </blockquote>
-<p>也许在一个 2 核处理器上这不是什么大问题，但是如果一个 32 核处理器在同一cache line上同时运行 32 个线程来访问和改变数据，那会发生什么？</p>
-<p>如果一个系统有两个物理处理器，每个处理器有16个核心，那又该怎么办呢？这将变得更糟，因为处理器到处理器的通信延迟更大。应用程序将会在主存中周转，性能将会大幅下降。</p>
+<p>也许在一个 2 核处理器上这不是什么大问题，但是如果一个 32 核处理器在同一cache line上同时运行 32 个线程来访问和改变数据，那会发生什么？处理器到处理器的通信延迟更大。应用程序将会在主存中周转，性能将会大幅下降。</p>
+<h2 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h2><p>从性能角度考虑，没有必要在修改后就立即flush修改的值——如果多次修改后才使用，那么只需要最后一次同步即可，在这之前的同步都是性能浪费。因此，可见性的定义要弱一些，只需要保证：<strong>当一个线程修改了线程共享变量的值，其它线程在使用前，能够得到最新的修改值</strong>。</p>
+<blockquote>
+<p>可见性可以认为是最弱的“一致性”（弱一致），只保证用户见到的数据是一致的，但不保证任意时刻，存储的数据都是一致的（强一致）。</p>
+</blockquote>
+<p><em>各种高级语言（包括Java）的多线程内存模型中，在线程栈内自己维护一份缓存是常见的优化措施，但显然在CPU级别的缓存一致性问题面前，一切都失效了。</em></p>
 <h1 id="伪共享问题"><a href="#伪共享问题" class="headerlink" title="伪共享问题"></a>伪共享问题</h1><p>缓存一致性会带来另一个问题，不同的处理器拥有完全或部分分离的缓存。</p>
 <p><strong>当一个处理器改变了属于它自己缓存中的一个值，其它处理器就再也无法使用它自己原来的值，因为其对应的内存位置将被刷新(invalidate)到所有缓存。而且由于缓存操作是以缓存行而不是字节为粒度，所有缓存中整个缓存行将被刷新！</strong></p>
 <p>举个例子</p>
@@ -316,6 +331,137 @@
 
 <p>变量 value 前后分别填充了 7 个 long 类型的变量。</p>
 <p>这样不论在什么情况下，都可以保证在多线程访问 value 变量时，value 与其他不相关的变量处于不同的 Cache Line</p>
+<h1 id="重排序"><a href="#重排序" class="headerlink" title="重排序"></a>重排序</h1><p>重排序总体上可以分为两种</p>
+<ol>
+<li>真重排序：<strong>编译器、底层硬件（CPU等）出于“优化”的目的</strong>，按照某种规则将指令重新排序（尽管有时候看起来像乱序）</li>
+<li>伪重排序：由于<strong>缓存同步顺序</strong>等问题，看起来指令被重排序了</li>
+</ol>
+<h2 id="乱序优化（真重排序）"><a href="#乱序优化（真重排序）" class="headerlink" title="乱序优化（真重排序）"></a>乱序优化（真重排序）</h2><p>处理器层面的乱序优化节省了大量等待时间，提高了处理器的性能。</p>
+<p>所谓“乱序”只是被叫做“乱序”，实际上也遵循着一定规则：只要两个指令之间不存在数据依赖，就可以对这两个指令乱序。不必关心数据的精准性</p>
+<p>简而言之：<strong>只要不影响程序单线程、顺序执行的结果，就可以对两个指令重排序</strong>。</p>
+<p>不进行乱序优化时，处理器的指令执行过程如下：</p>
+<ol>
+<li>指令获取。</li>
+<li>如果输入的运算对象是可以获取的（比如已经存在于寄存器中），这条指令会被发送到功能单元。如果运算对象在当前的时间片中是不可获取的（通常需要从主内存获取），处理器会开始等待直到它们是可以获取的。</li>
+<li>指令在功能单元中被执行</li>
+<li>功能单元将运算结果写回寄存器</li>
+</ol>
+<p>乱序优化下的执行过程如下：</p>
+<ol>
+<li>指令获取。</li>
+<li>指令被发送到一个指令序列（也称执行缓冲区或者保留站）中。</li>
+<li><strong>指令将在序列中等待，直到它的数据运算对象是可以获取的。然后，指令被允许在先进入的旧指令之前离开序列缓冲区</strong>。（此处表现为乱序）</li>
+<li>指令被分配给功能单元并执行。</li>
+<li>将结果放到一个序列中。</li>
+<li>仅当所有该指令之前的指令都将他们的结果写入寄存器后，这条指令的结果才会被写入寄存器中。</li>
+</ol>
+<p><strong>总结：使用指令序列实现乱序执行，先执行可获取运算对象的指令。再使用序列让结果按顺序写入寄存器，重新整理乱序结果。</strong></p>
+<p>当然，为了实现乱序优化，还需要很多技术的支持，如<strong>寄存器重命名、分枝预测</strong>等，但大致了解到这里就足够</p>
+<h2 id="编译器编译时的优化"><a href="#编译器编译时的优化" class="headerlink" title="编译器编译时的优化"></a>编译器编译时的优化</h2><blockquote>
+<p>JVM自己维护的内存模型中也有可见性问题，使用volatile做标记，就解决了JVM层面的可见性问题。编译器产生的重排序也采用了同样的思路</p>
+</blockquote>
+<p>编译器为什么要重排序呢？和处理器乱序执行的目的是一样的：与其等待阻塞指令（如等待缓存刷入）完成，不如先去执行其他指令。与处理器乱序执行相比，编译器重排序能够完成更大范围、效果更好的乱序优化。</p>
+<p>幸运的是，编译器层面的重排序，自然可以由编译器控制。使用volatile做标记，就可以禁用编译器层面的重排序。</p>
+<h2 id="伪重排序"><a href="#伪重排序" class="headerlink" title="伪重排序"></a>伪重排序</h2><p>假定一种场景</p>
+<ol>
+<li>Core0先更新缓存中的v1，再更新缓存中的v2（位于两个缓存行，这样淘汰缓存行时不会一起写回内存）。</li>
+<li>Core0读取v1（使用LRU淘汰缓存），然后长时间并未读取v2</li>
+<li>Core0的缓存满，此时将最久未使用的v2写回内存。</li>
+<li>Core1的缓存中本来存有v1，现在将v2加载入缓存</li>
+</ol>
+<p>此时，尽管“更新v1”早于“更新v2”发生，但Core1只看到了v2的最新值，却看不到v1的最新值。</p>
+<p>这属于可见性导致的<strong>伪重排序：虽然没有实际上没有重排序，但看起来发生了重排序</strong>。</p>
+<p>所以缓存可见性不仅仅导致可见性问题，还会导致伪重排序。</p>
+<h1 id="内存屏障（Memory-Barrier）"><a href="#内存屏障（Memory-Barrier）" class="headerlink" title="内存屏障（Memory Barrier）"></a>内存屏障（Memory Barrier）</h1><p>如何解决伪重排序问题：<em><strong>在Core0修改了数据v后，让Core1在使用v前，能得到v最新的修改值</strong></em></p>
+<ol>
+<li>Core0修改v1后，发送一个信号，将Core1缓存的v1<strong>标记为失效</strong>，并将修改值写回内存。</li>
+<li>Core0可能会多次修改v1，每次修改都只发送一个信号（<strong>发信号时会锁住缓存间的总线</strong>），Core1缓存的v1保持着失效标记。</li>
+<li>Core1使用v1前，发现缓存中的v1已经失效了，得知v1已经被修改了，于是重新从其他缓存或内存中加载v1。</li>
+</ol>
+<p>内存屏障是硬件之上、操作系统或JVM之下，<strong>对并发作出的最后一层支持</strong>。</p>
+<p>再向下是是硬件提供的支持；向上是操作系统或JVM对内存屏障作出的各种封装。内存屏障是一种标准，各厂商可能采用不同的实现。</p>
+<p>通过volatile，可以解决编译器层面的可见性与重排序问题。<strong>而内存屏障则解决了硬件层面的可见性与重排序问题。</strong></p>
+<h2 id="标准"><a href="#标准" class="headerlink" title="标准"></a>标准</h2><ol>
+<li>Store：将处理器缓存的数据flush到内存中。</li>
+<li>Load：将内存的数据拷贝到处理器的缓存中。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><strong>屏障类型</strong></th>
+<th><strong>指令示例</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LoadLoad</td>
+<td>Load1;LoadLoad;Load2</td>
+<td>该屏障确保Load1数据装载先于Load2及其之后所有的装载操作</td>
+</tr>
+<tr>
+<td>StoreStore</td>
+<td>Store1;StoreStore;Store2</td>
+<td>该屏障确保Store1刷新数据到内存先于Store2及其之后所有的内存刷新操作，<strong>即保证对其他处理器可见</strong></td>
+</tr>
+<tr>
+<td>LoadStore</td>
+<td>Load1;LoadStore;Store2</td>
+<td>该屏障确保Load1数据装载先于Store2及其之后所有的内存刷新操作</td>
+</tr>
+<tr>
+<td>StoreLoad</td>
+<td>Store1;StoreLoad;Load2</td>
+<td>该屏障确保Store1刷新数据到内存先于Load2及其之后所有的装载操作。<strong>StoreLoad会使该屏障之前的所有内存访问指令(存储指令和访问指令)完成之后,才执行该屏障之后的内存访问指令</strong></td>
+</tr>
+</tbody></table>
+<p><strong>StoreLoad</strong>同时具备其他三个屏障的效果，因此也称之为<strong>全能屏障（mfence）</strong>，但是相对其他屏障，该屏障的开销相对昂贵。</p>
+<h2 id="x86架构的实现"><a href="#x86架构的实现" class="headerlink" title="x86架构的实现"></a>x86架构的实现</h2><p><strong>除了mfence，不同的CPU架构对内存屏障的实现方式与实现程都度非常不一样</strong>。</p>
+<p>相对来说，<strong>Intel CPU的强内存模型</strong>比DEC Alpha的弱复杂内存模型（缓存不仅分层了，还分区了）更简单。</p>
+<p>x86架构是在多线程编程中最常见的，下面讨论x86架构中内存屏障的实现。</p>
+<p>不过不管是哪种方案，<strong>内存屏障的实现都要针对乱序执行的过程来设计</strong>，前文已经有写过。</p>
+<p>内存屏障可以通过使用类似MESI协议的思路实现。</p>
+<h3 id="Store-Barrier"><a href="#Store-Barrier" class="headerlink" title="Store Barrier"></a>Store Barrier</h3><p>sfence指令实现了Store Barrier，相当于StoreStore Barriers</p>
+<p>强制所有在sfence指令之前的store指令，都在该sfence指令执行之前被执行，发送缓存失效信号，并把store buffer中的数据刷新到CPU的L1 Cache中，所有在sfence指令之后的store指令，都在该sfence指令执行之后被执行。禁止对sfence指令前后store指令的重排序跨越sfence指令</p>
+<p><strong>所有Store Barrier之前发生的内存更新都是可见的</strong>。</p>
+<blockquote>
+<p>前文说的乱序优化说基于寄存器和内存，而在内存屏障的标准中，讨论的是缓存与内存间的相干性，实际上，这同样适用于寄存器与缓存、甚至寄存器与内存间等多级缓存之间。x86架构使用了MESI协议的一个变种，由协议保证三层缓存与内存间的相关性，则内存屏障只需要保证store buffer（可以认为是寄存器与L1 Cache间的一层缓存）与L1 Cache间的相干性。</p>
+</blockquote>
+<h3 id="Load-Barrier"><a href="#Load-Barrier" class="headerlink" title="Load Barrier"></a>Load Barrier</h3><p>lfence指令实现了Load Barrier，相当于LoadLoad Barriers</p>
+<p>强制所有在lfence指令之后的load指令，都在该lfence指令执行之后被执行，并且一直等到load buffer被该CPU读完才能执行之后的load指令（发现缓存失效后发起的刷入）。禁止对lfence指令前后load指令的重排序跨越lfence指令。</p>
+<p>配合Store Barrier，使<strong>所有Store Barrier之前发生的内存更新，对Load Barrier之后的load操作都是可见的</strong>。</p>
+<p>这里的“可见”，指<strong>修改值可见</strong>（内存可见性）且<strong>操作结果可见</strong>（禁用重排序）</p>
+<h3 id="Full-Barrier"><a href="#Full-Barrier" class="headerlink" title="Full Barrier"></a>Full Barrier</h3><p>mfence指令实现了Full Barrier，相当于StoreLoad Barriers。</p>
+<p>mfence指令综合了sfence指令与lfence指令的作用</p>
+<p>强制所有在mfence指令之前的store&#x2F;load指令，都在该mfence指令执行之前被执行；</p>
+<p>所有在mfence指令之后的store&#x2F;load指令，都在该mfence指令执行之后被执行。</p>
+<p><strong>禁止对mfence指令前后store&#x2F;load指令的重排序跨越mfence指令，使所有Full Barrier之前发生的操作，对所有Full Barrier之后的操作都是可见的。</strong></p>
+<h2 id="volatile如何解决内存可见性与处理器重排序问题"><a href="#volatile如何解决内存可见性与处理器重排序问题" class="headerlink" title="volatile如何解决内存可见性与处理器重排序问题"></a>volatile如何解决内存可见性与处理器重排序问题</h2><p>既然有了内存屏障，是不是就不需要volatile了？当然不是，还有三个问题：</p>
+<ol>
+<li><strong>并不是所有的硬件架构都提供了相同的一致性保证，JVM需要volatile统一语义</strong></li>
+<li>可见性问题不仅仅局限于CPU缓存内，JVM自己维护的内存模型中也有可见性问题。使用volatile做标记，可以解决JVM层面的可见性问题。</li>
+<li>如果不考虑真重排序，MESI确实解决了CPU缓存层面的可见性问题；然而，真重排序也会导致可见性问题。</li>
+</ol>
+<blockquote>
+<p>在编译器层面，仅将volatile作为标记使用，取消编译层面的缓存和重排序。</p>
+</blockquote>
+<p>如果硬件架构本身已经保证了内存可见性（<strong>单核处理器、一致性足够的内存模型等</strong>），那么volatile就是一个空标记，不会插入内存屏障</p>
+<p>如果不保证，以x86架构为例，JVM对volatile变量的处理如下：</p>
+<ol>
+<li>在写volatile变量v之后，插入一个sfence。<strong>这样，sfence之前的所有store（包括写）不会被重排序到sfence之后，sfence之后的所有store不会被重排序到sfence之前，禁用跨sfence的store重排序</strong>；sfence之前修改的值都会被立刻写回缓存，并标记其他CPU中的缓存失效。</li>
+<li>在读volatile变量v之前，插入一个lfence。<strong>这样，lfence之后的load（包括读v）不会被重排序到lfence之前，lfence之前的load不会被重排序到lfence之后，禁用跨lfence的load重排序；</strong>且lfence之后，会首先刷新掉无效缓存，从而得到最新的修改值，与sfence配合保证内存可见性。</li>
+<li>在另外一些平台上，JVM使用mfence代替sfence与lfence，实现更强的语义。</li>
+</ol>
+<h2 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h2><p>在x86架构上，CAS被翻译为”<code>lock cmpxchg</code>“。cmpxchg是CAS的汇编指令。</p>
+<p>在CPU架构中依靠<strong>lock信号</strong>保证可见性并禁止重排序。</p>
+<p>lock前缀是一个特殊的信号，执行过程如下：</p>
+<ol>
+<li>对总线和缓存上锁。</li>
+<li>强制所有lock信号之前的指令，都在此之前被执行，并同步相关缓存。</li>
+<li>执行lock后的指令（如cmpxchg）。</li>
+<li>释放对总线和缓存上的锁。</li>
+<li>强制所有lock信号之后的指令，都在此之后被执行，并同步相关缓存。</li>
+</ol>
+<p>因此，lock信号虽然不是内存屏障，但具有mfence的语义</p>
 
                 
               </div>

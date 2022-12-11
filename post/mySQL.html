@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://example.com/img/undolog.png">
 <meta property="og:image" content="http://example.com/img/phantom.png">
 <meta property="article:published_time" content="2022-10-25T14:02:31.000Z">
-<meta property="article:modified_time" content="2022-12-08T08:03:32.181Z">
+<meta property="article:modified_time" content="2022-12-08T08:46:03.039Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary_large_image">
@@ -305,7 +305,7 @@
 <li>原子性：要么全部成功，要么全部失败。由undo_log来保证</li>
 <li>一致性：数据库总是从一个状态转移到另一个状态</li>
 <li>隔离性：最终提交前，其他事务不可见，MVCC</li>
-<li>持久性：事务一旦提交，修改将会永久保存到数据库中，内存+redo_log</li>
+<li>持久性：事务一旦提交，修改将会永久保存到数据库中，redo_log实现</li>
 </ol>
 <h2 id="范式"><a href="#范式" class="headerlink" title="范式"></a>范式</h2><h3 id="1NF-第一范式"><a href="#1NF-第一范式" class="headerlink" title="1NF(第一范式)"></a>1NF(第一范式)</h3><p>属性（对应于表中的字段）不能再被分割，也就是这个字段只能是一个值，不能再分为多个其他的字段了。<strong>1NF 是所有关系型数据库的最基本要求</strong> ，也就是说关系型数据库中创建的表一定满足第一范式</p>
 <blockquote>
