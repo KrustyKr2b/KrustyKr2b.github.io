@@ -16,22 +16,26 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="进程的Linux实现 an instance of a computer program that is being executed 进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。  与程序不同的是，进程具有动态性和生命周期，是系统进行资源分配和调度的独立单位。 进程的结构：  控制块 数据段 程序段  线程的Linux实现而在windows中，线程被抽象为一">
+    <meta name="description" content="进程的Linux实现 an instance of a computer program that is being executed 进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。  与程序不同的是，进程具有动态性和生命周期，是系统进行资源分配和调度的独立单位。 和静态的程序相比，进程是一个运行态的实体，拥有各种各样的资源：地址空间（未必使用全部地址空间，而是">
 <meta property="og:type" content="article">
 <meta property="og:title" content="进程，线程和协程详解">
 <meta property="og:url" content="http://example.com/post/%E8%BF%9B%E7%A8%8B%EF%BC%8C%E7%BA%BF%E7%A8%8B%EF%BC%8C%E5%8D%8F%E7%A8%8B.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="进程的Linux实现 an instance of a computer program that is being executed 进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。  与程序不同的是，进程具有动态性和生命周期，是系统进行资源分配和调度的独立单位。 进程的结构：  控制块 数据段 程序段  线程的Linux实现而在windows中，线程被抽象为一">
+<meta property="og:description" content="进程的Linux实现 an instance of a computer program that is being executed 进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。  与程序不同的是，进程具有动态性和生命周期，是系统进行资源分配和调度的独立单位。 和静态的程序相比，进程是一个运行态的实体，拥有各种各样的资源：地址空间（未必使用全部地址空间，而是">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/v2-b91bda69063284f0a0b5a4922608fad8_r.jpg">
+<meta property="og:image" content="http://example.com/img/20210509204006284.png">
+<meta property="og:image" content="http://example.com/img/20170508102103048.jpg">
+<meta property="og:image" content="http://example.com/img/33f6c2014042fc8356990f33df47a22f.png">
 <meta property="og:image" content="http://example.com/img/thread.png">
 <meta property="og:image" content="http://example.com/img/javaThread.png">
 <meta property="og:image" content="http://example.com/img/GMP-scheduler.png">
 <meta property="article:published_time" content="2022-10-20T08:53:01.000Z">
-<meta property="article:modified_time" content="2022-12-11T09:13:03.647Z">
+<meta property="article:modified_time" content="2022-12-12T09:59:25.917Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="Java基础知识">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/thread.png">
+<meta name="twitter:image" content="http://example.com/img/v2-b91bda69063284f0a0b5a4922608fad8_r.jpg">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
@@ -231,7 +235,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          9.6k 字
+          12k 字
         
       </span>
     
@@ -242,7 +246,7 @@
         
         
         
-          81 分钟
+          102 分钟
         
       </span>
     
@@ -290,12 +294,52 @@
 <p>进程是程序的一次执行，是一个程序及其数据，运行环境，在处理机上运行时所发生的活动。</p>
 </blockquote>
 <p>与程序不同的是，进程具有动态性和生命周期，是系统进行资源分配和调度的独立单位。</p>
-<p>进程的结构：</p>
+<p>和静态的程序相比，进程是一个运行态的实体，拥有各种各样的资源：地址空间（未必使用全部地址空间，而是排布在地址空间上的一段段的memory mappings）、打开的文件、pending信号、内核中数据实体（例如task_struct实体），内核栈等。针对进程，我们使用进程ID，也就是pid（process ID）。通过getpid和getppid可以获取当前进程的pid以及父进程的pid。</p>
+<p>Linux进程结构主要涉及三个结构体task_struct、mm_struct、vm_area_struct</p>
+<h2 id="task-struct"><a href="#task-struct" class="headerlink" title="task_struct"></a>task_struct</h2><p>在 Linux 中每一个进程都由 task_struct 数据结构来定义。task_struct 就是我们通常所说的 PCB，是对进程控制的唯一手段。</p>
+<p>当我们调用 fork()  时，系统会为我们产生一个 task_struct 结构。然后从父进程，那里继承一些数据，并把新的进程插入到进程树中，以待进行进程管理。内核在为每个进程分配Task_struct结构的内存空间时，实际上一次性分配两个连续的内存页面（共8KB），其底部约1KB空间存放Task_struct结构，上面的7KB空间存放进程系统空间堆栈。</p>
+<p><img src="/../img/v2-b91bda69063284f0a0b5a4922608fad8_r.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/../img/20210509204006284.png" srcset="/img/loading.gif" lazyload alt="task struct详细结构"></p>
+<h3 id="PID"><a href="#PID" class="headerlink" title="PID"></a>PID</h3><p>进程标识值，实际上是一个int类型，默认最大值为32768</p>
+<h3 id="volatile-long-state"><a href="#volatile-long-state" class="headerlink" title="volatile long state"></a>volatile long state</h3><p><strong>进程状态位</strong>，它会根据具体情况改变状态，是进程调度和对换的依据</p>
 <ol>
-<li>控制块</li>
-<li>数据段</li>
-<li>程序段</li>
+<li>TASK_RUNNING：可运行，其包括两种：正在运行，由current所指向的进程。正准备运行，只要得到CPU就可以立即投入运行，CPU是唯一等待的系统资源</li>
+<li>TASK_INTERRUPTIBLE：可中断等待，因为等待某事件或其他资源而睡眠，内核发送信号给该进程表明资源到达或事件发生，进程状态则可变为TASK_RUNNING，只要调度器选中该进程即可恢复执行 </li>
+<li>TASK_UNINTERRUPTIBLE：不可中断等待，处于该状态的进程因为正在等待某个事件或某个资源，而被放入系统中的某个等待队列(wait_queue)，因为等待特定的系统资源而不可中断等待，只能用特定的方式来唤醒它，例如唤醒函数wake_up()等，它们不能由外部信号唤醒，只能由内核亲自唤醒        </li>
+<li>TASK_ZOMBIE： <strong>僵尸进程</strong>，分配的绝大部分资源将被回收，除了task_struct结构及少数资源外。<strong>此时的进程已经“死亡”，但task_struct结构还保存在进程列表中，半死不活，故称为“僵尸进程”</strong>。</li>
+<li>TASK_STOPPED: 暂停，此时的进程暂时停止运行来接受某种特殊处理，比如接受调试。通常当进程接收到SIGSTOP、SIGTSTP、SIGTTIN或 SIGTTOU信号后就处于这种状态。</li>
+<li>TASK_TRACED：本质上来说，这属于TASK_STOPPED状态，用于从停止的进程中，将当前被调试的进程与常规的进程区分开来</li>
+<li>TASK_DEAD：进程wait系统调用发出后，当子进程退出时，父进程负责回收子进程的全部资源，子进程进入TASK_DEAD状态</li>
+<li>TASK_SWAPPING：换入&#x2F;换出</li>
 </ol>
+<h3 id="stack"><a href="#stack" class="headerlink" title="stack"></a>stack</h3><p><strong>内核栈指针</strong>，进程内核栈是OS为进程开辟的一个栈帧空间。</p>
+<p>但是这个栈帧空间不是用户的栈帧空间，因为用户的栈帧空间是不安全的，所以内核会专门为它开辟一个空间，<strong>就是内核栈</strong>。</p>
+<p><img src="/../img/20170508102103048.jpg" srcset="/img/loading.gif" lazyload alt="通过stack指针指向内核栈"></p>
+<p>进程通过alloc_thread_info函数分配它的内核栈，通过free_thread_info函数释放所分配的内核栈</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-comment">//内核栈结构体</span><br><span class="hljs-class"><span class="hljs-keyword">union</span> <span class="hljs-title">thread_union</span> &#123;</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">thread_info</span> <span class="hljs-title">thread_info</span>;</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> <span class="hljs-built_in">stack</span>[THREAD_SIZE/<span class="hljs-keyword">sizeof</span>(<span class="hljs-type">long</span>)];<br>    &#125;;<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>thread_info：记录部分进程信息的结构体，<strong>其中包括了进程上下文信息，不同硬件平台的thread_info不一样</strong>，位于内核栈的尾端或顶端，内部有一个指针指向task_struct</li>
+<li>stack：一个数组，就是内核栈实体</li>
+</ol>
+<p>由图可知，<strong>task_struct和 thread_info内部各有一个指针指向对方</strong></p>
+<p>因为内核中大部分处理进程的代码都是直接通过task_struct进行的，所以，通过current宏查找到当前正在运行的进程的task_struct的速度就显得尤其重要。硬件平台不同，这个宏的实现也会不同：</p>
+<ol>
+<li>对于X86平台，因为其寄存器并不富裕，所以会在内核栈的底端创建thread_info，<strong>通过地址偏移找到task_struct</strong></li>
+<li>对于PowerPC，因为它有足够多的寄存器，所以它会直接将指针存在一个寄存器中，获取时可以直接返回</li>
+</ol>
+<h3 id="mm-struct"><a href="#mm-struct" class="headerlink" title="mm_struct"></a>mm_struct</h3><p>内存描述符指针，mm_struct结构描述了一个进程的<strong>整个虚拟地址空间</strong></p>
+<p>例如：<strong>物理页，代码段，数据段，堆等区域的起始地址和尾地址，当然还有一些内存配置信息，比如页表锁，分配的物理页数目，页目录等等</strong></p>
+<p>每一个进程都会有自己独立的mm_struct，即<strong>拥有自己独立的地址空间</strong>，这样才能互不干扰。</p>
+<p>所有的mm_struct都会使用自身的mmlist指针链接到一个双向链表中</p>
+<p><strong>内核线程的mm_struct指向为null，这也正是内核线程的真正含义：它们不需要访问任何用户空间的内存，没有用户空间的上下文，在用户空间也没有页。</strong></p>
+<p>当一个进程被调度时，该进程的mm_struct内指向的所有地址空间就会被装载到内存（<strong>所以一个进程的调度是一个十分重量级的操作</strong>），当内核发现mm_struct指针为null时，就会保留前一个进程的地址空间，也就是说，内核线程会直接使用前一个进程的页表，因为不访问用户空间，所以只会使用前一个进程页表中于内核空间相关的信息。</p>
+<h3 id="vm-area-struct"><a href="#vm-area-struct" class="headerlink" title="vm_area_struct"></a>vm_area_struct</h3><p>简称为VMA，VMA指定了地址空间内的一块<strong>连续内存范围</strong>，内核将每个VMA<strong>作为一个单独的对象</strong>来进行管理，赋予其一致的属性，比如访问权限等。</p>
+<p>也就是说，内核并不是直接操作物理页表来管理内存，而是又将大大小小的连续内存空间包装成对象来进行管理，每个对象都会有一些属性，以应对不同类型的内存区域，比如用户空间栈等。</p>
+<p><img src="/../img/33f6c2014042fc8356990f33df47a22f.png" srcset="/img/loading.gif" lazyload></p>
+<p>vm_area_struct结构使用<strong>链表或</strong>者<strong>树形结构</strong>链接，方便进程快速访问</p>
+<p>在mm_struct中，如果指定聚簇方式为mm_rb，那么这些VMA会以红黑树的方式存储；如果为mmap，则会以链表的形式存储</p>
+<p>由于VMA与mm_struct紧密相关，所以共享mm_struct的线程也会共享所有的VMA对象</p>
 <h1 id="线程的Linux实现"><a href="#线程的Linux实现" class="headerlink" title="线程的Linux实现"></a>线程的Linux实现</h1><p>而在windows中，线程被抽象为一种比进程更轻量级的可以独立处理事件的单元，操作系统提供了线程控制块：TCB。这是一种和PCB不同的数据结构</p>
 <p>而在Linux中却不一样，从内核的角度来看，并没有线程这个概念，Linux把所有的线程都当作进程来处理，<strong>内核也并没有定义独特的调度算法和数据结构来实现线程，线程就是一个与父进程共享资源的进程而已</strong>，Linux在创建线程时，会直接创建进程并分配task_struct，同时指定共享资源，所以对于内核来说，它就是进程，线程在Linux中是一个实现进程共享资源的机制。</p>
 <p>在 Linux 中每一个进程都由 task_struct 数据结构来定义。task_struct 就是我们通常所说的 PCB，当我们调用 fork()  时，系统会为我们产生一个 task_struct 结构。然后从父进程，那里继承一些数据，并将PCB插入任务队列中，以待进行进程管理。</p>
@@ -356,8 +400,8 @@
 <p><strong>在Linux中把系统提供给进程的的处于动态变化的运行环境总和称为进程上下文，系统中的每一个进程都有自己的上下文。</strong></p>
 <p>当前进程因时间片用完或者因等待某个事件而阻塞时，进程调度需要把处理器的使用权从当前进程交给另一个进程，这个过程叫做进程切换。</p>
 <p>此时，被调用进程成为当前进程。在进程切换时系统要把当前进程的上下文保存在指定的内存区域（该进程的任务状态段TSS中），然后把下一个使用处理器运行的进程的上下文设置成当前进程的上下文。当一个进程经过调度再次使用CPU运行时，系统要恢复该进程保存的上下文。所以，<strong>进程的切换也就是上下文切换</strong>。</p>
-<p>在系统内核为用户进程服务时，通常是进程通过系统调用执行内核代码，此时<strong>内核为用户进程服务</strong>，可以说内核在代替当前进程执行某种服务。</p>
-<p>所以可以认为，<strong>内核态就是内核运行在进程上下文中的状态，也就是陷入内核态</strong>。</p>
+<p><strong>在系统内核为用户进程服务时，通常是通过系统调用来让内核接管，此时内核为用户进程服务，可以说内核在代替当前进程执行某种服务。</strong></p>
+<p><strong>所以可以认为，内核态就是内核运行在进程上下文中的状态，也就是陷入内核态。</strong></p>
 <p><strong>中断上下文</strong>：硬件通过触发信号，导致内核调用中断处理程序，进入内核空间。这个过程中，硬件的一些变量和参数也要传递给内核，内核通过这些参数进行中断处理。所谓的“中断上下文”，其实也可以看作就是硬<strong>件传递过来的这些参数和内核需要保存的一些其他环境</strong>（主要是当前被打断执行的进程环境）</p>
 <h1 id="从用户态进入内核态：中断"><a href="#从用户态进入内核态：中断" class="headerlink" title="从用户态进入内核态：中断"></a>从用户态进入内核态：中断</h1><p>中断是CPU的一个功能：<strong>CPU停下工作，保留现场，自动的转去执行相应的处理程序</strong>，处理完该事件后再返回断点继续执行。<strong>避免了CPU的轮询检查</strong>，而是转换为事件驱动，向CPU发送中断事件，强制让CPU来执行中断处理程序。发生中断，CPU会立即进入<strong>内核态</strong>，针对不同的中断信号，采取不同的处理方式。**中断是CPU从用户态进入核心态的唯一途径(如系统调用)**。</p>
 <h2 id="硬中断"><a href="#硬中断" class="headerlink" title="硬中断"></a>硬中断</h2><p>硬中断时由外部事件引起的，具有<strong>随机性和突发性</strong>，比如键盘，鼠标的输入，磁盘的读写，缺页。硬中断的中断号是<strong>由中断控制器提供的</strong>，硬中断是<strong>可以屏蔽</strong>掉的。流程如下：</p>
