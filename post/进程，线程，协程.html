@@ -31,7 +31,7 @@
 <meta property="og:image" content="http://example.com/img/javaThread.png">
 <meta property="og:image" content="http://example.com/img/GMP-scheduler.png">
 <meta property="article:published_time" content="2022-10-20T08:53:01.000Z">
-<meta property="article:modified_time" content="2022-12-12T09:59:25.917Z">
+<meta property="article:modified_time" content="2022-12-12T10:01:13.221Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="Java基础知识">
 <meta name="twitter:card" content="summary_large_image">
@@ -246,7 +246,7 @@
         
         
         
-          102 分钟
+          103 分钟
         
       </span>
     
@@ -340,11 +340,11 @@
 <p>vm_area_struct结构使用<strong>链表或</strong>者<strong>树形结构</strong>链接，方便进程快速访问</p>
 <p>在mm_struct中，如果指定聚簇方式为mm_rb，那么这些VMA会以红黑树的方式存储；如果为mmap，则会以链表的形式存储</p>
 <p>由于VMA与mm_struct紧密相关，所以共享mm_struct的线程也会共享所有的VMA对象</p>
-<h1 id="线程的Linux实现"><a href="#线程的Linux实现" class="headerlink" title="线程的Linux实现"></a>线程的Linux实现</h1><p>而在windows中，线程被抽象为一种比进程更轻量级的可以独立处理事件的单元，操作系统提供了线程控制块：TCB。这是一种和PCB不同的数据结构</p>
+<h1 id="线程的Linux实现"><a href="#线程的Linux实现" class="headerlink" title="线程的Linux实现"></a>线程的Linux实现</h1><p>而在windows中，线程被抽象为一种比进程更轻量级的可以独立处理事件的单元，操作系统提供了线程控制块TCB，这是一种和PCB不同的数据结构</p>
 <p>而在Linux中却不一样，从内核的角度来看，并没有线程这个概念，Linux把所有的线程都当作进程来处理，<strong>内核也并没有定义独特的调度算法和数据结构来实现线程，线程就是一个与父进程共享资源的进程而已</strong>，Linux在创建线程时，会直接创建进程并分配task_struct，同时指定共享资源，所以对于内核来说，它就是进程，线程在Linux中是一个实现进程共享资源的机制。</p>
 <p>在 Linux 中每一个进程都由 task_struct 数据结构来定义。task_struct 就是我们通常所说的 PCB，当我们调用 fork()  时，系统会为我们产生一个 task_struct 结构。然后从父进程，那里继承一些数据，并将PCB插入任务队列中，以待进行进程管理。</p>
 <p>对于线程来说，需要在clone()中指定共享资源</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c">clone(CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND,<span class="hljs-number">0</span>);<br><span class="hljs-comment">//VM：共享地址空间</span><br><span class="hljs-comment">//FS：共享文件系统信息</span><br><span class="hljs-comment">//FILES:共享打开的文件</span><br><span class="hljs-comment">//SIGHAND：共享阻断信号</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c">clone(CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND,<span class="hljs-number">0</span>);<br><span class="hljs-comment">//VM：共享地址空间，这个是核心参数，必须指定</span><br><span class="hljs-comment">//FS：共享文件系统信息</span><br><span class="hljs-comment">//FILES:共享打开的文件</span><br><span class="hljs-comment">//SIGHAND：共享阻断信号</span><br></code></pre></td></tr></table></figure>
 
 <p>而一个普通的fork()就是</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">clone(SIGCHLD,<span class="hljs-number">0</span>);<br></code></pre></td></tr></table></figure>
