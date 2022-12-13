@@ -30,7 +30,7 @@
 <meta property="og:image" content="http://example.com/img/62091486-c2da2380-b2a3-11e9-8cf9-0e63d7f774d8.png">
 <meta property="og:image" content="http://example.com/img/netpoller-goroutines-scheduling.png">
 <meta property="article:published_time" content="2022-12-06T13:15:06.000Z">
-<meta property="article:modified_time" content="2022-12-11T09:02:27.120Z">
+<meta property="article:modified_time" content="2022-12-13T07:41:52.766Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="Golang">
 <meta name="twitter:card" content="summary_large_image">
@@ -292,7 +292,7 @@
 <p>因为有了这层抽象，我们不会直接面对thread，我们只会看到代码里的goroutine。</p>
 <p>操作系统却相反，管你什么 goroutine，我才没空理会。我安心地执行线程就可以了，线程才是我调度的基本单位。</p>
 <p>而这也是基于<strong>两级线程模型</strong>实现的，Goroutine与内核线程是多对多的关系，也叫M:N模型</p>
-<p><img src="/../img/61340362-8c001880-a874-11e9-9237-d97e6105cd62.png" srcset="/img/loading.gif" lazyload alt="61340362-8c001880-a874-11e9-9237-d97e6105cd62"></p>
+<p><img src="/../img/61340362-8c001880-a874-11e9-9237-d97e6105cd62.png" srcset="/img/loading.gif" lazyload></p>
 <p>Go runtime 会负责 goroutine的生老病死，从创建到销毁。Runtime 会在程序启动的时候，创建 M 个线程（CPU 执行调度的单位），之后创建的 N 个 goroutine 都会依附在这 M 个线程上执行。</p>
 <p>在同一时刻，一个线程上只能跑一个 goroutine。当 goroutine 发生阻塞时，<strong>runtime 会把当前 goroutine 调度走</strong>，让其他 goroutine 来执行。目的就是不让一个线程闲着，榨干 CPU 的每一滴油水。所以一个线程内的Goroutine一定是串行的。</p>
 <p><strong>Goroutine和thread有什么区别？</strong></p>

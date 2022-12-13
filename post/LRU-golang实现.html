@@ -16,27 +16,24 @@
   <meta name="author" content="SamuelZhou">
   <meta name="keywords" content="">
   
-    <meta name="description" content="6257.删除每行中的最大值 给你一个 m x n 大小的矩阵 grid ，由若干正整数组成。 执行下述操作，直到 grid 变为空矩阵：  从每一行删除值最大的元素。如果存在多个这样的值，删除其中任何一个。 将所有被删除元素中的最大值相加。  每执行一次操作，矩阵中列的数据量就会减1 返回执行上述操作后的答案  12345上图展示在每一步中需要移除的值。- 在第一步操作中，从第一行删除 4 ，从">
+    <meta name="description" content="1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768type Cache struct &amp;#123;   maxBytes int64   nbytes   int64    &#x2F;&#x2F;用于排序的双向链表">
 <meta property="og:type" content="article">
-<meta property="og:title" content="周赛笔记12&#x2F;11&#x2F;2022">
-<meta property="og:url" content="http://example.com/post/%E5%91%A8%E8%B5%9B%E7%AC%94%E8%AE%B012-11-2022.html">
+<meta property="og:title" content="LRU golang实现">
+<meta property="og:url" content="http://example.com/post/LRU-golang%E5%AE%9E%E7%8E%B0.html">
 <meta property="og:site_name" content="welcome">
-<meta property="og:description" content="6257.删除每行中的最大值 给你一个 m x n 大小的矩阵 grid ，由若干正整数组成。 执行下述操作，直到 grid 变为空矩阵：  从每一行删除值最大的元素。如果存在多个这样的值，删除其中任何一个。 将所有被删除元素中的最大值相加。  每执行一次操作，矩阵中列的数据量就会减1 返回执行上述操作后的答案  12345上图展示在每一步中需要移除的值。- 在第一步操作中，从第一行删除 4 ，从">
+<meta property="og:description" content="1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768type Cache struct &amp;#123;   maxBytes int64   nbytes   int64    &#x2F;&#x2F;用于排序的双向链表">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/q1ex1.jpg">
-<meta property="og:image" content="http://example.com/img/drawio.png">
-<meta property="article:published_time" content="2022-12-11T09:14:45.000Z">
-<meta property="article:modified_time" content="2022-12-11T09:22:44.607Z">
+<meta property="article:published_time" content="2022-12-13T12:24:51.000Z">
+<meta property="article:modified_time" content="2022-12-13T12:35:49.138Z">
 <meta property="article:author" content="SamuelZhou">
-<meta property="article:tag" content="LeetCode初见">
+<meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/q1ex1.jpg">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>周赛笔记12/11/2022 - welcome</title>
+  <title>LRU golang实现 - welcome</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -202,7 +199,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="周赛笔记12/11/2022"></span>
+            <span id="subtitle" data-typed-text="LRU golang实现"></span>
           
         </div>
 
@@ -218,8 +215,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-12-11 17:14" pubdate>
-          2022年12月11日 下午
+        <time datetime="2022-12-13 20:24" pubdate>
+          2022年12月13日 晚上
         </time>
       </span>
     
@@ -230,7 +227,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.6k 字
+          1.5k 字
         
       </span>
     
@@ -241,7 +238,7 @@
         
         
         
-          14 分钟
+          13 分钟
         
       </span>
     
@@ -279,32 +276,12 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">周赛笔记12/11/2022</h1>
+            <h1 style="display: none">LRU golang实现</h1>
             
             
               <div class="markdown-body">
                 
-                <p>6257.删除每行中的最大值</p>
-<p>给你一个 <code>m x n</code> 大小的矩阵 <code>grid</code> ，由若干正整数组成。</p>
-<p>执行下述操作，直到 <code>grid</code> 变为空矩阵：</p>
-<ul>
-<li>从每一行删除值最大的元素。如果存在多个这样的值，删除其中任何一个。</li>
-<li>将所有被删除元素中的最大值相加。</li>
-</ul>
-<p>每执行一次操作，矩阵中列的数据量就会减1</p>
-<p>返回执行上述操作后的答案</p>
-<p><img src="/../img/q1ex1.jpg" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">上图展示在每一步中需要移除的值。<br>- 在第一步操作中，从第一行删除<span class="hljs-number"> 4 </span>，从第二行删除 3（注意，有两个单元格中的值为<span class="hljs-number"> 3 </span>，我们可以删除任一）。在答案上加<span class="hljs-number"> 4 </span>。<br>- 在第二步操作中，从第一行删除<span class="hljs-number"> 2 </span>，从第二行删除<span class="hljs-number"> 3 </span>。在答案上加<span class="hljs-number"> 3 </span>。<br>- 在第三步操作中，从第一行删除<span class="hljs-number"> 1 </span>，从第二行删除<span class="hljs-number"> 1 </span>。在答案上加<span class="hljs-number"> 1 </span>。<br>最终，答案 =<span class="hljs-number"> 4 </span>+<span class="hljs-number"> 3 </span>+<span class="hljs-number"> 1 </span>=<span class="hljs-number"> 8 </span>。<br></code></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">deleteGreatestValue</span><span class="hljs-params">(<span class="hljs-type">int</span>[][] grid)</span> &#123;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">res</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">n</span> <span class="hljs-operator">=</span> grid[<span class="hljs-number">0</span>].length;<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>;i&lt;n;i++)&#123;<br>            <span class="hljs-type">int</span> <span class="hljs-variable">max</span> <span class="hljs-operator">=</span> Integer.MIN_VALUE;<br>            <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span>[] temp: grid)&#123;<br>                <span class="hljs-type">Pair</span> <span class="hljs-variable">p</span> <span class="hljs-operator">=</span> findMax(temp);<br>                max = Math.max(max,p.val);<br>                <span class="hljs-comment">//将删除的值置为0</span><br>                temp[p.i]=<span class="hljs-number">0</span>;<br>            &#125;<br>            res+=max;<br>        &#125;<br>        <span class="hljs-keyword">return</span> res;<br>    &#125;<br>    Pair <span class="hljs-title function_">findMax</span><span class="hljs-params">(<span class="hljs-type">int</span>[] arr)</span>&#123;<br>        <span class="hljs-comment">//二叉堆找最大值</span><br>        PriorityQueue&lt;Pair&gt; pq = <span class="hljs-keyword">new</span> <span class="hljs-title class_">PriorityQueue</span>&lt;&gt;(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Comparator</span>&lt;Pair&gt;()&#123;<br>            <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">compare</span><span class="hljs-params">(Pair o1, Pair o2)</span> &#123;<br>                <span class="hljs-keyword">return</span> o2.val - o1.val;<br>            &#125;<br>        &#125;);<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>;i&lt;arr.length;i++)&#123;<br>            pq.add(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Pair</span>(i,arr[i]));<br>        &#125;<br>        <span class="hljs-keyword">return</span> pq.peek();<br>    &#125;<br>&#125;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Pair</span>&#123;<br>    <span class="hljs-type">int</span> i;<br>    <span class="hljs-type">int</span> val;<br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Pair</span><span class="hljs-params">(<span class="hljs-type">int</span> i, <span class="hljs-type">int</span> val)</span>&#123;<br>        <span class="hljs-built_in">this</span>.i = i;<br>        <span class="hljs-built_in">this</span>.val = val;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
-
-<p>2487.从链表中移除节点</p>
-<p>给你一个链表的头节点 <code>head</code> 。</p>
-<p>对于列表中的每个节点 <code>node</code> ，如果其右侧存在一个具有 <strong>严格更大</strong> 值的节点，则移除 <code>node</code> 。</p>
-<p>返回修改后链表的头节点 <code>head</code> 。</p>
-<p> <img src="/../img/drawio.png" srcset="/img/loading.gif" lazyload alt="drawio"></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//单调栈思想，大的元素会挤掉小元素，保证了栈底永远是最大元素</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> &#123;<br>    <span class="hljs-keyword">public</span> ListNode <span class="hljs-title function_">removeNodes</span><span class="hljs-params">(ListNode head)</span> &#123;<br>        <span class="hljs-comment">//使用双端队列，保证性能的同时还支持从栈底出列</span><br>        ArrayDeque&lt;ListNode&gt; ad = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayDeque</span>();<br>        <span class="hljs-type">ListNode</span> <span class="hljs-variable">dummy</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ListNode</span>(-<span class="hljs-number">1</span>);<br>        <span class="hljs-type">ListNode</span> <span class="hljs-variable">temp</span> <span class="hljs-operator">=</span> dummy;<br>        <span class="hljs-keyword">while</span>(head!=<span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-keyword">while</span>(!ad.isEmpty())&#123;<br>                <span class="hljs-keyword">if</span>(ad.peek().val&lt;head.val) ad.pop();<br>                <span class="hljs-keyword">else</span> <span class="hljs-keyword">break</span>;<br>            &#125;<br>            ad.push(head);<br>            head=head.next;<br>        &#125;<br>        <span class="hljs-keyword">while</span>(!ad.isEmpty())&#123;<br>            temp.next = ad.removeLast();<br>            temp=temp.next;<br>        &#125;<br>        <span class="hljs-keyword">return</span> dummy.next;  <br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
-
+                <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">type</span> Cache <span class="hljs-keyword">struct</span> &#123;<br>   maxBytes <span class="hljs-type">int64</span><br>   nbytes   <span class="hljs-type">int64</span><br>    <span class="hljs-comment">//用于排序的双向链表</span><br>   ll       *list.List<br>    <span class="hljs-comment">//用于查找的哈希表，K是字符串，V是链表中的元素</span><br>   cache    <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]*list.Element<br>   <span class="hljs-comment">// optional and executed when an entry is purged.</span><br>   OnEvicted <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(key <span class="hljs-type">string</span>, value Value)</span></span><br>&#125;<br><br><span class="hljs-keyword">type</span> entry <span class="hljs-keyword">struct</span> &#123;<br>   key   <span class="hljs-type">string</span><br>   value Value<br>&#125;<br><br><span class="hljs-comment">// Value use Len to count how many bytes it takes</span><br><span class="hljs-keyword">type</span> Value <span class="hljs-keyword">interface</span> &#123;<br>   Len() <span class="hljs-type">int</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">New</span><span class="hljs-params">(maxBytes <span class="hljs-type">int64</span>, onEvicted <span class="hljs-keyword">func</span>(<span class="hljs-type">string</span>, Value)</span></span>) *Cache &#123;<br>   <span class="hljs-keyword">return</span> &amp;Cache&#123;<br>      maxBytes:  maxBytes,<br>      ll:        list.New(),<br>      cache:     <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]*list.Element),<br>      OnEvicted: onEvicted,<br>   &#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(c *Cache)</span></span> Get(key <span class="hljs-type">string</span>) (value Value, ok <span class="hljs-type">bool</span>) &#123;<br>   <span class="hljs-keyword">if</span> ele, ok := c.cache[key]; ok &#123;<br>      c.ll.MoveToFront(ele)<br>      kv := ele.Value.(*entry)<br>      <span class="hljs-keyword">return</span> kv.value, <span class="hljs-literal">true</span><br>   &#125;<br>   <span class="hljs-keyword">return</span><br>&#125;<br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(c *Cache)</span></span> RemoveOldest() &#123;<br>   ele := c.ll.Back()<br>   <span class="hljs-keyword">if</span> ele != <span class="hljs-literal">nil</span> &#123;<br>      c.ll.Remove(ele)<br>      kv := ele.Value.(*entry)<br>      <span class="hljs-built_in">delete</span>(c.cache, kv.key)<br>      c.nbytes -= <span class="hljs-type">int64</span>(<span class="hljs-built_in">len</span>(kv.key)) + <span class="hljs-type">int64</span>(kv.value.Len())<br>      <span class="hljs-keyword">if</span> c.OnEvicted != <span class="hljs-literal">nil</span> &#123;<br>         c.OnEvicted(kv.key, kv.value)<br>      &#125;<br>   &#125;<br>&#125;<br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(c *Cache)</span></span> Add(key <span class="hljs-type">string</span>, value Value) &#123;<br>   <span class="hljs-keyword">if</span> ele, ok := c.cache[key]; ok &#123;<br>      c.ll.MoveToFront(ele)<br>      kv := ele.Value.(*entry)<br>      c.nbytes += <span class="hljs-type">int64</span>(value.Len()) - <span class="hljs-type">int64</span>(kv.value.Len())<br>      kv.value = value<br>   &#125; <span class="hljs-keyword">else</span> &#123;<br>      ele := c.ll.PushFront(&amp;entry&#123;key, value&#125;)<br>      c.cache[key] = ele<br>      c.nbytes += <span class="hljs-type">int64</span>(<span class="hljs-built_in">len</span>(key)) + <span class="hljs-type">int64</span>(value.Len())<br>   &#125;<br>   <span class="hljs-keyword">for</span> c.maxBytes != <span class="hljs-number">0</span> &amp;&amp; c.maxBytes &lt; c.nbytes &#123;<br>      c.RemoveOldest()<br>   &#125;<br>&#125;<br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(c *Cache)</span></span> Len() <span class="hljs-type">int</span> &#123;<br>   <span class="hljs-keyword">return</span> c.ll.Len()<br>&#125;<br></code></pre></td></tr></table></figure>
 
                 
               </div>
@@ -317,7 +294,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/LeetCode%E5%88%9D%E8%A7%81/">#LeetCode初见</a>
+        <a href="/tags/golang/">#golang</a>
       
     </div>
   
@@ -329,8 +306,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>周赛笔记12/11/2022</div>
-      <div>http://example.com/post/周赛笔记12-11-2022.html</div>
+      <div>LRU golang实现</div>
+      <div>http://example.com/post/LRU-golang实现.html</div>
     </div>
     <div class="license-meta">
       
@@ -342,7 +319,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2022年12月11日</div>
+          <div>2022年12月13日</div>
         </div>
       
       
@@ -374,18 +351,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/post/LRU-golang%E5%AE%9E%E7%8E%B0.html" title="LRU golang实现">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">LRU golang实现</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/post/B-%E6%A0%91%E6%9F%A5%E8%AF%A2%E8%AF%A6%E8%A7%A3.html" title="B+树查询详解">
-                        <span class="hidden-mobile">B+树查询详解</span>
+                      <a href="/post/%E5%91%A8%E8%B5%9B%E7%AC%94%E8%AE%B012-11-2022.html" title="周赛笔记12/11/2022">
+                        <span class="hidden-mobile">周赛笔记12/11/2022</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
