@@ -1,0 +1,715 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="SamuelZhou">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="局部性原理在绝大多数程序的运行过程中，当前指令大概率都会引用最近访问过的数据，也就是说，程序的数据访问会表现出明显的倾向性。这种倾向性，我们就称之为局部性原理 (Principle of locality)。 局部性原理主要有两个方面：  时间局部性，也就是说被访问过一次的内存位置很可能在不远的将来会被再次访问 空间局部性，如果一个内存位置被引用过，那么它邻近的位置在不远的将来也有很大概率会被访问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟内存">
+<meta property="og:url" content="http://example.com/post/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98.html">
+<meta property="og:site_name" content="welcome">
+<meta property="og:description" content="局部性原理在绝大多数程序的运行过程中，当前指令大概率都会引用最近访问过的数据，也就是说，程序的数据访问会表现出明显的倾向性。这种倾向性，我们就称之为局部性原理 (Principle of locality)。 局部性原理主要有两个方面：  时间局部性，也就是说被访问过一次的内存位置很可能在不远的将来会被再次访问 空间局部性，如果一个内存位置被引用过，那么它邻近的位置在不远的将来也有很大概率会被访问">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="d:/samuelBlog/folder/source/img/QQ%E6%88%AA%E5%9B%BE20221219131621.png">
+<meta property="og:image" content="d:/samuelBlog/folder/source/img/QQ%E6%88%AA%E5%9B%BE20221219132128.png">
+<meta property="og:image" content="d:/samuelBlog/folder/source/img/QQ%E6%88%AA%E5%9B%BE20221219132437.png">
+<meta property="og:image" content="d:/samuelBlog/folder/source/img/QQ%E6%88%AA%E5%9B%BE20221219150505.png">
+<meta property="og:image" content="d:/samuelBlog/folder/source/img/QQ%E6%88%AA%E5%9B%BE20221219150529.png">
+<meta property="article:published_time" content="2022-12-18T13:33:05.000Z">
+<meta property="article:modified_time" content="2022-12-19T07:56:20.796Z">
+<meta property="article:author" content="SamuelZhou">
+<meta property="article:tag" content="计算机内存系统">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="d:/samuelBlog/folder/source/img/QQ%E6%88%AA%E5%9B%BE20221219131621.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>虚拟内存 - welcome</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>samuel`s world</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="虚拟内存"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        SamuelZhou
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-12-18 21:33" pubdate>
+          2022年12月18日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          30 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">虚拟内存</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="局部性原理"><a href="#局部性原理" class="headerlink" title="局部性原理"></a>局部性原理</h1><p>在绝大多数程序的运行过程中，当前指令大概率都会引用最近访问过的数据，也就是说，程序的数据访问会表现出明显的倾向性。这种倾向性，我们就称之为局部性原理 (Principle of locality)。</p>
+<p>局部性原理主要有两个方面：</p>
+<ol>
+<li>时间局部性，也就是说被访问过一次的内存位置很可能在不远的将来会被再次访问</li>
+<li>空间局部性，如果一个内存位置被引用过，那么<strong>它邻近的位置</strong>在不远的将来也有很大概率会被访问</li>
+</ol>
+<p>基于这个原理，我们可以做出一个推论：无论一个进程需要的总资源有多大，<strong>在任一时刻</strong>，它需要的物理内存都是其中的少部分。所以CPU 只需为每个进程保留很少的物理内存就可以保证进程的正常运行。</p>
+<h1 id="虚拟内存"><a href="#虚拟内存" class="headerlink" title="虚拟内存"></a>虚拟内存</h1><p>基于局部性原理，我们无需将该进程需要的所有资源都装入内存，而是部分装入，待使用malloc等分配内存的接口时，才会将相应的数据页装入内存。</p>
+<p>但是对于程序本身来说，每个程序看见的内存空间都是远大于实际可用空间且互相独立的</p>
+<p>比如进程 A 中有个变量 a，它的地址是 0x100，但是进程 B 中也有个变量 b，它的地址也是 0x100。但这并不会造成冲突，因为进程 A 的地址空间与进程 B 的地址空间是独立的，相互不影响。</p>
+<p>这就是虚拟内存：现代物理内存的容量增长已经非常快速了，然而还是跟不上应用程序对主存需求的增长速度，对于应用程序来说内存还是可能会不够用，因此便需要一种方法来<strong>解决这两者之间的容量差矛盾</strong>。为了更高效地管理内存并尽可能消除程序错误，现代计算机系统对物理主存 RAM 进行抽象，实现了虚拟内存 (Virtual Memory, VM) </p>
+<h2 id="映射"><a href="#映射" class="headerlink" title="映射"></a>映射</h2><p><img src="D:/samuelBlog/folder/source/img/QQ截图20221219131621.png" srcset="/img/loading.gif" lazyload></p>
+<p>CPU 充分利用程序局部性原理，提出了虚拟内存和物理内存的映射 (Mapping) 机制</p>
+<p>这种映射关系是以页为单位的，操作系统管理着这种映射关系，所以用户就不用再操心物理内存的使用情况了，你看到的内存就是虚拟内存。</p>
+<p>在虚拟内存中连续的页面，<strong>在物理内存中不必是连续的</strong>。只要维护好从虚拟内存页到物理内存页的映射关系，你就能正确地使用内存了。不过虚拟地址空间往往与机器字宽有关系。例如 32 位机器上，指向内存的指针是 32 位的，所以它的虚拟地址空间是 2 的 32 次方，也就是 4G。在 64 位机器上，指向内存的指针就是 64 位的，但在 64 位系统里只使用了低 48 位，所以它的虚拟地址空间是 2 的 48 次方，也就是 256T。</p>
+<h2 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h2><p>大多数情况下CPU 和操作系统会一起完成页面的自动映射，不需要你关心其中的机制。</p>
+<p>但是当我们在做系统性能优化的时候，理解内存映射的过程就是十分必要的了。例如一个性能很差的程序就有可能是因为<strong>缺页中断过多</strong>导致的。</p>
+<p>映射的过程，是由 CPU 的内存管理单元 (Memory Management Unit, <strong>MMU</strong>) 自动完成的，但它依赖操作系统设置的页表。页表的本质是<strong>页表项 (Page Table Entry, PTE) 数组</strong>，虚拟空间中的每一个页在页表中都有一个 PTE 与之对应，<strong>PTE 中会记录这个虚拟内存页所对应的实际物理页的起始地址</strong>。</p>
+<p><img src="D:/samuelBlog/folder/source/img/QQ截图20221219132128.png" srcset="/img/loading.gif" lazyload></p>
+<p>每个页表项大小为4字节，一页的页表项有1024个，其所能支持的空间就是 4M</p>
+<p>当然对于拥有更大地址空间的计算机，单级页表结构肯定是不能完整描述内存的，所以需要引入多级页表结构</p>
+<p><img src="D:/samuelBlog/folder/source/img/QQ截图20221219132437.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="页中断"><a href="#页中断" class="headerlink" title="页中断"></a>页中断</h1><p>页中断和普通的中断一样，它的中断服务程序入口也在中断向量表中，但它是<strong>由 MMU 产生的硬件中断</strong>。</p>
+<p>页中断有两类重要的类型：<strong>写保护中断和缺页中断</strong>。正是这两类中断在整个系统的后台默默地工作着，就像守护神一样支撑着内存系统正常工作。</p>
+<p>大多数时候，我们可以不知道它们的存在。但是有时候，程序设计有缺陷就有可能造成中断频繁发生，从而带来巨大的性能下降。</p>
+<h2 id="fork的原理"><a href="#fork的原理" class="headerlink" title="fork的原理"></a>fork的原理</h2><p>父进程和子进程不仅可以访问共有的变量，还可以各自修改这个变量，并且这个修改对方都看不见。这其实就是写时复制机制，实现原理便是写保护中断。</p>
+<p>fork 的第一个动作是把 PCB 复制一份，进程与子进程的代码段、数据段、堆和栈都是相同的，这是因为它们拥有相同的页表，自然也有相同的虚拟空间布局和对物理内存的映射。如果父进程在 fork 子进程之前创建了一个变量，打开了一个文件，那么父子进程都能看到这个变量和文件。</p>
+<p>fork 的第二个动作是复制页表和 PCB 中的 VMA ，并把所有当前正常状态的数据段、堆和栈空间的虚拟内存页，设置为不可写，然后把已经映射的物理页面的引用计数加 1。</p>
+<p>这一步只需要复制页表和修改 PTE 中的写权限位可以了，<strong>并不会真的为子进程的所有内存空间分配物理页面</strong>，修改映射，所以它的效率是非常高的。这时，父子进程的页表的情况如下图所示：</p>
+<p><img src="D:/samuelBlog/folder/source/img/QQ截图20221219150505.png" srcset="/img/loading.gif" lazyload></p>
+<p>这两个动作执行完后，fork 调用就结束了。</p>
+<p>此时，由于有父进程和子进程两个 PCB，操作系统就会把两个进程都加入到调度队列中。</p>
+<p>当父进程得到执行，它的 IP 寄存器还是指向 fork 调用中，所以它会从这个调用中返回，只不过返回值是子进程的 PID。当子进程得到执行时，它的 IP 寄存器也是停在 fork 调用中，它从这个调用中返回，其返回值是 0。</p>
+<p>不管是父进程还是子进程，它们接下来都有可能发生写操作，但在 fork 的第二步操作中，已经将所有原来可写的地方都变成不可写了，所以这时必然会发生写保护中断。</p>
+<p>Linux 系统的页中断的入口地址是 do_page_fault，在这个函数里，它会继续判断中断的类型。由于发生中断的虚拟地址<strong>在VAM中是可写的，在 PTE 中却是只读的，可以断定这是一次写保护中断</strong>。这时候，内核就会转而调用 do_wp_page 来处理这次中断，wp 是 write protection 的缩写。</p>
+<p>在 do_wp_page 中，系统会首先判断发生中断的虚拟地址所对应的物理地址的引用计数，如果大于 1，就说明现在存在多个进程共享这一块物理页面，那么它就需要为发生中断的进程再分配一个物理页面，把老的页面内容拷贝进这个新的物理页，最后把发生中断的虚拟地址映射到新的物理页。这就完成了一次写时复制 (Copy On Write， COW）。具体过程如下图所示：</p>
+<p><img src="D:/samuelBlog/folder/source/img/QQ截图20221219150529.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="execve原理"><a href="#execve原理" class="headerlink" title="execve原理"></a>execve原理</h2><p>execve 的作用是使用当前进程执行一个新的可执行程序，当调用execve时：</p>
+<ol>
+<li><strong>清空页表，这样整个进程中的页都变成不存在了，一旦访问这些页，就会发生页中断</strong></li>
+<li>打开待加载执行的文件，在内核中创建代表这个文件的 struct file 结构</li>
+<li>加载和解析文件头，文件头里描述了这个可执行文件一共有多少 section</li>
+<li><strong>创建相应的VMA来描述代码段，数据段，并且将文件的各个 section 与这些内存区域建立映射关系</strong></li>
+<li>处理依赖的其他共享库文件</li>
+<li>最后跳转到可执行程序的入口处执行</li>
+</ol>
+<p>execve 的实现并不负责将文件内容加载到物理页中，它只建立了这种文件 section与内存区域的映射关系</p>
+<p>真正负责加载文件内容的是缺页中断：</p>
+<p>在 execve的执行步骤中，我们讲了，内核为可执行程序创建一个VMA对象，然后将它的 vm_file 属性设成第 2 步所打开的文件，这就建立起了内存区域和文件的映射关系。这个内核区域的区间首地址、区间尾地址和控制权限，都是由第 3 步解析的信息决定的。例如.text 段被加载到的内存首地址，也就是链接时所决定的起始地址，它就决定了内存代码段的起始地址。</p>
+<p>由于第 1 步把页表都清空了，这就导致 CPU 在加载指令时会发现代码段是缺失的，此时就会产生缺页中断。Linux 内核用于处理缺页中断的函数是 do_no_page，如果内核检查，当前出现缺页中断的虚拟地址所在的 VMA（虚拟地址落在该内存区域的 vm_start 和 vm_end 之间）存在文件映射 (vm_file 不为空），那就可以通过虚拟内存地址计算文件中的偏移，这就定位到了内存所缺的页对应到文件的哪一段。</p>
+<p>然后内核启动磁盘 IO，将对应的页从磁盘加载进内存，完成页表项的记录，一次缺页中断就这样被解决了。</p>
+<p><strong>所以可执行程序的加载不是一次性完成的，而是由缺页中断根据需要，将文件的内容以页为单位加载进内存的，一次只会加载一页。</strong></p>
+<h2 id="mmap原理"><a href="#mmap原理" class="headerlink" title="mmap原理"></a>mmap原理</h2><h3 id="私有匿名映射：用于分配堆空间"><a href="#私有匿名映射：用于分配堆空间" class="headerlink" title="私有匿名映射：用于分配堆空间"></a>私有匿名映射：用于分配堆空间</h3><p>私有匿名映射很简单：在调用 mmap 时，只需要在文件映射区域分配一块内存，然后创建这块内存所对应的VMA就结束了。当访问到这块虚拟内存时，由于这块虚拟内存都没有映射到物理内存上，就会发生缺页中断。</p>
+<p>但这一次的缺页中断与 execve时的缺页中断不一样，这次是匿名映射，所以关联文件属性为空。此时，内核就会调用 do_anonymous_page 来分配一个物理内存，并将整个物理页全部初始化为 0，然后在页表里建立起虚拟地址到物理地址的映射关系。 </p>
+<h3 id="私有文件映射：用于加载动态链接库"><a href="#私有文件映射：用于加载动态链接库" class="headerlink" title="私有文件映射：用于加载动态链接库"></a>私有文件映射：用于加载动态链接库</h3><p>则借助文件的 inode 结构共享文件的物理缓存页，当发生写操作时，则会出现写时复制，从而保证每一个进程中都有自己的副本；</p>
+<h3 id="共享文件映射，用于多进程之间通讯"><a href="#共享文件映射，用于多进程之间通讯" class="headerlink" title="共享文件映射，用于多进程之间通讯"></a>共享文件映射，用于多进程之间通讯</h3><p>在私有文件映射的基础上，只取消了写时复制，这样一个进程就可以看到其他进程对这个页的修改了；</p>
+<h3 id="共享匿名映射，用于父子进程之间通讯"><a href="#共享匿名映射，用于父子进程之间通讯" class="headerlink" title="共享匿名映射，用于父子进程之间通讯"></a>共享匿名映射，用于父子进程之间通讯</h3><p>借助了虚拟文件系统。内核在父子进程间，使用自己创建的虚拟文件和共享文件映射，来实现共享匿名映射。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F/">#计算机内存系统</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>虚拟内存</div>
+      <div>http://example.com/post/虚拟内存.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>SamuelZhou</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年12月18日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/post/go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B.html" title="go并发编程">
+                        <span class="hidden-mobile">go并发编程</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
