@@ -226,6 +226,46 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/post/MySQL%E7%9A%84%E6%97%A5%E5%BF%97%E5%92%8C%E6%8C%81%E4%B9%85%E6%80%A7.html" target="_self">
+          MySQL的日志和持久性
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/post/MySQL%E7%9A%84%E6%97%A5%E5%BF%97%E5%92%8C%E6%8C%81%E4%B9%85%E6%80%A7.html" target="_self">
+        <div>
+          Buffer Pool关系型数据库的特点就是需要频繁对磁盘页进行IO，所以有时候也被叫做基于磁盘的数据库，InnoDB为了改善直接读写磁盘导致的 IO 性能问题，引入了缓冲池 缓冲池是一片内存区域，存储引擎在读取数据时，会先将页读取到缓冲池中。下次读取时，看缓冲池是否命中，如果命中，则直接读取，否则从磁盘中读取。 在修改数据时，如果缓冲池中不存在所需的数据页，则从磁盘读入缓冲池，否则直接对缓冲池中
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2022-12-02 14:54" pubdate>
+              2022-12-02
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/MySQL/">#MySQL</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/post/ants%E2%80%94%E2%80%94Goroutine-Pool%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0.html" target="_self">
           ants——Goroutine Pool阅读笔记
         </a>
@@ -580,51 +620,11 @@
     </article>
   </div>
 
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/post/HashMap.html" target="_self">
-          HashMap
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/post/HashMap.html" target="_self">
-        <div>
-          HashCodeHashCode()，在未被重写前，即object类中，是一个Native方法，默认返回JVM生成的随机数，是一个独特值，可以看作是对象的身份ID 而在String类中，HashCode被重写 123456789101112public int hashCode() &#123;       int h = hash;       if (h == 0 &amp;&amp; val
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2022-10-30 22:05" pubdate>
-              2022-10-30
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Java%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">#Java基础知识</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
 
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <a class="extend prev" rel="prev" href="/"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/#board">3</a><a class="page-number" href="/page/4/#board">4</a><a class="extend next" rel="next" href="/page/3/#board"><i class="iconfont icon-arrowright"></i></a>
+      <a class="extend prev" rel="prev" href="/"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/#board">3</a><a class="page-number" href="/page/4/#board">4</a><a class="page-number" href="/page/5/#board">5</a><a class="extend next" rel="next" href="/page/3/#board"><i class="iconfont icon-arrowright"></i></a>
     </span>
   </nav>
 
