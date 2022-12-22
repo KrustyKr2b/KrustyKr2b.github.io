@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/img/QQ%E6%88%AA%E5%9B%BE20221221163223.png">
 <meta property="article:published_time" content="2022-12-21T07:45:29.000Z">
-<meta property="article:modified_time" content="2022-12-21T08:54:43.922Z">
+<meta property="article:modified_time" content="2022-12-21T13:34:41.719Z">
 <meta property="article:author" content="SamuelZhou">
 <meta property="article:tag" content="RPC">
 <meta name="twitter:card" content="summary_large_image">
@@ -302,13 +302,9 @@
 <h1 id="DAY2总结"><a href="#DAY2总结" class="headerlink" title="DAY2总结"></a>DAY2总结</h1><p>今天实现了一个支持<strong>异步和并发</strong>的客户端，昨天的客户端太简单了，全程编码都在main函数中进行</p>
 <p>几个重点</p>
 <ol>
-<li><p>使用一个信道done来存储调用，用于异步回调通知调用方已经完成调用，当完成调用接收到返回值后，该call会出信道</p>
-</li>
-<li><p>我们重写了dial方法用于建立连接+生成client对象，此时客户端会生成一个协程来等待响应信息</p>
-</li>
-<li><p>客户端会使用call方法来生成一个call对象并发送，阻塞等待信道done，当等到了done，证明已经拿到了返回值</p>
-</li>
-<li></li>
+<li>使用一个信道done来存储调用，用于异步回调通知调用方已经完成调用，当完成调用接收到返回值后，该call会出信道</li>
+<li>我们重写了dial方法用于建立连接+生成client对象，此时客户端会生成一个协程来等待响应信息</li>
+<li>客户端会使用call方法来生成一个call对象并发送，阻塞等待信道done，当等到了done，证明已经拿到了返回值</li>
 </ol>
 <h2 id="启动客户端"><a href="#启动客户端" class="headerlink" title="启动客户端"></a>启动客户端</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> &#123;<br>    log.SetFlags(<span class="hljs-number">0</span>)<br>	addr := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">chan</span> <span class="hljs-type">string</span>)<br>    <span class="hljs-comment">//和DAY1一样，启动服务器</span><br>	<span class="hljs-keyword">go</span> startServer(addr)<br>    <span class="hljs-comment">//使用我们重写的dial来建立连接，返回client对象</span><br>	client, _ := geerpc.Dial(<span class="hljs-string">&quot;tcp&quot;</span>, &lt;-addr)<br>	<span class="hljs-keyword">defer</span> <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">()</span></span> &#123; _ = client.Close() &#125;()<br><br>	time.Sleep(time.Second)<br>	<span class="hljs-comment">// send request &amp; receive response</span><br>	<span class="hljs-keyword">var</span> wg sync.WaitGroup<br>	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++ &#123;<br>		wg.Add(<span class="hljs-number">1</span>)<br>		<span class="hljs-keyword">go</span> <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(i <span class="hljs-type">int</span>)</span></span> &#123;<br>			<span class="hljs-keyword">defer</span> wg.Done()<br>			args := fmt.Sprintf(<span class="hljs-string">&quot;geerpc req %d&quot;</span>, i)<br>			<span class="hljs-keyword">var</span> reply <span class="hljs-type">string</span><br>            <span class="hljs-comment">//使用封装好的call方法发送信息获取返回值</span><br>			<span class="hljs-keyword">if</span> err := client.Call(<span class="hljs-string">&quot;Foo.Sum&quot;</span>, args, &amp;reply); err != <span class="hljs-literal">nil</span> &#123;<br>				log.Fatal(<span class="hljs-string">&quot;call Foo.Sum error:&quot;</span>, err)<br>			&#125;<br>			log.Println(<span class="hljs-string">&quot;reply:&quot;</span>, reply)<br>		&#125;(i)<br>	&#125;<br>	wg.Wait()<br>&#125;<br></code></pre></td></tr></table></figure>
 
@@ -382,6 +378,12 @@
                 <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/post/GeeRPC-day3.html" title="GeeRPC-day3">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">GeeRPC-day3</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
