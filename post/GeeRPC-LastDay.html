@@ -1,0 +1,699 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="SamuelZhou">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="注册中心 如果我们引入注册中心，那么客户端和服务端都只需要感知注册中心的存在，而无需感知对方的存在。 更具体一些：  服务端启动后，向注册中心发送注册消息，注册中心得知该服务已经启动，处于可用状态。一般来说，服务端还需要定期向注册中心发送心跳，证明自己还活着。 客户端向注册中心询问，当前哪条服务是可用的，注册中心将可用的服务列表返回客户端。 客户端根据注册中心得到的服务列表，选择其中一个发起调用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GeeRPC-LastDay">
+<meta property="og:url" content="http://example.com/post/GeeRPC-LastDay.html">
+<meta property="og:site_name" content="welcome">
+<meta property="og:description" content="注册中心 如果我们引入注册中心，那么客户端和服务端都只需要感知注册中心的存在，而无需感知对方的存在。 更具体一些：  服务端启动后，向注册中心发送注册消息，注册中心得知该服务已经启动，处于可用状态。一般来说，服务端还需要定期向注册中心发送心跳，证明自己还活着。 客户端向注册中心询问，当前哪条服务是可用的，注册中心将可用的服务列表返回客户端。 客户端根据注册中心得到的服务列表，选择其中一个发起调用。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/registry.jpg">
+<meta property="article:published_time" content="2023-01-10T11:56:50.000Z">
+<meta property="article:modified_time" content="2023-01-10T13:44:14.750Z">
+<meta property="article:author" content="SamuelZhou">
+<meta property="article:tag" content="GeeRPC">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/registry.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>GeeRPC-LastDay - welcome</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>samuel`s world</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="GeeRPC-LastDay"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        SamuelZhou
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-01-10 19:56" pubdate>
+          2023年1月10日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          49 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">GeeRPC-LastDay</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="注册中心"><a href="#注册中心" class="headerlink" title="注册中心"></a>注册中心</h1><p><img src="/../img/registry.jpg" srcset="/img/loading.gif" lazyload alt="registry"></p>
+<p>如果我们引入注册中心，<strong>那么客户端和服务端都只需要感知注册中心的存在</strong>，而无需感知对方的存在。</p>
+<p>更具体一些：</p>
+<ol>
+<li>服务端启动后，向注册中心发送注册消息，注册中心得知该服务已经启动，处于可用状态。一般来说，服务端还需要定期向注册中心发送心跳，证明自己还活着。</li>
+<li>客户端向注册中心询问，当前哪条服务是可用的，注册中心将可用的服务列表返回客户端。</li>
+<li>客户端根据注册中心得到的服务列表，选择其中一个发起调用。</li>
+</ol>
+<p>如果没有注册中心，就像 上一篇文章实现的一样，客户端需要硬编码服务端的地址，而且没有机制保证服务端是否处于可用状态。当然注册中心的功能还有很多，比如配置的动态同步、通知机制等。</p>
+<h1 id="Gee-Registry"><a href="#Gee-Registry" class="headerlink" title="Gee Registry"></a>Gee Registry</h1><p>我们来实现一个简单支持心跳保活的注册中心</p>
+<p>先定义结构体</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">// GeeRegistry is a simple register center, provide following functions.</span><br><span class="hljs-comment">// add a server and receive heartbeat to keep it alive.</span><br><span class="hljs-comment">// returns all alive servers and delete dead servers sync simultaneously.</span><br><span class="hljs-keyword">type</span> GeeRegistry <span class="hljs-keyword">struct</span> &#123;<br>	timeout time.Duration<br>	mu      sync.Mutex <span class="hljs-comment">// 互斥锁，保证使用注册中心的顺序</span><br>	servers <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]*ServerItem<br>&#125;<br><br><span class="hljs-keyword">type</span> ServerItem <span class="hljs-keyword">struct</span> &#123;<br>	Addr  <span class="hljs-type">string</span><br>	start time.Time<br>&#125;<br><br><span class="hljs-keyword">const</span> (<br>	defaultPath    = <span class="hljs-string">&quot;/_geerpc_/registry&quot;</span><br>	defaultTimeout = time.Minute * <span class="hljs-number">5</span><br>)<br><br><span class="hljs-comment">// New create a registry instance with timeout setting</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">New</span><span class="hljs-params">(timeout time.Duration)</span></span> *GeeRegistry &#123;<br>	<span class="hljs-keyword">return</span> &amp;GeeRegistry&#123;<br>		servers: <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]*ServerItem),<br>		timeout: timeout,<br>	&#125;<br>&#125;<br><br><span class="hljs-keyword">var</span> DefaultGeeRegister = New(defaultTimeout)<br></code></pre></td></tr></table></figure>
+
+<p>为该对象编写基本的方法：添加服务实例+返回服务列表</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(r *GeeRegistry)</span></span> putServer(addr <span class="hljs-type">string</span>) &#123;<br>	r.mu.Lock()<br>	<span class="hljs-keyword">defer</span> r.mu.Unlock()<br>	s := r.servers[addr]<br>	<span class="hljs-keyword">if</span> s == <span class="hljs-literal">nil</span> &#123;<br>		r.servers[addr] = &amp;ServerItem&#123;Addr: addr, start: time.Now()&#125;<br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>		s.start = time.Now() <span class="hljs-comment">// if exists, update start time to keep alive</span><br>	&#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(r *GeeRegistry)</span></span> aliveServers() []<span class="hljs-type">string</span> &#123;<br>	r.mu.Lock()<br>	<span class="hljs-keyword">defer</span> r.mu.Unlock()<br>	<span class="hljs-keyword">var</span> alive []<span class="hljs-type">string</span><br>	<span class="hljs-keyword">for</span> addr, s := <span class="hljs-keyword">range</span> r.servers &#123;<br>		<span class="hljs-keyword">if</span> r.timeout == <span class="hljs-number">0</span> || s.start.Add(r.timeout).After(time.Now()) &#123;<br>			alive = <span class="hljs-built_in">append</span>(alive, addr)<br>		&#125; <span class="hljs-keyword">else</span> &#123;<br>			<span class="hljs-built_in">delete</span>(r.servers, addr)<br>		&#125;<br>	&#125;<br>	sort.Strings(alive)<br>	<span class="hljs-keyword">return</span> alive<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="对接HTTP请求"><a href="#对接HTTP请求" class="headerlink" title="对接HTTP请求"></a>对接HTTP请求</h2><p>Get：返回所有可用的服务列表，通过自定义字段 X-Geerpc-Servers 承载。</p>
+<p>Post：添加服务实例或发送心跳，通过自定义字段 X-Geerpc-Server 承载。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">// Runs at /_geerpc_/registry</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(r *GeeRegistry)</span></span> ServeHTTP(w http.ResponseWriter, req *http.Request) &#123;<br>	<span class="hljs-keyword">switch</span> req.Method &#123;<br>	<span class="hljs-keyword">case</span> <span class="hljs-string">&quot;GET&quot;</span>:<br>		<span class="hljs-comment">// keep it simple, server is in req.Header</span><br>		w.Header().Set(<span class="hljs-string">&quot;X-Geerpc-Servers&quot;</span>, strings.Join(r.aliveServers(), <span class="hljs-string">&quot;,&quot;</span>))<br>	<span class="hljs-keyword">case</span> <span class="hljs-string">&quot;POST&quot;</span>:<br>		<span class="hljs-comment">// keep it simple, server is in req.Header</span><br>		addr := req.Header.Get(<span class="hljs-string">&quot;X-Geerpc-Server&quot;</span>)<br>		<span class="hljs-keyword">if</span> addr == <span class="hljs-string">&quot;&quot;</span> &#123;<br>			w.WriteHeader(http.StatusInternalServerError)<br>			<span class="hljs-keyword">return</span><br>		&#125;<br>		r.putServer(addr)<br>	<span class="hljs-keyword">default</span>:<br>		w.WriteHeader(http.StatusMethodNotAllowed)<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">// HandleHTTP registers an HTTP handler for GeeRegistry messages on registryPath</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(r *GeeRegistry)</span></span> HandleHTTP(registryPath <span class="hljs-type">string</span>) &#123;<br>	http.Handle(registryPath, r)<br>	log.Println(<span class="hljs-string">&quot;rpc registry path:&quot;</span>, registryPath)<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">HandleHTTP</span><span class="hljs-params">()</span></span> &#123;<br>	DefaultGeeRegister.HandleHTTP(defaultPath)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="脉冲器"><a href="#脉冲器" class="headerlink" title="脉冲器"></a>脉冲器</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">//定时向注册中心发送心跳</span><br><span class="hljs-comment">// Heartbeat send a heartbeat message every once in a while</span><br><span class="hljs-comment">// it&#x27;s a helper function for a server to register or send heartbeat</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">Heartbeat</span><span class="hljs-params">(registry, addr <span class="hljs-type">string</span>, duration time.Duration)</span></span> &#123;<br>	<span class="hljs-keyword">if</span> duration == <span class="hljs-number">0</span> &#123;<br>		<span class="hljs-comment">// make sure there is enough time to send heart beat</span><br>		<span class="hljs-comment">// before it&#x27;s removed from registry</span><br>        <span class="hljs-comment">//默认周期为比过期时间少1min</span><br>		duration = defaultTimeout - time.Duration(<span class="hljs-number">1</span>)*time.Minute<br>	&#125;<br>	<span class="hljs-keyword">var</span> err <span class="hljs-type">error</span><br>	err = sendHeartbeat(registry, addr)<br>	<span class="hljs-keyword">go</span> <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">()</span></span> &#123;<br>        <span class="hljs-comment">//golang的周期性定时器，它会按照一个时间间隔往channel发送系统当前时间</span><br>		t := time.NewTicker(duration)<br>		<span class="hljs-keyword">for</span> err == <span class="hljs-literal">nil</span> &#123;<br>            <span class="hljs-comment">//C就是从通道内获取到的时间</span><br>			&lt;-t.C<br>			err = sendHeartbeat(registry, addr)<br>		&#125;<br>	&#125;()<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">sendHeartbeat</span><span class="hljs-params">(registry, addr <span class="hljs-type">string</span>)</span></span> <span class="hljs-type">error</span> &#123;<br>	log.Println(addr, <span class="hljs-string">&quot;send heart beat to registry&quot;</span>, registry)<br>	httpClient := &amp;http.Client&#123;&#125;<br>	req, _ := http.NewRequest(<span class="hljs-string">&quot;POST&quot;</span>, registry, <span class="hljs-literal">nil</span>)<br>	req.Header.Set(<span class="hljs-string">&quot;X-Geerpc-Server&quot;</span>, addr)<br>	<span class="hljs-keyword">if</span> _, err := httpClient.Do(req); err != <span class="hljs-literal">nil</span> &#123;<br>		log.Println(<span class="hljs-string">&quot;rpc server: heart beat err:&quot;</span>, err)<br>		<span class="hljs-keyword">return</span> err<br>	&#125;<br>	<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="完善服务发现"><a href="#完善服务发现" class="headerlink" title="完善服务发现"></a>完善服务发现</h1><p>在上一篇博客中，我们实现了一个简易的服务发现接口</p>
+<p>使用MultiServersDiscovery结构体来调用获取server的方法，其中加入了负载均衡的方式来分散热点</p>
+<p>今天我们加入注册中心后来进一步完善</p>
+<p>在xclient中完善服务发现</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">package</span> xclient<br><br><span class="hljs-keyword">type</span> GeeRegistryDiscovery <span class="hljs-keyword">struct</span> &#123;<br>    <span class="hljs-comment">//嵌套了 MultiServersDiscovery，很多能力可以复用</span><br>	*MultiServersDiscovery<br>	registry   <span class="hljs-type">string</span><br>	timeout    time.Duration<br>	lastUpdate time.Time<br>&#125;<br><br><span class="hljs-keyword">const</span> defaultUpdateTimeout = time.Second * <span class="hljs-number">10</span><br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">NewGeeRegistryDiscovery</span><span class="hljs-params">(registerAddr <span class="hljs-type">string</span>, timeout time.Duration)</span></span> *GeeRegistryDiscovery &#123;<br>	<span class="hljs-keyword">if</span> timeout == <span class="hljs-number">0</span> &#123;<br>		timeout = defaultUpdateTimeout<br>	&#125;<br>	d := &amp;GeeRegistryDiscovery&#123;<br>		MultiServersDiscovery: NewMultiServerDiscovery(<span class="hljs-built_in">make</span>([]<span class="hljs-type">string</span>, <span class="hljs-number">0</span>)),<br>		registry:              registerAddr,<br>		timeout:               timeout,<br>	&#125;<br>	<span class="hljs-keyword">return</span> d<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>registry 即注册中心的地址</li>
+<li>timeout 服务列表的过期时间</li>
+<li>lastUpdate 是代表最后从注册中心更新服务列表的时间，默认 10s 过期，即 10s 之后，需要从注册中心更新新的列表。</li>
+</ol>
+<p>重写方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(d *GeeRegistryDiscovery)</span></span> Update(servers []<span class="hljs-type">string</span>) <span class="hljs-type">error</span> &#123;<br>	d.mu.Lock()<br>	<span class="hljs-keyword">defer</span> d.mu.Unlock()<br>	d.servers = servers<br>	d.lastUpdate = time.Now()<br>	<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(d *GeeRegistryDiscovery)</span></span> Refresh() <span class="hljs-type">error</span> &#123;<br>	d.mu.Lock()<br>	<span class="hljs-keyword">defer</span> d.mu.Unlock()<br>	<span class="hljs-keyword">if</span> d.lastUpdate.Add(d.timeout).After(time.Now()) &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span><br>	&#125;<br>	log.Println(<span class="hljs-string">&quot;rpc registry: refresh servers from registry&quot;</span>, d.registry)<br>	resp, err := http.Get(d.registry)<br>	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> &#123;<br>		log.Println(<span class="hljs-string">&quot;rpc registry refresh err:&quot;</span>, err)<br>		<span class="hljs-keyword">return</span> err<br>	&#125;<br>	servers := strings.Split(resp.Header.Get(<span class="hljs-string">&quot;X-Geerpc-Servers&quot;</span>), <span class="hljs-string">&quot;,&quot;</span>)<br>	d.servers = <span class="hljs-built_in">make</span>([]<span class="hljs-type">string</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(servers))<br>	<span class="hljs-keyword">for</span> _, server := <span class="hljs-keyword">range</span> servers &#123;<br>		<span class="hljs-keyword">if</span> strings.TrimSpace(server) != <span class="hljs-string">&quot;&quot;</span> &#123;<br>			d.servers = <span class="hljs-built_in">append</span>(d.servers, strings.TrimSpace(server))<br>		&#125;<br>	&#125;<br>	d.lastUpdate = time.Now()<br>	<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Get 和 GetAll 与 MultiServersDiscovery</p>
+<p>唯一的不同在于，GeeRegistryDiscovery 需要<strong>先调用 Refresh 确保服务列表没有过期。</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(d *GeeRegistryDiscovery)</span></span> Get(mode SelectMode) (<span class="hljs-type">string</span>, <span class="hljs-type">error</span>) &#123;<br>	<span class="hljs-keyword">if</span> err := d.Refresh(); err != <span class="hljs-literal">nil</span> &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>, err<br>	&#125;<br>	<span class="hljs-keyword">return</span> d.MultiServersDiscovery.Get(mode)<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(d *GeeRegistryDiscovery)</span></span> GetAll() ([]<span class="hljs-type">string</span>, <span class="hljs-type">error</span>) &#123;<br>	<span class="hljs-keyword">if</span> err := d.Refresh(); err != <span class="hljs-literal">nil</span> &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err<br>	&#125;<br>	<span class="hljs-keyword">return</span> d.MultiServersDiscovery.GetAll()<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>今天完成了注册中心，那么一个RPC框架就算是完成了，虽然代码量很少，但是能够提供最基本的服务</p>
+<p>registry是一个结构体，存储了每个服务端的地址和过期时间</p>
+<p>对于服务端来说，服务端启动时便需要在注册中心里进行注册，在确定过期时间后便开始为客户端提供服务</p>
+<p>当然我们也编写了脉冲器来进行心跳保活，脉冲器会定时为注册中心发送保活HTTP报文来确保该服务未过期</p>
+<p>对于客户端来说，我们需要向注册中心询问获取可用的服务名单</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/GeeRPC/">#GeeRPC</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>GeeRPC-LastDay</div>
+      <div>http://example.com/post/GeeRPC-LastDay.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>SamuelZhou</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年1月10日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/post/GeeRPC-day6.html" title="GeeRPC-day6">
+                        <span class="hidden-mobile">GeeRPC-day6</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
